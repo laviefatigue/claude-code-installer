@@ -17,7 +17,7 @@
 
         .header {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            padding: 60px 20px;
+            padding: 60px 20px 40px;
             text-align: center;
             color: white;
         }
@@ -30,12 +30,62 @@
         .header p {
             color: #94a3b8;
             font-size: 18px;
+            margin-bottom: 32px;
+        }
+
+        /* Platform Toggle */
+        .platform-toggle {
+            display: inline-flex;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 6px;
+            gap: 6px;
+        }
+
+        .platform-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            color: #94a3b8;
+        }
+
+        .platform-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .platform-btn.active {
+            background: white;
+            color: #1a1a2e;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .platform-btn svg {
+            width: 24px;
+            height: 24px;
         }
 
         .container {
             max-width: 900px;
             margin: 0 auto;
             padding: 40px 20px;
+        }
+
+        /* Platform content visibility */
+        .platform-content {
+            display: none;
+        }
+
+        .platform-content.active {
+            display: block;
         }
 
         .step {
@@ -230,6 +280,22 @@
             font-weight: 600;
         }
 
+        .transparency-note {
+            text-align: center;
+            margin-top: 24px;
+            padding: 16px;
+            background: #f0fdf4;
+            border-radius: 10px;
+            color: #166534;
+            font-size: 13px;
+            border: 1px solid #bbf7d0;
+        }
+
+        .transparency-note a {
+            color: #166534;
+            font-weight: 600;
+        }
+
         @media (max-width: 700px) {
             .step {
                 grid-template-columns: 1fr;
@@ -239,6 +305,10 @@
             }
             .package-list {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            .platform-btn {
+                padding: 12px 20px;
+                font-size: 14px;
             }
         }
 
@@ -251,203 +321,414 @@
 </head>
 <body>
     <div class="header">
-        <h1>🤖 Install Claude Code</h1>
+        <h1>Install Claude Code</h1>
         <p>AI coding assistant - step by step setup</p>
+
+        <!-- Platform Toggle -->
+        <div class="platform-toggle">
+            <button class="platform-btn active" onclick="setPlatform('windows')" id="btn-windows">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/>
+                </svg>
+                Windows
+            </button>
+            <button class="platform-btn" onclick="setPlatform('mac')" id="btn-mac">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                </svg>
+                macOS
+            </button>
+        </div>
     </div>
 
     <div class="container">
 
-        <!-- Step 1 -->
-        <div class="step">
-            <div class="step-content">
-                <div class="step-number">1</div>
-                <div class="step-title">Open PowerShell</div>
-                <div class="step-description">
-                    Right-click the Start button and select "Windows PowerShell" or "Terminal"
+        <!-- WINDOWS CONTENT -->
+        <div class="platform-content active" id="content-windows">
+
+            <!-- Step 1 -->
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Open PowerShell</div>
+                    <div class="step-description">
+                        Right-click the Start button and select "Windows PowerShell" or "Terminal"
+                    </div>
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Crect fill='%230f172a' width='400' height='200' rx='8'/%3E%3Ctext x='20' y='30' fill='%2394a3b8' font-family='monospace' font-size='12'%3EWindows PowerShell%3C/text%3E%3Ctext x='20' y='60' fill='%236366f1' font-family='monospace' font-size='14'%3EPS C:\Users\You%3E %3C/text%3E%3Crect x='180' y='52' width='8' height='16' fill='%23a5f3fc'/%3E%3C/svg%3E" alt="PowerShell" style="width:100%; border-radius: 8px; margin-top: 12px;">
                 </div>
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Crect fill='%230f172a' width='400' height='200' rx='8'/%3E%3Ctext x='20' y='30' fill='%2394a3b8' font-family='monospace' font-size='12'%3EWindows PowerShell%3C/text%3E%3Ctext x='20' y='60' fill='%236366f1' font-family='monospace' font-size='14'%3EPS C:\Users\You%3E %3C/text%3E%3Crect x='180' y='52' width='8' height='16' fill='%23a5f3fc'/%3E%3C/svg%3E" alt="PowerShell" style="width:100%; border-radius: 8px; margin-top: 12px;">
+                <div class="explanation">
+                    <h4>What is PowerShell?</h4>
+                    <p>PowerShell is a command-line tool built into Windows. It lets you run commands by typing instead of clicking.</p>
+                    <p>Think of it like texting your computer instead of pointing at things.</p>
+                    <p><strong>Tip:</strong> You can also press <span class="highlight">Win + X</span> then click "Terminal" or "PowerShell"</p>
+                </div>
             </div>
-            <div class="explanation">
-                <h4>What is PowerShell?</h4>
-                <p>PowerShell is a command-line tool built into Windows. It lets you run commands by typing instead of clicking.</p>
-                <p>Think of it like texting your computer instead of pointing at things.</p>
-                <p><strong>Tip:</strong> You can also press <span class="highlight">Win + X</span> then click "Terminal" or "PowerShell"</p>
+
+            <!-- Step 2 -->
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Copy this command</div>
+                    <div class="step-description">
+                        Click the Copy button, then paste it into PowerShell
+                    </div>
+                    <div class="code-block">
+                        <code id="install-cmd-win">irm https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.ps1 | iex</code>
+                        <button class="copy-btn" onclick="copyCode('install-cmd-win', this)">Copy</button>
+                    </div>
+                    <div class="step-description" style="margin-bottom:0; font-size: 13px; color: #94a3b8;">
+                        To paste: right-click in PowerShell, or press Ctrl+V
+                    </div>
+                </div>
+                <div class="explanation">
+                    <h4>What does this command do?</h4>
+                    <p><span class="highlight">irm</span> = "Invoke-RestMethod" - downloads a file from the internet</p>
+                    <p><span class="highlight">https://...install.ps1</span> = the installer script (<a href="https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.ps1" target="_blank">view source</a>)</p>
+                    <p><span class="highlight">|</span> = "pipe" - sends the downloaded script to the next command</p>
+                    <p><span class="highlight">iex</span> = "Invoke-Expression" - runs the script</p>
+                </div>
             </div>
+
+            <!-- Step 3 -->
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Press Enter and wait</div>
+                    <div class="step-description">
+                        The installer will download and set up everything automatically. You'll see progress like this:
+                    </div>
+                    <div class="code-block" style="font-size: 13px;">
+                        <code style="color: #94a3b8;">[1/6] Git for Windows (REQUIRED)</code><br>
+                        <code style="color: #22c55e;">      Already installed: 2.43.0</code><br><br>
+                        <code style="color: #94a3b8;">[2/6] Claude Code CLI (REQUIRED)</code><br>
+                        <code style="color: #fbbf24;">      Installing...</code>
+                    </div>
+                </div>
+                <div class="explanation">
+                    <h4>What's happening?</h4>
+                    <p>The installer checks if each tool is already installed. If not, it downloads and installs it automatically.</p>
+                    <p><strong>Git</strong> - Required. Claude Code uses this to run terminal commands.</p>
+                    <p><strong>Claude Code</strong> - The AI assistant itself.</p>
+                    <p><strong>VS Code + Extensions</strong> - Code editor with Claude Code and Foam extensions pre-installed.</p>
+                    <p><strong>Node.js, Python</strong> - Runtimes so everything "just works" later.</p>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Sign in to Anthropic</div>
+                    <div class="step-description">
+                        A browser window will open. Sign in with your Claude Pro, Max, or Teams account.
+                    </div>
+                    <div style="background: #f1f5f9; border-radius: 8px; padding: 20px; text-align: center; margin-top: 12px;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">🔐</div>
+                        <div style="color: #64748b; font-size: 14px;">Browser opens automatically</div>
+                    </div>
+                </div>
+                <div class="explanation">
+                    <h4>Why sign in?</h4>
+                    <p>Claude Code connects to Anthropic's servers to provide AI assistance. Your account verifies you have access.</p>
+                    <p><strong>Don't have an account?</strong> You need a paid Claude subscription (Pro, Max, or Teams). <a href="https://claude.ai" target="_blank">Get one here</a></p>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">5</div>
+                    <div class="step-title">Start using Claude Code</div>
+                    <div class="step-description">
+                        Open any terminal and type:
+                    </div>
+                    <div class="code-block">
+                        <code>claude</code>
+                        <button class="copy-btn" onclick="copyCode(null, this, 'claude')">Copy</button>
+                    </div>
+                    <div class="step-description">
+                        Or open VS Code, press <span class="highlight">Ctrl + `</span> to open the terminal, then type <span class="highlight">claude</span>
+                    </div>
+                </div>
+                <div class="explanation">
+                    <h4>You're ready!</h4>
+                    <p>Try these commands:</p>
+                    <p><span class="highlight">/help</span> - See what Claude Code can do</p>
+                    <p><span class="highlight">/getting-started</span> - Interactive tutorial</p>
+                    <p>Or just type naturally: "Help me write a Python script that..."</p>
+                </div>
+            </div>
+
+            <!-- What's Installed - Windows -->
+            <div class="whats-installed">
+                <h3>What gets installed on Windows</h3>
+                <div class="package-list">
+                    <div class="package">
+                        <div class="package-icon">🤖</div>
+                        <div class="package-name">Claude Code CLI</div>
+                        <div class="package-desc">AI assistant</div>
+                        <div class="package-badge">Required</div>
+                    </div>
+                    <div class="package">
+                        <div class="package-icon">📦</div>
+                        <div class="package-name">Git for Windows</div>
+                        <div class="package-desc">Terminal + commands</div>
+                        <div class="package-badge">Required</div>
+                    </div>
+                    <div class="package">
+                        <div class="package-icon">💻</div>
+                        <div class="package-name">VS Code</div>
+                        <div class="package-desc">Code editor</div>
+                    </div>
+                    <div class="package">
+                        <div class="package-icon">🧩</div>
+                        <div class="package-name">Claude Extension</div>
+                        <div class="package-desc">VS Code integration</div>
+                    </div>
+                    <div class="package">
+                        <div class="package-icon">🫧</div>
+                        <div class="package-name">Foam</div>
+                        <div class="package-desc">Knowledge graph</div>
+                    </div>
+                    <div class="package">
+                        <div class="package-icon">🟢</div>
+                        <div class="package-name">Node.js</div>
+                        <div class="package-desc">JavaScript runtime</div>
+                    </div>
+                    <div class="package">
+                        <div class="package-icon">🐍</div>
+                        <div class="package-name">Python</div>
+                        <div class="package-desc">Python runtime</div>
+                    </div>
+                    <div class="package">
+                        <div class="package-icon">⚡</div>
+                        <div class="package-name">Starter Skills</div>
+                        <div class="package-desc">/help commands</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="transparency-note">
+                Full source code: <a href="https://github.com/laviefatigue/claude-code-installer/blob/master/install.ps1" target="_blank">install.ps1 on GitHub</a> - read every line before running
+            </div>
+
+            <div class="note">
+                Requires Windows 10 or 11 and a <a href="https://claude.ai">Claude Pro, Max, or Teams</a> subscription
+            </div>
+
         </div>
 
-        <!-- Step 2 -->
-        <div class="step">
-            <div class="step-content">
-                <div class="step-number">2</div>
-                <div class="step-title">Copy this command</div>
-                <div class="step-description">
-                    Click the Copy button, then paste it into PowerShell
-                </div>
-                <div class="code-block">
-                    <code id="install-cmd">irm https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.ps1 | iex</code>
-                    <button class="copy-btn" onclick="copyCommand()">Copy</button>
-                </div>
-                <div class="step-description" style="margin-bottom:0; font-size: 13px; color: #94a3b8;">
-                    To paste: right-click in PowerShell, or press Ctrl+V
-                </div>
-            </div>
-            <div class="explanation">
-                <h4>What does this command do?</h4>
-                <p><span class="highlight">irm</span> = "Invoke-RestMethod" - downloads a file from the internet</p>
-                <p><span class="highlight">https://...install.ps1</span> = the installer script (you can view it <a href="https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.ps1" target="_blank">here</a>)</p>
-                <p><span class="highlight">|</span> = "pipe" - sends the downloaded script to the next command</p>
-                <p><span class="highlight">iex</span> = "Invoke-Expression" - runs the script</p>
-            </div>
-        </div>
+        <!-- MACOS CONTENT -->
+        <div class="platform-content" id="content-mac">
 
-        <!-- Step 3 -->
-        <div class="step">
-            <div class="step-content">
-                <div class="step-number">3</div>
-                <div class="step-title">Press Enter and wait</div>
-                <div class="step-description">
-                    The installer will download and set up everything automatically. You'll see progress like this:
+            <!-- Step 1 -->
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Open Terminal</div>
+                    <div class="step-description">
+                        Press <span class="highlight">Cmd + Space</span>, type "Terminal", and press Enter
+                    </div>
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Crect fill='%231e1e1e' width='400' height='200' rx='8'/%3E%3Crect fill='%23383838' width='400' height='28' rx='8 8 0 0'/%3E%3Ccircle cx='20' cy='14' r='6' fill='%23ff5f57'/%3E%3Ccircle cx='40' cy='14' r='6' fill='%23febc2e'/%3E%3Ccircle cx='60' cy='14' r='6' fill='%2328c840'/%3E%3Ctext x='20' y='60' fill='%2322c55e' font-family='monospace' font-size='14'%3Eyou@mac ~ %25 %3C/text%3E%3Crect x='140' y='47' width='8' height='16' fill='%23a5f3fc'/%3E%3C/svg%3E" alt="Terminal" style="width:100%; border-radius: 8px; margin-top: 12px;">
                 </div>
-                <div class="code-block" style="font-size: 13px;">
-                    <code style="color: #94a3b8;">[1/6] Git for Windows (REQUIRED)</code><br>
-                    <code style="color: #22c55e;">      Already installed: 2.43.0</code><br><br>
-                    <code style="color: #94a3b8;">[2/6] Claude Code CLI (REQUIRED)</code><br>
-                    <code style="color: #fbbf24;">      Installing...</code>
+                <div class="explanation">
+                    <h4>What is Terminal?</h4>
+                    <p>Terminal is macOS's built-in command-line tool. It lets you run commands by typing instead of clicking.</p>
+                    <p>Think of it like texting your computer instead of pointing at things.</p>
+                    <p><strong>Tip:</strong> You can also find Terminal in Applications > Utilities</p>
                 </div>
             </div>
-            <div class="explanation">
-                <h4>What's happening?</h4>
-                <p>The installer checks if each tool is already installed. If not, it downloads and installs it automatically.</p>
-                <p><strong>Git</strong> - Required. Claude Code uses this to run terminal commands.</p>
-                <p><strong>Claude Code</strong> - The AI assistant itself.</p>
-                <p><strong>VS Code + Extensions</strong> - Code editor with Claude Code and Foam (knowledge graph) extensions pre-installed.</p>
-                <p><strong>Node.js, Python</strong> - Runtimes so everything "just works" later.</p>
-            </div>
-        </div>
 
-        <!-- Step 4 -->
-        <div class="step">
-            <div class="step-content">
-                <div class="step-number">4</div>
-                <div class="step-title">Sign in to Anthropic</div>
-                <div class="step-description">
-                    A browser window will open. Sign in with your Claude Pro, Max, or Teams account.
+            <!-- Step 2 -->
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Copy this command</div>
+                    <div class="step-description">
+                        Click the Copy button, then paste it into Terminal
+                    </div>
+                    <div class="code-block">
+                        <code id="install-cmd-mac">curl -fsSL https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.sh | bash</code>
+                        <button class="copy-btn" onclick="copyCode('install-cmd-mac', this)">Copy</button>
+                    </div>
+                    <div class="step-description" style="margin-bottom:0; font-size: 13px; color: #94a3b8;">
+                        To paste: press Cmd+V in Terminal
+                    </div>
                 </div>
-                <div style="background: #f1f5f9; border-radius: 8px; padding: 20px; text-align: center; margin-top: 12px;">
-                    <div style="font-size: 32px; margin-bottom: 8px;">🔐</div>
-                    <div style="color: #64748b; font-size: 14px;">Browser opens automatically</div>
+                <div class="explanation">
+                    <h4>What does this command do?</h4>
+                    <p><span class="highlight">curl -fsSL</span> = downloads a file from the internet silently</p>
+                    <p><span class="highlight">https://...install.sh</span> = the installer script (<a href="https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.sh" target="_blank">view source</a>)</p>
+                    <p><span class="highlight">|</span> = "pipe" - sends the downloaded script to the next command</p>
+                    <p><span class="highlight">bash</span> = runs the script in the Bash shell</p>
                 </div>
             </div>
-            <div class="explanation">
-                <h4>Why sign in?</h4>
-                <p>Claude Code connects to Anthropic's servers to provide AI assistance. Your account verifies you have access.</p>
-                <p><strong>Don't have an account?</strong> You need a paid Claude subscription (Pro, Max, or Teams). <a href="https://claude.ai" target="_blank">Get one here →</a></p>
-            </div>
-        </div>
 
-        <!-- Step 5 -->
-        <div class="step">
-            <div class="step-content">
-                <div class="step-number">5</div>
-                <div class="step-title">Start using Claude Code</div>
-                <div class="step-description">
-                    Open any terminal and type:
+            <!-- Step 3 -->
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Enter your password if asked</div>
+                    <div class="step-description">
+                        Some installations require admin access. Type your Mac password when prompted (you won't see it as you type).
+                    </div>
+                    <div class="code-block" style="font-size: 13px;">
+                        <code style="color: #94a3b8;">[1/7] Homebrew (package manager)</code><br>
+                        <code style="color: #22c55e;">      Already installed</code><br><br>
+                        <code style="color: #94a3b8;">[2/7] Claude Code CLI (REQUIRED)</code><br>
+                        <code style="color: #fbbf24;">      Installing via npm...</code>
+                    </div>
                 </div>
-                <div class="code-block">
-                    <code>claude</code>
-                    <button class="copy-btn" onclick="copySimple('claude')">Copy</button>
-                </div>
-                <div class="step-description">
-                    Or open VS Code, press <span class="highlight">Ctrl + `</span> to open the terminal, then type <span class="highlight">claude</span>
+                <div class="explanation">
+                    <h4>What's happening?</h4>
+                    <p>The installer checks if each tool is already installed. If not, it downloads and installs it automatically.</p>
+                    <p><strong>Homebrew</strong> - macOS package manager (like an app store for developer tools)</p>
+                    <p><strong>Claude Code</strong> - The AI assistant itself.</p>
+                    <p><strong>VS Code + Extensions</strong> - Code editor with Claude Code and Foam extensions.</p>
+                    <p><strong>Node.js, Python</strong> - Runtimes so everything "just works" later.</p>
                 </div>
             </div>
-            <div class="explanation">
-                <h4>You're ready!</h4>
-                <p>Try these commands:</p>
-                <p><span class="highlight">/help</span> - See what Claude Code can do</p>
-                <p><span class="highlight">/getting-started</span> - Interactive tutorial</p>
-                <p>Or just type naturally: "Help me write a Python script that..."</p>
-            </div>
-        </div>
 
-        <!-- What's Installed -->
-        <div class="whats-installed">
-            <h3>What gets installed</h3>
-            <div class="package-list">
-                <div class="package">
-                    <div class="package-icon">🤖</div>
-                    <div class="package-name">Claude Code CLI</div>
-                    <div class="package-desc">AI assistant</div>
-                    <div class="package-badge">Required</div>
+            <!-- Step 4 -->
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Sign in to Anthropic</div>
+                    <div class="step-description">
+                        A browser window will open. Sign in with your Claude Pro, Max, or Teams account.
+                    </div>
+                    <div style="background: #f1f5f9; border-radius: 8px; padding: 20px; text-align: center; margin-top: 12px;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">🔐</div>
+                        <div style="color: #64748b; font-size: 14px;">Browser opens automatically</div>
+                    </div>
                 </div>
-                <div class="package">
-                    <div class="package-icon">📦</div>
-                    <div class="package-name">Git</div>
-                    <div class="package-desc">Terminal commands</div>
-                    <div class="package-badge">Required</div>
-                </div>
-                <div class="package">
-                    <div class="package-icon">💻</div>
-                    <div class="package-name">VS Code</div>
-                    <div class="package-desc">Code editor</div>
-                </div>
-                <div class="package">
-                    <div class="package-icon">🧩</div>
-                    <div class="package-name">Claude Extension</div>
-                    <div class="package-desc">VS Code integration</div>
-                </div>
-                <div class="package">
-                    <div class="package-icon">🫧</div>
-                    <div class="package-name">Foam</div>
-                    <div class="package-desc">Knowledge graph</div>
-                </div>
-                <div class="package">
-                    <div class="package-icon">🟢</div>
-                    <div class="package-name">Node.js</div>
-                    <div class="package-desc">JavaScript</div>
-                </div>
-                <div class="package">
-                    <div class="package-icon">🐍</div>
-                    <div class="package-name">Python</div>
-                    <div class="package-desc">Python runtime</div>
-                </div>
-                <div class="package">
-                    <div class="package-icon">⚡</div>
-                    <div class="package-name">Skills</div>
-                    <div class="package-desc">/help commands</div>
+                <div class="explanation">
+                    <h4>Why sign in?</h4>
+                    <p>Claude Code connects to Anthropic's servers to provide AI assistance. Your account verifies you have access.</p>
+                    <p><strong>Don't have an account?</strong> You need a paid Claude subscription (Pro, Max, or Teams). <a href="https://claude.ai" target="_blank">Get one here</a></p>
                 </div>
             </div>
-        </div>
 
-        <div class="note">
-            Requires Windows 10 or 11 and a <a href="https://claude.ai">Claude Pro, Max, or Teams</a> subscription
+            <!-- Step 5 -->
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">5</div>
+                    <div class="step-title">Start using Claude Code</div>
+                    <div class="step-description">
+                        Open any terminal and type:
+                    </div>
+                    <div class="code-block">
+                        <code>claude</code>
+                        <button class="copy-btn" onclick="copyCode(null, this, 'claude')">Copy</button>
+                    </div>
+                    <div class="step-description">
+                        Or open VS Code, press <span class="highlight">Cmd + `</span> to open the terminal, then type <span class="highlight">claude</span>
+                    </div>
+                </div>
+                <div class="explanation">
+                    <h4>You're ready!</h4>
+                    <p>Try these commands:</p>
+                    <p><span class="highlight">/help</span> - See what Claude Code can do</p>
+                    <p><span class="highlight">/getting-started</span> - Interactive tutorial</p>
+                    <p>Or just type naturally: "Help me write a Python script that..."</p>
+                </div>
+            </div>
+
+            <!-- What's Installed - macOS -->
+            <div class="whats-installed">
+                <h3>What gets installed on macOS</h3>
+                <div class="package-list">
+                    <div class="package">
+                        <div class="package-icon">🤖</div>
+                        <div class="package-name">Claude Code CLI</div>
+                        <div class="package-desc">AI assistant</div>
+                        <div class="package-badge">Required</div>
+                    </div>
+                    <div class="package">
+                        <div class="package-icon">🍺</div>
+                        <div class="package-name">Homebrew</div>
+                        <div class="package-desc">Package manager</div>
+                        <div class="package-badge">Required</div>
+                    </div>
+                    <div class="package">
+                        <div class="package-icon">💻</div>
+                        <div class="package-name">VS Code</div>
+                        <div class="package-desc">Code editor</div>
+                    </div>
+                    <div class="package">
+                        <div class="package-icon">🧩</div>
+                        <div class="package-name">Claude Extension</div>
+                        <div class="package-desc">VS Code integration</div>
+                    </div>
+                    <div class="package">
+                        <div class="package-icon">🫧</div>
+                        <div class="package-name">Foam</div>
+                        <div class="package-desc">Knowledge graph</div>
+                    </div>
+                    <div class="package">
+                        <div class="package-icon">🟢</div>
+                        <div class="package-name">Node.js</div>
+                        <div class="package-desc">JavaScript runtime</div>
+                    </div>
+                    <div class="package">
+                        <div class="package-icon">🐍</div>
+                        <div class="package-name">Python</div>
+                        <div class="package-desc">Python runtime</div>
+                    </div>
+                    <div class="package">
+                        <div class="package-icon">⚡</div>
+                        <div class="package-name">Starter Skills</div>
+                        <div class="package-desc">/help commands</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="transparency-note">
+                Full source code: <a href="https://github.com/laviefatigue/claude-code-installer/blob/master/install.sh" target="_blank">install.sh on GitHub</a> - read every line before running
+            </div>
+
+            <div class="note">
+                Requires macOS 12 (Monterey) or later and a <a href="https://claude.ai">Claude Pro, Max, or Teams</a> subscription
+            </div>
+
         </div>
 
     </div>
 
     <script>
-        function copyCommand() {
-            const cmd = document.getElementById('install-cmd').textContent;
-            navigator.clipboard.writeText(cmd);
-            const btn = event.target;
-            btn.textContent = 'Copied!';
-            btn.classList.add('copied');
+        function setPlatform(platform) {
+            // Update buttons
+            document.getElementById('btn-windows').classList.toggle('active', platform === 'windows');
+            document.getElementById('btn-mac').classList.toggle('active', platform === 'mac');
+
+            // Update content
+            document.getElementById('content-windows').classList.toggle('active', platform === 'windows');
+            document.getElementById('content-mac').classList.toggle('active', platform === 'mac');
+
+            // Save preference
+            localStorage.setItem('preferred-platform', platform);
+        }
+
+        function copyCode(elementId, button, text) {
+            const content = text || document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(content);
+            button.textContent = 'Copied!';
+            button.classList.add('copied');
             setTimeout(() => {
-                btn.textContent = 'Copy';
-                btn.classList.remove('copied');
+                button.textContent = 'Copy';
+                button.classList.remove('copied');
             }, 2000);
         }
 
-        function copySimple(text) {
-            navigator.clipboard.writeText(text);
-            const btn = event.target;
-            btn.textContent = 'Copied!';
-            btn.classList.add('copied');
-            setTimeout(() => {
-                btn.textContent = 'Copy';
-                btn.classList.remove('copied');
-            }, 2000);
-        }
+        // Auto-detect platform on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('preferred-platform');
+            if (saved) {
+                setPlatform(saved);
+            } else if (navigator.platform.toLowerCase().includes('mac')) {
+                setPlatform('mac');
+            }
+        });
     </script>
 </body>
 </html>
