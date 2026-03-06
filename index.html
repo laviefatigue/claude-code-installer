@@ -20,36 +20,23 @@
         .container {
             background: white;
             border-radius: 20px;
-            padding: 60px 40px;
-            max-width: 500px;
+            padding: 50px 40px;
+            max-width: 540px;
             text-align: center;
             box-shadow: 0 25px 50px rgba(0,0,0,0.3);
         }
 
-        .logo {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            color: #1a1a2e;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            color: #666;
-            font-size: 16px;
-            margin-bottom: 40px;
-        }
+        .logo { font-size: 48px; margin-bottom: 16px; }
+        h1 { color: #1a1a2e; font-size: 32px; margin-bottom: 8px; }
+        .subtitle { color: #666; font-size: 16px; margin-bottom: 32px; }
 
         .download-btn {
             display: inline-block;
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
             text-decoration: none;
-            padding: 18px 50px;
-            border-radius: 12px;
+            padding: 20px 56px;
+            border-radius: 14px;
             font-size: 18px;
             font-weight: 600;
             transition: transform 0.2s, box-shadow 0.2s;
@@ -61,105 +48,192 @@
             box-shadow: 0 15px 40px rgba(99, 102, 241, 0.5);
         }
 
-        .steps {
-            margin-top: 50px;
-            text-align: left;
+        .tagline {
+            margin-top: 16px;
+            color: #888;
+            font-size: 13px;
         }
 
-        .steps h3 {
+        .packages {
+            margin-top: 40px;
+            text-align: left;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .packages h3 {
             color: #1a1a2e;
-            font-size: 16px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             margin-bottom: 20px;
             text-align: center;
         }
 
-        .step {
-            display: flex;
-            align-items: flex-start;
+        .package-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .package {
+            background: white;
+            border-radius: 8px;
+            padding: 14px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .package-name {
+            font-weight: 600;
+            color: #1a1a2e;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .package-why {
+            color: #666;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .required-badge {
+            display: inline-block;
+            background: #dcfce7;
+            color: #166534;
+            font-size: 9px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            text-transform: uppercase;
+        }
+
+        .steps {
+            margin-top: 32px;
+        }
+
+        .steps h3 {
+            color: #1a1a2e;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             margin-bottom: 16px;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 10px;
+        }
+
+        .step-list {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        .step-item {
+            text-align: center;
         }
 
         .step-num {
-            background: #6366f1;
-            color: white;
-            width: 28px;
-            height: 28px;
+            background: #e0e7ff;
+            color: #4f46e5;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 600;
             font-size: 14px;
-            margin-right: 14px;
-            flex-shrink: 0;
+            margin: 0 auto 8px;
         }
 
         .step-text {
             color: #444;
-            font-size: 15px;
-            line-height: 1.5;
+            font-size: 12px;
         }
 
         .note {
-            margin-top: 30px;
-            padding: 16px;
+            margin-top: 28px;
+            padding: 14px;
             background: #fef3c7;
-            border-radius: 10px;
-            font-size: 14px;
+            border-radius: 8px;
+            font-size: 13px;
             color: #92400e;
         }
 
         .footer {
-            margin-top: 40px;
+            margin-top: 20px;
             color: #999;
-            font-size: 13px;
+            font-size: 12px;
         }
+
+        .footer a { color: #6366f1; text-decoration: none; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="logo">🤖</div>
         <h1>Claude Code</h1>
-        <p class="subtitle">Your AI coding assistant, one click away</p>
+        <p class="subtitle">Everything you need to code with AI</p>
 
-        <a href="https://github.com/laviefatigue/claude-code-installer/releases/download/v1.0.0/Install-ClaudeCode.bat"
+        <a href="https://github.com/laviefatigue/claude-code-installer/releases/download/v1.0.1/Install-ClaudeCode.bat"
            class="download-btn">
-            Download Installer
+            Download for Windows
         </a>
+        <p class="tagline">One installer. Everything included. Just run it.</p>
+
+        <div class="packages">
+            <h3>What's in the box</h3>
+            <div class="package-grid">
+                <div class="package">
+                    <div class="package-name">Claude Code <span class="required-badge">Core</span></div>
+                    <div class="package-why">The AI assistant</div>
+                </div>
+                <div class="package">
+                    <div class="package-name">Git <span class="required-badge">Core</span></div>
+                    <div class="package-why">Run terminal commands</div>
+                </div>
+                <div class="package">
+                    <div class="package-name">VS Code</div>
+                    <div class="package-why">Code editor</div>
+                </div>
+                <div class="package">
+                    <div class="package-name">Node.js</div>
+                    <div class="package-why">JavaScript runtime</div>
+                </div>
+                <div class="package">
+                    <div class="package-name">Python</div>
+                    <div class="package-why">Python runtime</div>
+                </div>
+                <div class="package">
+                    <div class="package-name">+ Starter skills</div>
+                    <div class="package-why">/help, /getting-started</div>
+                </div>
+            </div>
+        </div>
 
         <div class="steps">
-            <h3>How to install</h3>
-
-            <div class="step">
-                <div class="step-num">1</div>
-                <div class="step-text">Click the <strong>Download</strong> button above</div>
-            </div>
-
-            <div class="step">
-                <div class="step-num">2</div>
-                <div class="step-text">Open the downloaded file <strong>Install-ClaudeCode.bat</strong></div>
-            </div>
-
-            <div class="step">
-                <div class="step-num">3</div>
-                <div class="step-text">Follow the prompts to sign in with your Anthropic account</div>
-            </div>
-
-            <div class="step">
-                <div class="step-num">4</div>
-                <div class="step-text">Open VS Code, press <strong>Ctrl+`</strong> and type <strong>claude</strong></div>
+            <h3>Three steps</h3>
+            <div class="step-list">
+                <div class="step-item">
+                    <div class="step-num">1</div>
+                    <div class="step-text">Download</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">2</div>
+                    <div class="step-text">Run installer</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">3</div>
+                    <div class="step-text">Sign in</div>
+                </div>
             </div>
         </div>
 
         <div class="note">
-            ⚠️ Requires Windows 10/11 and a Claude Pro, Max, or Teams subscription
+            Requires Windows 10/11 and a Claude Pro, Max, or Teams account
         </div>
 
         <div class="footer">
-            Installs: VS Code, Git, Claude Code CLI
+            <a href="https://claude.ai" target="_blank">Get Claude →</a>
         </div>
     </div>
 </body>
