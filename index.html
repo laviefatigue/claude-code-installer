@@ -21,7 +21,7 @@
             background: white;
             border-radius: 20px;
             padding: 50px 40px;
-            max-width: 540px;
+            max-width: 580px;
             text-align: center;
             box-shadow: 0 25px 50px rgba(0,0,0,0.3);
         }
@@ -30,32 +30,69 @@
         h1 { color: #1a1a2e; font-size: 32px; margin-bottom: 8px; }
         .subtitle { color: #666; font-size: 16px; margin-bottom: 32px; }
 
-        .download-btn {
-            display: inline-block;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: white;
-            text-decoration: none;
-            padding: 20px 56px;
-            border-radius: 14px;
-            font-size: 18px;
-            font-weight: 600;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        .install-box {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
         }
 
-        .download-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.5);
-        }
-
-        .tagline {
-            margin-top: 16px;
+        .install-label {
             color: #888;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .install-command {
+            color: #a5f3fc;
+            font-family: 'Monaco', 'Menlo', monospace;
             font-size: 13px;
+            word-break: break-all;
+            line-height: 1.5;
+            user-select: all;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #374151;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover { background: #4b5563; }
+        .copy-btn.copied { background: #059669; }
+
+        .install-steps {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .install-step {
+            background: #f3f4f6;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #374151;
+        }
+
+        .install-step strong {
+            color: #6366f1;
         }
 
         .packages {
-            margin-top: 40px;
             text-align: left;
             background: #f8f9fa;
             border-radius: 12px;
@@ -74,13 +111,13 @@
         .package-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 10px;
         }
 
         .package {
             background: white;
             border-radius: 8px;
-            padding: 14px;
+            padding: 12px;
             border: 1px solid #e5e7eb;
         }
 
@@ -88,13 +125,12 @@
             font-weight: 600;
             color: #1a1a2e;
             font-size: 13px;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .package-why {
             color: #666;
             font-size: 11px;
-            line-height: 1.4;
         }
 
         .required-badge {
@@ -105,49 +141,8 @@
             font-weight: 600;
             padding: 2px 6px;
             border-radius: 4px;
-            margin-left: 6px;
+            margin-left: 4px;
             text-transform: uppercase;
-        }
-
-        .steps {
-            margin-top: 32px;
-        }
-
-        .steps h3 {
-            color: #1a1a2e;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 16px;
-        }
-
-        .step-list {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-        }
-
-        .step-item {
-            text-align: center;
-        }
-
-        .step-num {
-            background: #e0e7ff;
-            color: #4f46e5;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 14px;
-            margin: 0 auto 8px;
-        }
-
-        .step-text {
-            color: #444;
-            font-size: 12px;
         }
 
         .note {
@@ -166,6 +161,22 @@
         }
 
         .footer a { color: #6366f1; text-decoration: none; }
+
+        .divider {
+            margin: 24px 0;
+            color: #ccc;
+            font-size: 12px;
+        }
+
+        .alt-download {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .alt-download a {
+            color: #6366f1;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -174,14 +185,20 @@
         <h1>Claude Code</h1>
         <p class="subtitle">Everything you need to code with AI</p>
 
-        <a href="https://github.com/laviefatigue/claude-code-installer/releases/download/v1.0.1/Install-ClaudeCode.bat"
-           class="download-btn">
-            Download for Windows
-        </a>
-        <p class="tagline">One installer. Everything included. Just run it.</p>
+        <div class="install-box">
+            <div class="install-label">Paste this in PowerShell</div>
+            <div class="install-command" id="command">irm https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.ps1 | iex</div>
+            <button class="copy-btn" onclick="copyCommand()">Copy</button>
+        </div>
+
+        <div class="install-steps">
+            <div class="install-step"><strong>1.</strong> Open PowerShell</div>
+            <div class="install-step"><strong>2.</strong> Paste command</div>
+            <div class="install-step"><strong>3.</strong> Press Enter</div>
+        </div>
 
         <div class="packages">
-            <h3>What's in the box</h3>
+            <h3>What gets installed</h3>
             <div class="package-grid">
                 <div class="package">
                     <div class="package-name">Claude Code <span class="required-badge">Core</span></div>
@@ -204,26 +221,8 @@
                     <div class="package-why">Python runtime</div>
                 </div>
                 <div class="package">
-                    <div class="package-name">+ Starter skills</div>
+                    <div class="package-name">Starter skills</div>
                     <div class="package-why">/help, /getting-started</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="steps">
-            <h3>Three steps</h3>
-            <div class="step-list">
-                <div class="step-item">
-                    <div class="step-num">1</div>
-                    <div class="step-text">Download</div>
-                </div>
-                <div class="step-item">
-                    <div class="step-num">2</div>
-                    <div class="step-text">Run installer</div>
-                </div>
-                <div class="step-item">
-                    <div class="step-num">3</div>
-                    <div class="step-text">Sign in</div>
                 </div>
             </div>
         </div>
@@ -236,5 +235,19 @@
             <a href="https://claude.ai" target="_blank">Get Claude →</a>
         </div>
     </div>
+
+    <script>
+        function copyCommand() {
+            const cmd = document.getElementById('command').textContent;
+            navigator.clipboard.writeText(cmd);
+            const btn = document.querySelector('.copy-btn');
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.textContent = 'Copy';
+                btn.classList.remove('copied');
+            }, 2000);
+        }
+    </script>
 </body>
 </html>
