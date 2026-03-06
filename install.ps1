@@ -4,7 +4,7 @@
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 
-function Write-Step { param($n, $t, $s) Write-Host "`n  [$n/6] $t" -ForegroundColor Cyan; Write-Host "  $s" -ForegroundColor Gray }
+function Write-Step { param($n, $t, $s) Write-Host "`n  [$n/8] $t" -ForegroundColor Cyan; Write-Host "  $s" -ForegroundColor Gray }
 function Write-Ok { param($m) Write-Host "       $m" -ForegroundColor Green }
 function Write-Skip { param($m) Write-Host "       $m" -ForegroundColor Yellow }
 function Write-Err { param($m) Write-Host "       $m" -ForegroundColor Red }
@@ -23,7 +23,9 @@ Write-Host @"
     - Claude Code CLI (the AI assistant)
 
     RECOMMENDED
-    - VS Code (code editor)
+    - VS Code + Extensions
+      - Claude Code extension
+      - Foam (knowledge graph)
     - Node.js (JavaScript runtime)
     - Python (Python runtime)
     - Starter skills (/help, /getting-started)
@@ -45,7 +47,7 @@ if (Get-Command git -ErrorAction SilentlyContinue) {
     if ($?) { Write-Ok " Done" } else { Write-Err " Failed - install manually: https://git-scm.com" }
 }
 
-# 2. Claude Code
+# 2. Claude Code CLI
 Write-Step "2" "Claude Code CLI" "Required - The AI assistant"
 if (Get-Command claude -ErrorAction SilentlyContinue) {
     Write-Ok "Already installed"
@@ -61,17 +63,51 @@ if (Get-Command claude -ErrorAction SilentlyContinue) {
 }
 
 # 3. VS Code
-Write-Step "3" "VS Code" "Recommended - Best editor for Claude Code"
-if (Get-Command code -ErrorAction SilentlyContinue) {
+Write-Step "3" "VS Code" "Code editor"
+$vscodeInstalled = Get-Command code -ErrorAction SilentlyContinue
+if ($vscodeInstalled) {
     Write-Ok "Already installed"
 } else {
     Write-Host "       Installing..." -NoNewline
     winget install Microsoft.VisualStudioCode --accept-package-agreements --accept-source-agreements --silent 2>$null
-    if ($?) { Write-Ok " Done" } else { Write-Skip " Skipped" }
+    if ($?) {
+        Write-Ok " Done"
+        # Refresh PATH to find code command
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+        $vscodeInstalled = $true
+    } else {
+        Write-Skip " Skipped"
+    }
 }
 
-# 4. Node.js
-Write-Step "4" "Node.js" "Recommended - JavaScript runtime"
+# 4. VS Code Extensions
+Write-Step "4" "VS Code Extensions" "Claude Code + Foam"
+if (Get-Command code -ErrorAction SilentlyContinue) {
+    # Claude Code extension
+    $extensions = code --list-extensions 2>$null
+
+    if ($extensions -contains "anthropic.claude-code") {
+        Write-Ok "Claude Code extension: installed"
+    } else {
+        Write-Host "       Installing Claude Code extension..." -NoNewline
+        code --install-extension anthropic.claude-code --force 2>$null
+        if ($?) { Write-Ok " Done" } else { Write-Skip " Skipped" }
+    }
+
+    # Foam extension
+    if ($extensions -contains "foam.foam-vscode") {
+        Write-Ok "Foam extension: installed"
+    } else {
+        Write-Host "       Installing Foam extension..." -NoNewline
+        code --install-extension foam.foam-vscode --force 2>$null
+        if ($?) { Write-Ok " Done" } else { Write-Skip " Skipped" }
+    }
+} else {
+    Write-Skip "VS Code not available - skipping extensions"
+}
+
+# 5. Node.js
+Write-Step "5" "Node.js" "JavaScript runtime"
 if (Get-Command node -ErrorAction SilentlyContinue) {
     $v = (node --version)
     Write-Ok "Already installed: $v"
@@ -81,8 +117,8 @@ if (Get-Command node -ErrorAction SilentlyContinue) {
     if ($?) { Write-Ok " Done" } else { Write-Skip " Skipped" }
 }
 
-# 5. Python
-Write-Step "5" "Python" "Recommended - Python runtime"
+# 6. Python
+Write-Step "6" "Python" "Python runtime"
 if (Get-Command python -ErrorAction SilentlyContinue) {
     $v = (python --version)
     Write-Ok "Already installed: $v"
@@ -92,8 +128,8 @@ if (Get-Command python -ErrorAction SilentlyContinue) {
     if ($?) { Write-Ok " Done" } else { Write-Skip " Skipped" }
 }
 
-# 6. Starter skills
-Write-Step "6" "Starter Skills" "/help and /getting-started commands"
+# 7. Starter skills
+Write-Step "7" "Starter Skills" "/help and /getting-started commands"
 
 $skillsDir = "$env:USERPROFILE\.claude\skills\getting-started"
 $commandsDir = "$env:USERPROFILE\.claude\commands"
@@ -127,7 +163,9 @@ Type /getting-started for a tutorial.
 
 Write-Ok "Installed"
 
-# Auth
+# 8. Authentication
+Write-Step "8" "Sign In" "Connect to Anthropic"
+
 Write-Host @"
 
   ==========================================
@@ -148,10 +186,19 @@ Write-Host @"
         INSTALLATION COMPLETE!
   ==========================================
 
+  What was installed:
+    - Git for Windows
+    - Claude Code CLI
+    - VS Code + Claude Code extension + Foam
+    - Node.js
+    - Python
+    - Starter skills
+
   To use Claude Code:
-    1. Open any terminal (PowerShell, VS Code, etc.)
-    2. Type: claude
-    3. Start chatting!
+    1. Open VS Code
+    2. Press Ctrl+` to open terminal
+    3. Type: claude
+    4. Start chatting!
 
   ==========================================
 

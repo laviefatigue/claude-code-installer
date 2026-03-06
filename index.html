@@ -175,8 +175,8 @@
 
         .package-list {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
         }
 
         .package {
@@ -239,6 +239,12 @@
             }
             .package-list {
                 grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 500px) {
+            .package-list {
+                grid-template-columns: 1fr 1fr;
             }
         }
     </style>
@@ -314,7 +320,8 @@
                 <p>The installer checks if each tool is already installed. If not, it downloads and installs it automatically.</p>
                 <p><strong>Git</strong> - Required. Claude Code uses this to run terminal commands.</p>
                 <p><strong>Claude Code</strong> - The AI assistant itself.</p>
-                <p><strong>VS Code, Node.js, Python</strong> - Helpful tools so everything "just works" later.</p>
+                <p><strong>VS Code + Extensions</strong> - Code editor with Claude Code and Foam (knowledge graph) extensions pre-installed.</p>
+                <p><strong>Node.js, Python</strong> - Runtimes so everything "just works" later.</p>
             </div>
         </div>
 
@@ -369,7 +376,7 @@
             <div class="package-list">
                 <div class="package">
                     <div class="package-icon">🤖</div>
-                    <div class="package-name">Claude Code</div>
+                    <div class="package-name">Claude Code CLI</div>
                     <div class="package-desc">AI assistant</div>
                     <div class="package-badge">Required</div>
                 </div>
@@ -383,6 +390,16 @@
                     <div class="package-icon">💻</div>
                     <div class="package-name">VS Code</div>
                     <div class="package-desc">Code editor</div>
+                </div>
+                <div class="package">
+                    <div class="package-icon">🧩</div>
+                    <div class="package-name">Claude Extension</div>
+                    <div class="package-desc">VS Code integration</div>
+                </div>
+                <div class="package">
+                    <div class="package-icon">🫧</div>
+                    <div class="package-name">Foam</div>
+                    <div class="package-desc">Knowledge graph</div>
                 </div>
                 <div class="package">
                     <div class="package-icon">🟢</div>
