@@ -1,0 +1,27 @@
+{
+  "name": "your-community-name",
+  "version": "1.0.0",
+  "description": "Description of your community and what makes it special",
+  "author": {
+    "name": "Your Name or Organization",
+    "email": "contact@example.com"
+  },
+  "branding": {
+    "welcome_message": "Welcome to [Your Community]! Let's build something great together."
+  },
+  "categories": ["your-category"],
+  "requirements": {
+    "python": {
+      "required": false,
+      "version": ">=3.10"
+    }
+  },
+  "environment": {
+    "YOUR_API_KEY": {
+      "description": "API key for your service (if needed)",
+      "required": false,
+      "sensitive": true
+    }
+  },
+  "mcpServers": {}
+}

@@ -1,0 +1,15 @@
+{
+  "name": "claude-code-base",
+  "version": "1.0.0",
+  "description": "Base Claude Code configuration with onboarding skills and helpful commands",
+  "author": {
+    "name": "Claude Code Framework",
+    "email": "support@example.com"
+  },
+  "branding": {
+    "welcome_message": "Welcome to Claude Code! Your AI-powered coding assistant awaits."
+  },
+  "categories": ["onboarding", "productivity"],
+  "requirements": {},
+  "mcpServers": {}
+}

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  installer-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: claude-framework-test
+    volumes:
+      # Mount source for live changes (optional)
+      - ./cli-installer:/app/cli-installer:ro
+      - ./communities:/app/communities:ro
+    environment:
+      - TERM=xterm-256color
+    # Keep container running for interactive debugging
+    # stdin_open: true
+    # tty: true
+    # command: pwsh
+
+  # Interactive mode for manual testing
+  installer-interactive:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: claude-framework-interactive
+    volumes:
+      - ./cli-installer:/app/cli-installer:ro
+      - ./communities:/app/communities:ro
+    stdin_open: true
+    tty: true
+    command: pwsh
+    profiles:
+      - interactive
