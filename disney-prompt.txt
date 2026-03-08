@@ -1,0 +1,82 @@
+You are creating a GROUNDBREAKING browser experience - not a webpage, but a DISNEY ANIMATED FILM told through scroll and cursor interaction.
+
+THE VISION:
+Imagine the opening of Aladdin - the merchant, the lamp, the magic unfolding. Now translate that to browser. The scroll IS the story. The cursor IS the viewer's hand. Every pixel scroll reveals more magic.
+
+CORE MECHANIC - THE LAMP & THE SMOKE:
+- Page opens with a SINGLE golden lamp centered on deep midnight background
+- As user scrolls DOWN, luminous blue/purple SMOKE begins pouring from the lamp
+- The smoke is CSS/canvas animated - swirling, organic, alive
+- The smoke FILLS the viewport as scroll progresses
+- Within the smoke, colors emerge: sunset oranges, magentas, golds
+- Each color band contains a STORY CARD that fades in - revealing what gets installed
+
+THE SMOKE COLOR JOURNEY (each is a scroll "chapter"):
+1. MIDNIGHT BLUE smoke - "The Voice Awakens" - Claude Code CLI card fades in
+2. DEEP PURPLE smoke - "A Sanctum Forms" - VS Code card emerges
+3. VIOLET/MAGENTA smoke - "Worlds Connect" - Claude Extension card
+4. WARM ORANGE smoke - "Stars Align" - Foam (knowledge web) card
+5. GOLDEN smoke - "The Heart Beats" - Node.js card
+6. SUNSET PINK smoke - "Ancient Wisdom" - Python card
+7. AMBER smoke - "Memory Eternal" - Git card
+8. BRIGHT GOLD smoke - "The Scrolls Unfold" - Starter Skills card
+
+SCROLL MECHANICS:
+- Use CSS scroll-snap for chapter transitions
+- Smoke effect uses CSS gradients that shift based on scroll position (use CSS custom properties + JS scroll listener)
+- Each card has a subtle parallax - moves slower than smoke
+- Cards should feel like they're FLOATING in the smoke
+- Consider using mix-blend-mode for ethereal effects
+
+CURSOR INTERACTION:
+- Cursor near the lamp causes it to glow brighter
+- Cursor movements create subtle ripples in the smoke
+- Hovering over cards causes them to illuminate and expand slightly
+
+THE FINALE - "THE JOURNEY BEGINS":
+- After all 8 cards, smoke clears to reveal bright dawn sky gradient
+- Simple, elegant terminal prompt appears
+- Platform tabs (macOS/Linux/Windows) with commands:
+  - macOS/Linux: curl -sL https://ccf.dev/install | sh
+  - Windows: iwr https://ccf.dev/install.ps1 | iex
+- Copy button styled as golden text: "Begin The Journey"
+- Click copies command, button transforms to checkmark with "The lamp has been rubbed"
+
+TECHNICAL APPROACH:
+- Single HTML file, embedded CSS/JS
+- Tailwind CSS via CDN for utility classes
+- Google Fonts: Cinzel Decorative (magical headers), Cormorant Garamond (body)
+- CSS custom properties for scroll-driven color transitions
+- Canvas or pure CSS for smoke effect (CSS preferred for performance)
+- IntersectionObserver for card reveals
+- Smooth scroll behavior
+- Full viewport sections (100vh)
+
+VISUAL REFERENCES:
+- Disney's Aladdin opening sequence colors
+- Genie emerging from lamp - that luminous blue
+- Arabian Nights sunset palette - deep purples to bright golds
+- Magic carpet ride scene - swirling clouds below
+
+CSS SMOKE TECHNIQUE:
+Use multiple layered divs with:
+- Large border-radius (40% 60% / 50% 40%)
+- CSS filters: blur(60px)
+- Transform animations for organic movement
+- Opacity transitions tied to scroll position
+- Background gradients that shift hue based on scroll
+
+CARD DESIGN:
+- Semi-transparent glass morphism effect
+- Subtle border glow matching current smoke color
+- Icon + poetic title + short description
+- Each card has unique accent color
+
+MAKE IT ART:
+- This is not a landing page, it's a portal
+- Every scroll should feel intentional, magical
+- The user should feel like they're uncovering secrets
+- Pacing matters - don't rush the reveal
+- Sound would be nice but keep silent (no audio)
+
+OUTPUT: Save as genie-journey.html. This should be portfolio-quality work that makes people say "I didn't know browsers could do this."

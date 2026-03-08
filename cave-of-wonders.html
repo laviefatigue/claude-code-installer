@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code Framework | The Cave of Wonders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        midnight: '#0d0a1a',
+                        deep: '#1a1030',
+                        gold: '#d4a853',
+                        warm: '#f0d78c',
+                        sand: '#f5f0e1',
+                        star: '#faf8f5',
+                    },
+                    fontFamily: {
+                        cinzel: ['"Cinzel"', 'serif'],
+                        cormorant: ['"Cormorant Garamond"', 'serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'twinkle': 'twinkle 4s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 12s linear infinite',
+                        'orbit': 'orbit 20s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        twinkle: {
+                            '0%, 100%': { opacity: '0.2' },
+                            '50%': { opacity: '1' },
+                        },
+                        orbit: {
+                            '0%': { transform: 'rotate(0deg)' },
+                            '100%': { transform: 'rotate(360deg)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0d0a1a;
+            color: #f5f0e1;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        .grain-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            z-index: 0;
+        }
+
+        .section-fade {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 1.5s ease-out, transform 1.5s ease-out;
+        }
+
+        .section-fade.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d0a1a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d4a853; 
+            border-radius: 4px;
+        }
+
+        .lamp-glow {
+            box-shadow: 0 0 30px #d4a853, 0 0 60px rgba(212, 168, 83, 0.4);
+        }
+        
+        .artifact-card {
+            transition: all 0.5s ease;
+        }
+        .artifact-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 10px 40px rgba(212, 168, 83, 0.15);
+            border-color: #d4a853;
+        }
+
+        .orbit-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+        
+        .orbit-item {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -20px;
+            margin-left: -20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transform-origin: 20px 20px; /* Center of the item */
+        }
+
+        /* Typewriter cursor */
+        .cursor-blink {
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .dust {
+            position: absolute;
+            background: #d4a853;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.6;
+            animation: float-dust 10s infinite linear;
+        }
+        @keyframes float-dust {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.6; }
+            100% { transform: translateY(-100px) translateX(20px); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="font-cormorant relative">
+
+    <div class="grain-overlay"></div>
+    
+    <!-- Fixed Starfield Background -->
+    <div id="starfield" class="fixed inset-0 z-0 pointer-events-none"></div>
+    
+    <!-- Navigation / Header -->
+    <nav class="fixed top-0 w-full z-40 p-6 flex justify-between items-center bg-gradient-to-b from-midnight to-transparent pointer-events-none">
+        <div class="text-gold font-cinzel text-xl font-bold tracking-widest opacity-80 pointer-events-auto cursor-pointer hover:text-white transition-colors">Claude Code Framework</div>
+        <div class="text-sand font-cormorant italic opacity-60">The Cave of Wonders</div>
+    </nav>
+
+    <!-- SECTION 1: THE ENTRANCE -->
+    <section id="entrance" class="min-h-screen relative flex flex-col justify-center items-center z-10 p-4">
+        <div class="text-center max-w-4xl mx-auto section-fade">
+            <h2 class="text-gold text-sm md:text-base tracking-[0.3em] font-cinzel mb-6 uppercase">The Journey Begins</h2>
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-cinzel font-black text-transparent bg-clip-text bg-gradient-to-b from-sand to-gold mb-8 drop-shadow-lg">
+                Seek the Lamp
+            </h1>
+            <p class="text-xl md:text-2xl text-sand/80 italic mb-12 max-w-2xl mx-auto leading-relaxed">
+                "Only one may enter here. One whose worth lies far within. A diamond in the rough."
+            </p>
+
+            <!-- The Lamp (Install Command) -->
+            <div class="relative group mx-auto w-full max-w-2xl">
+                <!-- Platform Tabs -->
+                <div class="flex justify-center space-x-4 mb-4">
+                    <button onclick="switchPlatform('mac')" id="tab-mac" class="text-gold border-b-2 border-gold pb-1 font-cinzel text-sm tracking-wider transition-all hover:text-white">macOS / Linux</button>
+                    <button onclick="switchPlatform('win')" id="tab-win" class="text-sand/50 border-b-2 border-transparent pb-1 font-cinzel text-sm tracking-wider transition-all hover:text-white">Windows</button>
+                </div>
+
+                <!-- Command Box -->
+                <div class="relative bg-deep/80 backdrop-blur-sm border border-gold/30 rounded-lg p-6 md:p-8 shadow-[0_0_50px_rgba(212,168,83,0.1)] transition-all duration-500 group-hover:shadow-[0_0_80px_rgba(212,168,83,0.3)]">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-gold to-purple-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    <div class="relative flex items-center justify-between font-mono text-lg md:text-xl text-sand">
+                        <span id="command-text" class="mr-4 text-left break-all">curl -sL https://ccf.dev/install | sh</span>
+                        <button onclick="copyCommand()" class="relative group/btn overflow-hidden rounded p-2 transition-colors hover:bg-gold/10">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <span id="copy-tooltip" class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 text-xs font-cinzel text-midnight bg-gold rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">Rub the Lamp</span>
+                        </button>
+                    </div>
+                </div>
+                <p class="mt-4 text-sm text-sand/40 font-mono">v1.0.2 • The Genie Awaits</p>
+            </div>
+            
+            <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce opacity-50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: THE DESCENT -->
+    <section id="descent" class="min-h-screen relative flex flex-col justify-center items-center z-10 p-4 bg-gradient-to-b from-midnight via-deep to-midnight overflow-hidden">
+        <div id="dust-container" class="absolute inset-0 pointer-events-none"></div>
+        
+        <div class="max-w-5xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center section-fade">
+            <div class="order-2 md:order-1 relative">
+                <!-- Ancient Inscriptions / System Checks -->
+                <div class="space-y-4 font-mono text-sm md:text-base">
+                    <div class="check-item flex items-center space-x-3 text-gold/60 opacity-0 transform translate-x-[-20px] transition-all duration-700 delay-100">
+                        <span class="text-gold">✓</span> <span>Node.js spirit detected...</span>
+                    </div>
+                    <div class="check-item flex items-center space-x-3 text-gold/60 opacity-0 transform translate-x-[-20px] transition-all duration-700 delay-300">
+                        <span class="text-gold">✓</span> <span>Git memory accessed...</span>
+                    </div>
+                    <div class="check-item flex items-center space-x-3 text-gold/60 opacity-0 transform translate-x-[-20px] transition-all duration-700 delay-500">
+                        <span class="text-gold">✓</span> <span>Python ancient serpent found...</span>
+                    </div>
+                    <div class="check-item flex items-center space-x-3 text-gold/60 opacity-0 transform translate-x-[-20px] transition-all duration-700 delay-700">
+                        <span class="text-gold">➜</span> <span class="text-white glow">Accessing The Cave of Wonders...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-1 md:order-2 text-center md:text-left">
+                <h2 class="text-4xl md:text-6xl font-cinzel text-sand mb-6">The Descent</h2>
+                <p class="text-xl text-sand/70 italic leading-relaxed">
+                    You fall not into darkness, but into a world of infinite possibility. 
+                    The air hums with ancient code. The walls are inscribed with the logic of the precursors.
+                    Here, your environment is not just a tool, but a living entity.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: THE TREASURE CHAMBER -->
+    <section id="chamber" class="min-h-screen relative flex flex-col justify-center items-center z-10 p-8 bg-[#0a0814]">
+        <div class="section-fade w-full max-w-7xl mx-auto">
+            <h2 class="text-center text-4xl md:text-5xl font-cinzel text-gold mb-16 drop-shadow-[0_0_15px_rgba(212,168,83,0.5)]">Choose Your Artifacts</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card 1 -->
+                <div class="artifact-card p-6 rounded-xl border border-gold/20 bg-deep/40 backdrop-blur-sm group">
+                    <div class="h-12 w-12 rounded-full bg-purple-900/50 flex items-center justify-center mb-4 text-2xl group-hover:text-gold transition-colors">🗣️</div>
+                    <h3 class="text-xl font-cinzel text-sand mb-2">Claude Code CLI</h3>
+                    <p class="text-gold/80 text-sm font-bold uppercase tracking-wider mb-2">'The Voice'</p>
+                    <p class="text-sand/60 text-sm italic">Speaks your will to the machine. Command the genie directly.</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="artifact-card p-6 rounded-xl border border-gold/20 bg-deep/40 backdrop-blur-sm group">
+                    <div class="h-12 w-12 rounded-full bg-blue-900/50 flex items-center justify-center mb-4 text-2xl group-hover:text-gold transition-colors">🏛️</div>
+                    <h3 class="text-xl font-cinzel text-sand mb-2">VS Code</h3>
+                    <p class="text-gold/80 text-sm font-bold uppercase tracking-wider mb-2">'The Sanctum'</p>
+                    <p class="text-sand/60 text-sm italic">Where the magic happens. Your temple of creation.</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="artifact-card p-6 rounded-xl border border-gold/20 bg-deep/40 backdrop-blur-sm group">
+                    <div class="h-12 w-12 rounded-full bg-orange-900/50 flex items-center justify-center mb-4 text-2xl group-hover:text-gold transition-colors">🌉</div>
+                    <h3 class="text-xl font-cinzel text-sand mb-2">Claude Extension</h3>
+                    <p class="text-gold/80 text-sm font-bold uppercase tracking-wider mb-2">'The Bridge'</p>
+                    <p class="text-sand/60 text-sm italic">Connects worlds. Brings the genie into your sanctum.</p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="artifact-card p-6 rounded-xl border border-gold/20 bg-deep/40 backdrop-blur-sm group">
+                    <div class="h-12 w-12 rounded-full bg-teal-900/50 flex items-center justify-center mb-4 text-2xl group-hover:text-gold transition-colors">🕸️</div>
+                    <h3 class="text-xl font-cinzel text-sand mb-2">Foam</h3>
+                    <p class="text-gold/80 text-sm font-bold uppercase tracking-wider mb-2">'The Web of Stars'</p>
+                    <p class="text-sand/60 text-sm italic">Knowledge constellation. Connect your thoughts like stars.</p>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="artifact-card p-6 rounded-xl border border-gold/20 bg-deep/40 backdrop-blur-sm group">
+                    <div class="h-12 w-12 rounded-full bg-green-900/50 flex items-center justify-center mb-4 text-2xl group-hover:text-gold transition-colors">💚</div>
+                    <h3 class="text-xl font-cinzel text-sand mb-2">Node.js</h3>
+                    <p class="text-gold/80 text-sm font-bold uppercase tracking-wider mb-2">'The Heartbeat'</p>
+                    <p class="text-sand/60 text-sm italic">The life force that pulses through the cave.</p>
+                </div>
+
+                <!-- Card 6 -->
+                <div class="artifact-card p-6 rounded-xl border border-gold/20 bg-deep/40 backdrop-blur-sm group">
+                    <div class="h-12 w-12 rounded-full bg-yellow-900/50 flex items-center justify-center mb-4 text-2xl group-hover:text-gold transition-colors">🐍</div>
+                    <h3 class="text-xl font-cinzel text-sand mb-2">Python</h3>
+                    <p class="text-gold/80 text-sm font-bold uppercase tracking-wider mb-2">'The Serpent'</p>
+                    <p class="text-sand/60 text-sm italic">Ancient power. Calculations as old as time.</p>
+                </div>
+
+                <!-- Card 7 -->
+                <div class="artifact-card p-6 rounded-xl border border-gold/20 bg-deep/40 backdrop-blur-sm group">
+                    <div class="h-12 w-12 rounded-full bg-red-900/50 flex items-center justify-center mb-4 text-2xl group-hover:text-gold transition-colors">📜</div>
+                    <h3 class="text-xl font-cinzel text-sand mb-2">Git</h3>
+                    <p class="text-gold/80 text-sm font-bold uppercase tracking-wider mb-2">'The Memory'</p>
+                    <p class="text-sand/60 text-sm italic">Nothing is forgotten. The sands of time reversed.</p>
+                </div>
+
+                <!-- Card 8 -->
+                <div class="artifact-card p-6 rounded-xl border border-gold/20 bg-deep/40 backdrop-blur-sm group">
+                    <div class="h-12 w-12 rounded-full bg-indigo-900/50 flex items-center justify-center mb-4 text-2xl group-hover:text-gold transition-colors">🔮</div>
+                    <h3 class="text-xl font-cinzel text-sand mb-2">Starter Skills</h3>
+                    <p class="text-gold/80 text-sm font-bold uppercase tracking-wider mb-2">'The Scrolls'</p>
+                    <p class="text-sand/60 text-sm italic">Ancient wisdom to guide your first wishes.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: THE AWAKENING -->
+    <section id="awakening" class="min-h-screen relative flex flex-col justify-center items-center z-10 p-4 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-radial from-purple-900/20 to-midnight pointer-events-none"></div>
+        
+        <div class="section-fade flex flex-col items-center">
+            <!-- Orbital Animation System -->
+            <div class="relative w-[300px] h-[300px] md:w-[500px] md:h-[500px] mb-12">
+                <!-- Center Core -->
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-gold rounded-full blur-[30px] opacity-50 animate-pulse"></div>
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full blur-[10px] opacity-80"></div>
+                
+                <!-- Orbits -->
+                <div class="absolute inset-0 animate-[spin_20s_linear_infinite]">
+                    <!-- Item 1 -->
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 bg-gold rounded-full shadow-[0_0_10px_#d4a853]"></div>
+                    <!-- Item 2 -->
+                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-4 bg-purple-400 rounded-full shadow-[0_0_10px_#a855f7]"></div>
+                     <!-- Item 3 -->
+                     <div class="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-blue-400 rounded-full shadow-[0_0_10px_#60a5fa]"></div>
+                     <!-- Item 4 -->
+                     <div class="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-green-400 rounded-full shadow-[0_0_10px_#4ade80]"></div>
+                </div>
+
+                <div class="absolute inset-[15%] animate-[spin_15s_linear_infinite_reverse]">
+                     <!-- Item 5 -->
+                     <div class="absolute top-[14%] right-[14%] w-3 h-3 bg-red-400 rounded-full shadow-[0_0_8px_#f87171]"></div>
+                     <!-- Item 6 -->
+                     <div class="absolute bottom-[14%] left-[14%] w-3 h-3 bg-indigo-400 rounded-full shadow-[0_0_8px_#818cf8]"></div>
+                </div>
+            </div>
+
+            <h2 class="text-5xl md:text-8xl font-cinzel font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-sand to-gold tracking-tighter text-center drop-shadow-[0_0_30px_rgba(212,168,83,0.3)]">
+                YOUR POWER<br>AWAKENS
+            </h2>
+        </div>
+    </section>
+
+    <!-- SECTION 5: THE FIRST WISH -->
+    <section id="wish" class="min-h-screen relative flex flex-col justify-center items-center z-10 p-4 bg-midnight">
+        <div class="section-fade max-w-4xl w-full text-center">
+            <div class="mb-12">
+                <div class="h-px w-32 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mb-8"></div>
+                <h2 class="text-3xl md:text-4xl font-cinzel text-sand mb-4">The Genie Awaits</h2>
+                <p class="text-sand/50 italic">Three wishes? No. Infinite.</p>
+            </div>
+
+            <div class="text-left max-w-2xl mx-auto font-mono text-xl md:text-3xl text-gold/90 leading-relaxed">
+                <span class="text-purple-400">user@cave</span><span class="text-sand">:</span><span class="text-blue-400">~</span><span class="text-sand">$</span> 
+                <span>What will you create?</span><span class="cursor-blink w-4 h-8 bg-gold inline-block ml-2 align-middle"></span>
+            </div>
+
+            <div class="mt-24">
+                <button onclick="document.getElementById('entrance').scrollIntoView({behavior: 'smooth'})" class="text-sand/30 hover:text-gold transition-colors font-cinzel text-sm uppercase tracking-widest">
+                    Return to Surface
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Starfield Generation
+        const starfield = document.getElementById('starfield');
+        const starCount = 200;
+
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            
+            // Random position
+            const x = Math.random() * 100;
+            const y = Math.random() * 100;
+            
+            // Random size
+            const size = Math.random() * 2 + 1;
+            
+            // Random opacity
+            const opacity = Math.random() * 0.7 + 0.1;
+            
+            // Random animation delay
+            const delay = Math.random() * 5;
+            const duration = Math.random() * 3 + 2;
+
+            star.style.left = `${x}%`;
+            star.style.top = `${y}%`;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.opacity = opacity;
+            star.style.animation = `twinkle ${duration}s ease-in-out ${delay}s infinite`;
+            
+            starfield.appendChild(star);
+        }
+
+        // Dust Generation
+        const dustContainer = document.getElementById('dust-container');
+        if (dustContainer) {
+            for (let i = 0; i < 30; i++) {
+                const dust = document.createElement('div');
+                dust.className = 'dust';
+                const size = Math.random() * 4 + 1;
+                dust.style.width = `${size}px`;
+                dust.style.height = `${size}px`;
+                dust.style.left = `${Math.random() * 100}%`;
+                dust.style.top = `${Math.random() * 100}%`;
+                dust.style.animationDelay = `${Math.random() * 10}s`;
+                dust.style.animationDuration = `${10 + Math.random() * 20}s`;
+                dustContainer.appendChild(dust);
+            }
+        }
+
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.2,
+            rootMargin: '0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    
+                    // Trigger specific animations for Descent section
+                    if (entry.target.closest('#descent')) {
+                        const checks = entry.target.querySelectorAll('.check-item');
+                        checks.forEach((check, index) => {
+                            setTimeout(() => {
+                                check.style.opacity = '1';
+                                check.style.transform = 'translateX(0)';
+                            }, index * 800);
+                        });
+                    }
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.section-fade').forEach(el => observer.observe(el));
+
+        // Platform Switch Logic
+        const commands = {
+            mac: 'curl -sL https://ccf.dev/install | sh',
+            win: 'iwr https://ccf.dev/install.ps1 | iex'
+        };
+
+        function switchPlatform(platform) {
+            const cmdText = document.getElementById('command-text');
+            const macTab = document.getElementById('tab-mac');
+            const winTab = document.getElementById('tab-win');
+
+            cmdText.textContent = commands[platform];
+            cmdText.classList.remove('animate-pulse');
+            void cmdText.offsetWidth; // Trigger reflow
+            cmdText.classList.add('animate-pulse'); // Subtle feedback
+
+            if (platform === 'mac') {
+                macTab.classList.add('text-gold', 'border-gold');
+                macTab.classList.remove('text-sand/50', 'border-transparent');
+                winTab.classList.remove('text-gold', 'border-gold');
+                winTab.classList.add('text-sand/50', 'border-transparent');
+            } else {
+                winTab.classList.add('text-gold', 'border-gold');
+                winTab.classList.remove('text-sand/50', 'border-transparent');
+                macTab.classList.remove('text-gold', 'border-gold');
+                macTab.classList.add('text-sand/50', 'border-transparent');
+            }
+        }
+
+        // Copy Function
+        function copyCommand() {
+            const text = document.getElementById('command-text').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const tooltip = document.getElementById('copy-tooltip');
+                const originalText = tooltip.textContent;
+                
+                tooltip.textContent = "Wish Granted!";
+                tooltip.classList.add('opacity-100');
+                
+                setTimeout(() => {
+                    tooltip.textContent = originalText;
+                    // Note: class handling for hover effect restoration is done via CSS group-hover
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

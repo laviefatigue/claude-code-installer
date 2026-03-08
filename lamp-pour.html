@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lamp Pour | Claude Code Framework</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0a0612;
+            --current-color: #0a0612;
+            --current-rgb: 10, 6, 18;
+            --accent-rgb: 255, 215, 0;
+            --flow-radius: 0vmax;
+            --flow-reach: 0%;
+            --mist-opacity: 0;
+            --card-opacity: 0;
+            --hint-opacity: 1;
+            --dawn-opacity: 0;
+            --lamp-glow: 0.28;
+            --install-opacity: 0;
+            --shake-x: 0px;
+            --shake-y: 0px;
+            --pulse-scale: 1;
+            --flow-origin-x: 50%;
+            --flow-origin-y: 82%;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            overflow: hidden;
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at top, rgba(255, 255, 255, 0.04), transparent 34%),
+                radial-gradient(circle at center, rgba(77, 27, 120, 0.1), transparent 60%),
+                var(--bg-color);
+            color: #f9f5ef;
+            font-family: 'Cormorant Garamond', serif;
+            touch-action: none;
+        }
+
+        button {
+            font: inherit;
+        }
+
+        .viewport {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            isolation: isolate;
+            transform: translate3d(var(--shake-x), var(--shake-y), 0) scale(var(--pulse-scale));
+            transition: transform 0.18s ease-out;
+        }
+
+        .ambient,
+        .dawn,
+        .flow,
+        .flow::before,
+        .flow::after,
+        .grain,
+        .vignette,
+        .particles {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .ambient {
+            background:
+                radial-gradient(circle at var(--flow-origin-x) calc(var(--flow-origin-y) + 5%), rgba(var(--current-rgb), 0.2), transparent 20%),
+                radial-gradient(circle at 18% 18%, rgba(96, 58, 168, 0.16), transparent 20%),
+                radial-gradient(circle at 82% 20%, rgba(255, 255, 255, 0.06), transparent 18%);
+            opacity: calc(0.35 + var(--mist-opacity) * 0.5);
+            filter: blur(18px);
+            mix-blend-mode: screen;
+        }
+
+        .dawn {
+            background:
+                radial-gradient(circle at 50% 52%, rgba(255, 237, 176, 0.65), transparent 28%),
+                linear-gradient(180deg, rgba(255, 216, 128, 0.05) 0%, rgba(255, 198, 113, 0.18) 54%, rgba(255, 235, 190, 0.62) 100%);
+            opacity: var(--dawn-opacity);
+            transition: opacity 0.3s ease-out;
+        }
+
+        .flow {
+            background:
+                radial-gradient(ellipse at var(--flow-origin-x) var(--flow-origin-y), rgba(var(--current-rgb), 0.82) 0%, rgba(var(--current-rgb), 0.55) calc(var(--flow-reach) * 0.48), transparent calc(var(--flow-reach) * 0.8)),
+                radial-gradient(circle at var(--flow-origin-x) calc(var(--flow-origin-y) - 2%), rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) calc(var(--flow-reach) * 0.3), transparent calc(var(--flow-reach) * 0.7));
+            filter: saturate(1.18);
+            opacity: calc(0.18 + var(--mist-opacity) * 0.88);
+        }
+
+        .flow::before {
+            content: "";
+            background:
+                radial-gradient(circle at var(--flow-origin-x) var(--flow-origin-y), rgba(var(--current-rgb), 0.95) 0%, rgba(var(--current-rgb), 0.4) var(--flow-radius), transparent calc(var(--flow-radius) + 12vmax));
+            filter: blur(8px) brightness(1.18);
+            mix-blend-mode: screen;
+            opacity: calc(0.1 + var(--mist-opacity) * 0.9);
+        }
+
+        .flow::after {
+            content: "";
+            background:
+                radial-gradient(ellipse at var(--flow-origin-x) calc(var(--flow-origin-y) - 3%), rgba(255, 255, 255, 0.18) 0%, rgba(var(--current-rgb), 0.14) calc(var(--flow-reach) * 0.34), transparent calc(var(--flow-reach) * 0.58));
+            filter: blur(28px);
+            mix-blend-mode: screen;
+            opacity: calc(0.08 + var(--mist-opacity) * 0.72);
+        }
+
+        .grain {
+            opacity: 0.08;
+            mix-blend-mode: soft-light;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.65'/%3E%3C/svg%3E");
+            background-size: 220px 220px;
+        }
+
+        .vignette {
+            box-shadow: inset 0 0 160px rgba(0, 0, 0, 0.75);
+        }
+
+        .status-pill {
+            position: absolute;
+            top: 2rem;
+            left: 50%;
+            z-index: 20;
+            transform: translateX(-50%);
+            padding: 0.6rem 1rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(8, 7, 18, 0.48);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            color: rgba(255, 251, 244, 0.75);
+            text-transform: uppercase;
+            letter-spacing: 0.24em;
+            font-size: 0.72rem;
+        }
+
+        .status-pill strong {
+            color: rgba(255, 245, 210, 0.95);
+            font-family: 'Fira Code', monospace;
+            font-weight: 500;
+        }
+
+        .stage-copy {
+            position: absolute;
+            top: clamp(4.5rem, 8vh, 5.8rem);
+            width: min(40rem, calc(100vw - 3rem));
+            left: 50%;
+            z-index: 18;
+            transform: translateX(-50%);
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(255, 240, 211, 0.78);
+        }
+
+        .kicker::before,
+        .kicker::after {
+            content: "";
+            width: 2.8rem;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 223, 144, 0.75), transparent);
+        }
+
+        .stage-copy h1 {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: clamp(2.3rem, 6vw, 5rem);
+            line-height: 1.04;
+            text-shadow: 0 0 26px rgba(0, 0, 0, 0.32);
+        }
+
+        .stage-copy p {
+            max-width: 34rem;
+            margin: 1rem auto 0;
+            font-size: clamp(1.2rem, 2.2vw, 1.55rem);
+            line-height: 1.45;
+            color: rgba(255, 246, 234, 0.84);
+        }
+
+        .cards-shell {
+            position: absolute;
+            inset: 0;
+            z-index: 22;
+            display: grid;
+            place-items: center;
+            pointer-events: none;
+            padding: 7rem 1.5rem 15rem;
+        }
+
+        .cards {
+            position: relative;
+            width: min(32rem, 100%);
+            height: 18rem;
+        }
+
+        .card,
+        .terminal {
+            position: absolute;
+            inset: 0;
+            border-radius: 1.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background:
+                linear-gradient(180deg, rgba(var(--current-rgb), 0.28), rgba(10, 6, 18, 0.42)),
+                rgba(9, 7, 17, 0.36);
+            box-shadow:
+                0 2rem 5rem rgba(0, 0, 0, 0.38),
+                0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+                0 0 3rem rgba(var(--current-rgb), 0.22);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .card {
+            padding: 2rem 2.1rem;
+            display: grid;
+            gap: 1rem;
+            align-content: center;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(2.4rem) scale(0.88);
+            transition:
+                opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 0.35s ease-out,
+                box-shadow 0.35s ease-out,
+                background 0.35s ease-out;
+        }
+
+        .card.is-active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .card-icon {
+            width: 4rem;
+            height: 4rem;
+            margin: 0 auto;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.3), transparent 42%),
+                rgba(var(--current-rgb), 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 0 2.5rem rgba(var(--current-rgb), 0.24);
+            font-size: 1.5rem;
+        }
+
+        .card h2,
+        .terminal h2 {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: clamp(1.9rem, 4vw, 2.7rem);
+            line-height: 1.1;
+        }
+
+        .card h3,
+        .terminal .terminal-subtitle {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.92rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(255, 240, 218, 0.74);
+        }
+
+        .card p,
+        .terminal p {
+            font-size: 1.18rem;
+            line-height: 1.45;
+            color: rgba(255, 247, 236, 0.9);
+        }
+
+        .terminal {
+            display: grid;
+            gap: 1.25rem;
+            padding: 2rem;
+            opacity: var(--install-opacity);
+            transform: translateY(calc((1 - var(--install-opacity)) * 2rem)) scale(calc(0.94 + var(--install-opacity) * 0.06));
+            pointer-events: none;
+            transition:
+                opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .terminal.is-ready {
+            pointer-events: auto;
+        }
+
+        .terminal-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .terminal-badge {
+            padding: 0.32rem 0.75rem;
+            border-radius: 999px;
+            background: rgba(255, 233, 173, 0.14);
+            color: rgba(255, 237, 192, 0.86);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.82rem;
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .tab {
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 242, 227, 0.72);
+            padding: 0.65rem 1rem;
+            border-radius: 999px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition:
+                background 0.25s ease-out,
+                border-color 0.25s ease-out,
+                color 0.25s ease-out,
+                transform 0.25s ease-out;
+        }
+
+        .tab:hover,
+        .tab:focus-visible {
+            transform: translateY(-1px);
+            outline: none;
+            color: rgba(255, 250, 241, 0.96);
+        }
+
+        .tab.is-active {
+            background: rgba(255, 221, 146, 0.16);
+            border-color: rgba(255, 223, 151, 0.45);
+            color: rgba(255, 244, 218, 0.98);
+            box-shadow: 0 0 2rem rgba(255, 213, 118, 0.18);
+        }
+
+        .command {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 32%),
+                rgba(4, 4, 10, 0.82);
+            box-shadow: inset 0 0 2rem rgba(255, 246, 222, 0.03);
+            padding: 1.4rem;
+        }
+
+        .command::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 233, 168, 0.55), transparent);
+        }
+
+        .command-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.85rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.78rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255, 227, 169, 0.78);
+        }
+
+        .command code {
+            display: block;
+            font-family: 'Fira Code', monospace;
+            font-size: clamp(0.95rem, 1.8vw, 1.02rem);
+            line-height: 1.65;
+            word-break: break-all;
+            color: #e4ffb1;
+        }
+
+        .terminal-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem;
+            justify-content: space-between;
+        }
+
+        .copy-button {
+            border: none;
+            padding: 0.95rem 1.55rem;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #ffe18a, #ffba55);
+            color: #1b1204;
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 1rem 2rem rgba(255, 190, 87, 0.26);
+            transition:
+                transform 0.25s ease-out,
+                box-shadow 0.25s ease-out,
+                filter 0.25s ease-out;
+        }
+
+        .copy-button:hover,
+        .copy-button:focus-visible {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 1.2rem 2.2rem rgba(255, 198, 92, 0.34);
+            filter: brightness(1.05);
+            outline: none;
+        }
+
+        .confirmation {
+            min-height: 1.4rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255, 239, 202, 0.82);
+        }
+
+        .lamp-wrap {
+            position: absolute;
+            left: 50%;
+            bottom: clamp(5.5rem, 12vh, 8rem);
+            z-index: 16;
+            width: min(30rem, 64vw);
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+
+        .lamp-aura {
+            position: absolute;
+            left: 50%;
+            bottom: 4.5rem;
+            width: clamp(18rem, 38vw, 28rem);
+            height: clamp(9rem, 24vw, 16rem);
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background:
+                radial-gradient(circle, rgba(255, 214, 97, calc(0.22 + var(--lamp-glow) * 0.28)) 0%, rgba(255, 168, 55, calc(0.1 + var(--lamp-glow) * 0.18)) 32%, transparent 74%);
+            filter: blur(22px);
+            opacity: calc(0.65 + var(--lamp-glow) * 0.9);
+        }
+
+        .lamp-svg {
+            position: relative;
+            width: 100%;
+            height: auto;
+            filter:
+                drop-shadow(0 0 22px rgba(255, 214, 97, calc(0.18 + var(--lamp-glow) * 0.42)))
+                drop-shadow(0 0 60px rgba(255, 179, 56, calc(0.08 + var(--lamp-glow) * 0.28)));
+            transform-origin: 50% 75%;
+            animation: lamp-float 6.8s ease-in-out infinite;
+        }
+
+        .lamp-ornament {
+            fill: rgba(255, 234, 182, 0.48);
+        }
+
+        .spout-anchor {
+            position: absolute;
+            left: 82.4%;
+            top: 28.8%;
+            width: 0;
+            height: 0;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            left: 50%;
+            bottom: 1.5rem;
+            z-index: 26;
+            transform: translateX(-50%);
+            text-align: center;
+            opacity: var(--hint-opacity);
+            transition: opacity 0.25s ease-out;
+            color: rgba(255, 245, 224, 0.78);
+        }
+
+        .scroll-hint span {
+            display: block;
+            font-family: 'Cinzel Decorative', serif;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            font-size: 0.94rem;
+        }
+
+        .scroll-hint small {
+            display: block;
+            margin-top: 0.35rem;
+            font-family: 'Fira Code', monospace;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255, 234, 183, 0.6);
+        }
+
+        .mouse {
+            width: 1.4rem;
+            height: 2.4rem;
+            margin: 0 auto 0.7rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 245, 220, 0.42);
+            position: relative;
+        }
+
+        .mouse::after {
+            content: "";
+            position: absolute;
+            top: 0.35rem;
+            left: 50%;
+            width: 0.2rem;
+            height: 0.55rem;
+            margin-left: -0.1rem;
+            border-radius: 999px;
+            background: rgba(255, 236, 193, 0.8);
+            animation: scroll-beat 1.8s ease-in-out infinite;
+        }
+
+        .progress {
+            position: absolute;
+            right: clamp(1rem, 3vw, 2rem);
+            bottom: clamp(1rem, 3vw, 2rem);
+            z-index: 19;
+            display: grid;
+            gap: 0.45rem;
+            justify-items: end;
+            font-family: 'Fira Code', monospace;
+            color: rgba(255, 240, 214, 0.7);
+        }
+
+        .progress strong {
+            font-size: 0.78rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .progress-track {
+            width: 8rem;
+            height: 0.24rem;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: var(--flow-reach);
+            background: linear-gradient(90deg, rgba(255, 235, 196, 0.35), rgba(var(--current-rgb), 0.95));
+            box-shadow: 0 0 1rem rgba(var(--current-rgb), 0.4);
+        }
+
+        .particle {
+            position: absolute;
+            left: var(--flow-origin-x);
+            top: var(--flow-origin-y);
+            border-radius: 50%;
+            opacity: 0;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.92) 0%, rgba(var(--particle-rgb), 0.88) 30%, rgba(var(--particle-rgb), 0) 76%);
+            transform: translate3d(0, 0, 0);
+            animation: drift var(--life, 2800ms) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes drift {
+            0% {
+                transform: translate3d(calc(var(--from-x) * 1px), calc(var(--from-y) * 1px), 0) scale(0.25);
+                opacity: 0;
+            }
+            18% {
+                opacity: 0.95;
+            }
+            100% {
+                transform: translate3d(calc(var(--to-x) * 1px), calc(var(--to-y) * 1px), 0) scale(1.65);
+                opacity: 0;
+            }
+        }
+
+        @keyframes lamp-float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-0.5rem);
+            }
+        }
+
+        @keyframes scroll-beat {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            70% {
+                transform: translateY(0.72rem);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .cards-shell {
+                padding-top: 6.5rem;
+                padding-bottom: 13rem;
+            }
+
+            .cards {
+                height: 20rem;
+            }
+
+            .card,
+            .terminal {
+                padding: 1.55rem;
+            }
+
+            .terminal-top,
+            .terminal-actions {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .stage-copy p {
+                font-size: 1.05rem;
+            }
+
+            .status-pill {
+                top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="viewport" id="viewport">
+        <div class="ambient"></div>
+        <div class="dawn"></div>
+        <div class="flow" id="flow"></div>
+        <div class="grain"></div>
+        <div class="vignette"></div>
+        <div class="particles" id="particles"></div>
+
+        <div class="status-pill">Animation Timeline <strong id="timelineLabel">00%</strong></div>
+
+        <header class="stage-copy">
+            <div class="kicker">Claude Code Framework</div>
+            <h1>The Lamp Remembers<br>How to Pour Light</h1>
+            <p>Scroll, and the viewport stays still while the lamp exhales liquid color across the room.</p>
+        </header>
+
+        <section class="cards-shell" aria-live="polite">
+            <div class="cards">
+                <article class="card" data-card="0">
+                    <div class="card-icon">✦</div>
+                    <h2>The Voice</h2>
+                    <h3>Claude Code CLI</h3>
+                    <p>A terminal oracle that turns intent into action and keeps your codebase speaking back with clarity.</p>
+                </article>
+                <article class="card" data-card="1">
+                    <div class="card-icon">⌘</div>
+                    <h2>The Sanctum</h2>
+                    <h3>VS Code</h3>
+                    <p>The chamber where every incantation lands: fast, focused, and layered with the context you need.</p>
+                </article>
+                <article class="card" data-card="2">
+                    <div class="card-icon">∞</div>
+                    <h2>The Bridge</h2>
+                    <h3>Claude Extension</h3>
+                    <p>The glowing span between thought and implementation, carrying context directly into the editor.</p>
+                </article>
+                <article class="card" data-card="3">
+                    <div class="card-icon">✶</div>
+                    <h2>The Stars</h2>
+                    <h3>Foam</h3>
+                    <p>Constellations of notes, linked until every fragment of the journey knows how to find the others.</p>
+                </article>
+                <article class="card" data-card="4">
+                    <div class="card-icon">⬢</div>
+                    <h2>The Heartbeat</h2>
+                    <h3>Node.js</h3>
+                    <p>The pulse under the artifact: evented, electric, and ready to keep the framework moving.</p>
+                </article>
+                <article class="card" data-card="5">
+                    <div class="card-icon">≈</div>
+                    <h2>The Serpent</h2>
+                    <h3>Python</h3>
+                    <p>Elegant control for scripts, workflows, and the small spells that stitch the system together.</p>
+                </article>
+                <article class="card" data-card="6">
+                    <div class="card-icon">⟡</div>
+                    <h2>The Memory</h2>
+                    <h3>Git</h3>
+                    <p>The keeper of every revision, preserving the path so no bright idea disappears into smoke.</p>
+                </article>
+                <article class="card" data-card="7">
+                    <div class="card-icon">☰</div>
+                    <h2>The Scrolls</h2>
+                    <h3>Starter Skills</h3>
+                    <p>Reusable wisdom and working scaffolds, offered right when the dawn arrives and the build begins.</p>
+                </article>
+
+                <section class="terminal" id="terminal">
+                    <div class="terminal-top">
+                        <div>
+                            <div class="terminal-subtitle">Final Invocation</div>
+                            <h2>Install the framework</h2>
+                        </div>
+                        <div class="terminal-badge">Warm dawn ready</div>
+                    </div>
+                    <p>Choose your platform, copy the command, and begin the journey while the lamp still glows.</p>
+                    <div class="tabs" role="tablist" aria-label="Platform commands">
+                        <button class="tab is-active" type="button" data-platform="mac" role="tab" aria-controls="commandPanel" aria-selected="true">macOS</button>
+                        <button class="tab" type="button" data-platform="linux" role="tab" aria-controls="commandPanel" aria-selected="false">Linux</button>
+                        <button class="tab" type="button" data-platform="windows" role="tab" aria-controls="commandPanel" aria-selected="false">Windows</button>
+                    </div>
+                    <div class="command" id="commandPanel" role="tabpanel">
+                        <div class="command-label">
+                            <span>Command</span>
+                            <span id="commandPlatform">macOS</span>
+                        </div>
+                        <code id="commandText">curl -sL https://ccf.dev/install | sh</code>
+                    </div>
+                    <div class="terminal-actions">
+                        <button class="copy-button" id="copyButton" type="button">Begin The Journey</button>
+                        <div class="confirmation" id="confirmation">The lamp waits for your touch.</div>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <div class="lamp-wrap">
+            <div class="lamp-aura"></div>
+            <div class="spout-anchor" id="spoutAnchor"></div>
+            <svg class="lamp-svg" viewBox="0 0 760 420" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <defs>
+                    <linearGradient id="lampGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#fff2a8" />
+                        <stop offset="28%" stop-color="#ffd45c" />
+                        <stop offset="62%" stop-color="#d89d22" />
+                        <stop offset="100%" stop-color="#7d5310" />
+                    </linearGradient>
+                    <linearGradient id="lampShadow" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#f8d87b" stop-opacity="0.95" />
+                        <stop offset="100%" stop-color="#8f5c12" stop-opacity="0.78" />
+                    </linearGradient>
+                    <radialGradient id="lampShine" cx="38%" cy="24%" r="80%">
+                        <stop offset="0%" stop-color="#fff6cd" stop-opacity="0.95" />
+                        <stop offset="48%" stop-color="#ffe487" stop-opacity="0.55" />
+                        <stop offset="100%" stop-color="#ffcf4f" stop-opacity="0" />
+                    </radialGradient>
+                </defs>
+                <path d="M210 286c-8 35 25 72 114 87 125 22 275-18 295-83 10-33-18-59-63-77-34-13-35-16-27-30 17-29 59-33 101-23-23-24-76-44-135-24-28 10-42 9-70-4-72-34-169-32-241 17-58 39-83 89-74 137Z" fill="url(#lampGold)" stroke="#4f3104" stroke-width="8" />
+                <path d="M498 132c18-34 67-73 128-65 48 6 74 34 84 53-38-3-79 11-101 30 51 4 105 37 115 84-60-35-125-33-194-14" fill="url(#lampShadow)" stroke="#4f3104" stroke-width="8" stroke-linejoin="round" />
+                <path d="M172 238c-43-2-79-26-85-67-5-34 9-59 32-78 18-15 45-22 70-14-26 8-41 30-38 55 5 32 33 47 65 49" fill="none" stroke="url(#lampGold)" stroke-width="18" stroke-linecap="round" />
+                <path d="M271 95c31-31 77-51 130-49 60 2 103 26 132 57" fill="none" stroke="url(#lampGold)" stroke-width="16" stroke-linecap="round" />
+                <path d="M320 79c15-33 47-56 82-60 32-4 63 8 84 31-27-8-56-4-74 9-12 8-19 18-28 34" fill="url(#lampGold)" stroke="#4f3104" stroke-width="8" stroke-linejoin="round" />
+                <ellipse cx="368" cy="257" rx="188" ry="92" fill="url(#lampShadow)" opacity="0.28" />
+                <ellipse cx="394" cy="231" rx="164" ry="72" fill="url(#lampShine)" />
+                <path d="M260 316c57 25 171 39 281 13" fill="none" stroke="#ffe18a" stroke-width="10" stroke-linecap="round" opacity="0.58" />
+                <path d="M312 132c29 19 76 29 126 29 48 0 90-9 119-25" fill="none" stroke="#fff0bc" stroke-width="8" stroke-linecap="round" opacity="0.38" />
+                <path class="lamp-ornament" d="M286 219c14-8 31-13 49-13s35 5 50 13c-15 8-32 13-50 13s-35-5-49-13Z" />
+                <path class="lamp-ornament" d="M414 219c14-8 31-13 49-13s35 5 50 13c-15 8-32 13-50 13s-35-5-49-13Z" />
+                <circle cx="401" cy="50" r="12" fill="#fff0bf" stroke="#8b5e16" stroke-width="5" />
+                <path d="M306 114c11-20 28-31 53-39" fill="none" stroke="#fff2bf" stroke-width="6" stroke-linecap="round" opacity="0.54" />
+                <path d="M548 139c21-13 52-19 86-16" fill="none" stroke="#fff2bf" stroke-width="6" stroke-linecap="round" opacity="0.48" />
+            </svg>
+        </div>
+
+        <div class="scroll-hint" id="scrollHint">
+            <div class="mouse"></div>
+            <span>Scroll to awaken</span>
+            <small>The page does not move. The lamp does.</small>
+        </div>
+
+        <div class="progress" aria-hidden="true">
+            <strong id="progressText">0 / 100</strong>
+            <div class="progress-track">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const timeline = [
+            { start: 0.00, end: 0.12, colorStart: "#0a0612", colorEnd: "#163a86" },
+            { start: 0.12, end: 0.25, colorStart: "#163a86", colorEnd: "#5d2799" },
+            { start: 0.25, end: 0.37, colorStart: "#5d2799", colorEnd: "#cb2ea0" },
+            { start: 0.37, end: 0.50, colorStart: "#cb2ea0", colorEnd: "#ff7d53" },
+            { start: 0.50, end: 0.62, colorStart: "#ff7d53", colorEnd: "#ffc548" },
+            { start: 0.62, end: 0.75, colorStart: "#ffc548", colorEnd: "#ff79bf" },
+            { start: 0.75, end: 0.87, colorStart: "#ff79bf", colorEnd: "#ffb347" },
+            { start: 0.87, end: 1.00, colorStart: "#ffb347", colorEnd: "#ffe7a4" }
+        ];
+
+        const platformCommands = {
+            mac: { label: "macOS", command: "curl -sL https://ccf.dev/install | sh" },
+            linux: { label: "Linux", command: "curl -sL https://ccf.dev/install | sh" },
+            windows: { label: "Windows", command: "iwr https://ccf.dev/install.ps1 | iex" }
+        };
+
+        const root = document.documentElement;
+        const viewport = document.getElementById("viewport");
+        const cards = [...document.querySelectorAll(".card")];
+        const terminal = document.getElementById("terminal");
+        const particles = document.getElementById("particles");
+        const spoutAnchor = document.getElementById("spoutAnchor");
+        const timelineLabel = document.getElementById("timelineLabel");
+        const progressText = document.getElementById("progressText");
+        const scrollHint = document.getElementById("scrollHint");
+        const commandText = document.getElementById("commandText");
+        const commandPlatform = document.getElementById("commandPlatform");
+        const confirmation = document.getElementById("confirmation");
+        const copyButton = document.getElementById("copyButton");
+        const tabs = [...document.querySelectorAll(".tab")];
+
+        const maxScroll = 5000;
+        let targetDistance = 0;
+        let currentDistance = 0;
+        let activeCard = -1;
+        let pulse = 0;
+        let touchY = 0;
+        let emitAccumulator = 0;
+        let currentPlatform = "mac";
+
+        function clamp(value, min, max) {
+            return Math.min(max, Math.max(min, value));
+        }
+
+        function smoothstep(min, max, value) {
+            const x = clamp((value - min) / (max - min), 0, 1);
+            return x * x * (3 - 2 * x);
+        }
+
+        function hexToRgb(hex) {
+            const value = hex.replace("#", "");
+            return {
+                r: parseInt(value.slice(0, 2), 16),
+                g: parseInt(value.slice(2, 4), 16),
+                b: parseInt(value.slice(4, 6), 16)
+            };
+        }
+
+        function lerp(start, end, factor) {
+            return start + (end - start) * factor;
+        }
+
+        function lerpColor(startHex, endHex, factor) {
+            const start = hexToRgb(startHex);
+            const end = hexToRgb(endHex);
+            const r = Math.round(lerp(start.r, end.r, factor));
+            const g = Math.round(lerp(start.g, end.g, factor));
+            const b = Math.round(lerp(start.b, end.b, factor));
+            return {
+                hex: "#" + [r, g, b].map((value) => value.toString(16).padStart(2, "0")).join(""),
+                rgb: `${r}, ${g}, ${b}`
+            };
+        }
+
+        function colorForProgress(progress) {
+            const step = timeline.find((item) => progress >= item.start && progress <= item.end) || timeline[timeline.length - 1];
+            const local = clamp((progress - step.start) / (step.end - step.start || 1), 0, 1);
+            return lerpColor(step.colorStart, step.colorEnd, local);
+        }
+
+        function cardIndexForProgress(progress) {
+            if (progress >= 0.94) {
+                return -1;
+            }
+            return timeline.findIndex((item) => progress >= item.start && progress < item.end);
+        }
+
+        function setPlatform(platform) {
+            currentPlatform = platform;
+            const { label, command } = platformCommands[platform];
+            commandText.textContent = command;
+            commandPlatform.textContent = label;
+            tabs.forEach((tab) => {
+                const active = tab.dataset.platform === platform;
+                tab.classList.toggle("is-active", active);
+                tab.setAttribute("aria-selected", active ? "true" : "false");
+                tab.tabIndex = active ? 0 : -1;
+            });
+        }
+
+        function updateFlowOrigin() {
+            if (!spoutAnchor || !viewport) {
+                return;
+            }
+
+            const anchorBox = spoutAnchor.getBoundingClientRect();
+            const viewportBox = viewport.getBoundingClientRect();
+            const x = ((anchorBox.left + anchorBox.width / 2 - viewportBox.left) / viewportBox.width) * 100;
+            const y = ((anchorBox.top + anchorBox.height / 2 - viewportBox.top) / viewportBox.height) * 100;
+
+            root.style.setProperty("--flow-origin-x", `${clamp(x, 0, 100).toFixed(2)}%`);
+            root.style.setProperty("--flow-origin-y", `${clamp(y, 0, 100).toFixed(2)}%`);
+        }
+
+        function fallbackCopy(text) {
+            const input = document.createElement("textarea");
+            input.value = text;
+            input.setAttribute("readonly", "");
+            input.style.position = "absolute";
+            input.style.left = "-9999px";
+            document.body.appendChild(input);
+            input.select();
+            const copied = document.execCommand("copy");
+            document.body.removeChild(input);
+            return copied;
+        }
+
+        function spawnParticle(rgb, progress) {
+            const particle = document.createElement("span");
+            const driftX = (Math.random() - 0.5) * lerp(120, 760, progress);
+            const driftY = lerp(-90, -540, progress) - Math.random() * 120;
+            const size = lerp(6, 20, Math.random());
+            const fromX = (Math.random() - 0.5) * 24;
+            const fromY = Math.random() * 16;
+
+            particle.className = "particle";
+            particle.style.setProperty("--particle-rgb", rgb);
+            particle.style.setProperty("--from-x", fromX.toFixed(1));
+            particle.style.setProperty("--from-y", fromY.toFixed(1));
+            particle.style.setProperty("--to-x", driftX.toFixed(1));
+            particle.style.setProperty("--to-y", driftY.toFixed(1));
+            particle.style.setProperty("--life", `${Math.round(lerp(1800, 3600, Math.random()))}ms`);
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.marginLeft = `${-size / 2}px`;
+            particle.style.marginTop = `${-size / 2}px`;
+
+            particles.appendChild(particle);
+            window.setTimeout(() => particle.remove(), 3800);
+        }
+
+        async function copyCommand() {
+            const text = platformCommands[currentPlatform].command;
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                } else if (!fallbackCopy(text)) {
+                    throw new Error("Clipboard unavailable");
+                }
+                copyButton.textContent = "The lamp has been rubbed";
+                confirmation.textContent = "The lamp has been rubbed";
+                pulse = 1;
+                window.setTimeout(() => {
+                    copyButton.textContent = "Begin The Journey";
+                    confirmation.textContent = "The lamp waits for your touch.";
+                }, 2200);
+            } catch (error) {
+                confirmation.textContent = "Clipboard magic failed. Copy the command manually.";
+            }
+        }
+
+        function render(progress) {
+            const { hex, rgb } = colorForProgress(progress);
+            const reach = Math.pow(progress, 0.76) * 100;
+            const radius = `${Math.pow(progress, 0.78) * 52}vmax`;
+            const installOpacity = smoothstep(0.88, 1, progress);
+            const dawnOpacity = smoothstep(0.9, 1, progress);
+            const mistOpacity = smoothstep(0.02, 0.18, progress);
+            const lampGlow = lerp(0.22, 1, smoothstep(0, 1, progress));
+            const cardIndex = cardIndexForProgress(progress);
+
+            root.style.setProperty("--current-color", hex);
+            root.style.setProperty("--current-rgb", rgb);
+            root.style.setProperty("--flow-radius", radius);
+            root.style.setProperty("--flow-reach", `${reach.toFixed(2)}%`);
+            root.style.setProperty("--mist-opacity", mistOpacity.toFixed(3));
+            root.style.setProperty("--dawn-opacity", dawnOpacity.toFixed(3));
+            root.style.setProperty("--lamp-glow", lampGlow.toFixed(3));
+            root.style.setProperty("--install-opacity", installOpacity.toFixed(3));
+            root.style.setProperty("--hint-opacity", (1 - smoothstep(0.01, 0.08, progress)).toFixed(3));
+
+            timelineLabel.textContent = `${String(Math.round(progress * 100)).padStart(2, "0")}%`;
+            progressText.textContent = `${Math.round(progress * 100)} / 100`;
+
+            if (cardIndex !== activeCard) {
+                activeCard = cardIndex;
+                pulse = 1;
+            }
+
+            cards.forEach((card, index) => {
+                const isActive = index === activeCard;
+                card.classList.toggle("is-active", isActive);
+                card.style.borderColor = isActive ? `rgba(${rgb}, 0.46)` : "rgba(255, 255, 255, 0.18)";
+                card.style.boxShadow = isActive
+                    ? `0 2rem 5rem rgba(0, 0, 0, 0.38), 0 0 3rem rgba(${rgb}, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05) inset`
+                    : `0 2rem 5rem rgba(0, 0, 0, 0.38), 0 0 3rem rgba(${rgb}, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.04) inset`;
+            });
+
+            terminal.classList.toggle("is-ready", installOpacity > 0.3);
+            terminal.style.borderColor = `rgba(${rgb}, ${lerp(0.18, 0.42, installOpacity).toFixed(3)})`;
+
+            const shakeX = Math.sin(performance.now() * 0.025) * pulse * 3;
+            const shakeY = Math.cos(performance.now() * 0.022) * pulse * 2;
+            root.style.setProperty("--shake-x", `${shakeX.toFixed(2)}px`);
+            root.style.setProperty("--shake-y", `${shakeY.toFixed(2)}px`);
+            root.style.setProperty("--pulse-scale", (1 + pulse * 0.01).toFixed(4));
+
+            scrollHint.setAttribute("aria-hidden", progress > 0.08 ? "true" : "false");
+
+            emitAccumulator += lerp(0, 1.9, smoothstep(0.02, 1, progress));
+            while (emitAccumulator >= 1) {
+                spawnParticle(rgb, progress);
+                emitAccumulator -= 1;
+            }
+        }
+
+        function animate() {
+            currentDistance += (targetDistance - currentDistance) * 0.085;
+            if (Math.abs(targetDistance - currentDistance) < 0.01) {
+                currentDistance = targetDistance;
+            }
+
+            pulse *= 0.9;
+            if (pulse < 0.001) {
+                pulse = 0;
+            }
+
+            render(currentDistance / maxScroll);
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener("wheel", (event) => {
+            event.preventDefault();
+            const normalized = clamp(event.deltaY, -120, 120);
+            targetDistance = clamp(targetDistance + normalized * 1.3, 0, maxScroll);
+        }, { passive: false });
+
+        window.addEventListener("keydown", (event) => {
+            const keySteps = {
+                ArrowDown: 180,
+                ArrowUp: -180,
+                PageDown: 420,
+                PageUp: -420,
+                Home: -maxScroll,
+                End: maxScroll
+            };
+
+            if (!(event.key in keySteps)) {
+                return;
+            }
+
+            event.preventDefault();
+            targetDistance = clamp(
+                event.key === "Home"
+                    ? 0
+                    : event.key === "End"
+                        ? maxScroll
+                        : targetDistance + keySteps[event.key],
+                0,
+                maxScroll
+            );
+        });
+
+        window.addEventListener("touchstart", (event) => {
+            touchY = event.touches[0].clientY;
+        }, { passive: false });
+
+        window.addEventListener("touchmove", (event) => {
+            event.preventDefault();
+            const nextY = event.touches[0].clientY;
+            const delta = touchY - nextY;
+            touchY = nextY;
+            targetDistance = clamp(targetDistance + delta * 2.2, 0, maxScroll);
+        }, { passive: false });
+
+        tabs.forEach((tab) => {
+            tab.addEventListener("click", () => setPlatform(tab.dataset.platform));
+        });
+
+        copyButton.addEventListener("click", copyCommand);
+
+        updateFlowOrigin();
+        window.addEventListener("resize", updateFlowOrigin);
+        setPlatform(currentPlatform);
+        render(0);
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>

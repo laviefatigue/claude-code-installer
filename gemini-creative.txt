@@ -1,0 +1,25 @@
+You are the CREATIVE DIRECTOR. Review magic-book.html and provide a detailed VISUAL REDESIGN BRIEF.
+
+CURRENT STATE: magic-book.html is a scroll-controlled book opening animation showing 8 Claude Code tools.
+
+YOUR TASK: Push the visual boundaries. Make it feel like a Disney/Pixar animated short.
+
+Analyze and provide:
+
+1. WHAT'S WORKING (keep these)
+2. WHAT'S FALLING FLAT (fix these)
+3. VISUAL UPGRADES needed:
+   - Book design improvements (leather texture, gold embossing, aging effects)
+   - Light/shadow drama (volumetric rays, caustics, ambient occlusion)
+   - Typography hierarchy (better font sizes, weights, glow effects)
+   - Color palette refinements (more cinematic, less flat)
+   - Particle effects (dust motes, magical sparkles, page wisps)
+   - Transition polish (smoother easing, anticipation, follow-through)
+
+4. THE "WOW MOMENT" - What single addition would make people gasp?
+
+5. SPECIFIC CSS/JS suggestions for each improvement
+
+Output a detailed creative brief that a technical developer can implement. Be specific with hex colors, pixel values, animation timings, and CSS properties.
+
+Read magic-book.html first, then provide your redesign vision.

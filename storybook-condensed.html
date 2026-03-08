@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code Framework: The Sanctum</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;400;600;700&family=Spectral:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        terracotta: '#E07A5F',
+                        sage: '#81B29A',
+                        sand: '#F4F1DE',
+                        charcoal: '#3D405B',
+                        cream: '#FDFCF5',
+                        gold: '#D4AF37',
+                        deep: '#262838'
+                    },
+                    fontFamily: {
+                        serif: ['Fraunces', 'serif'],
+                        body: ['Spectral', 'serif']
+                    },
+                    animation: {
+                        float: 'float 7s ease-in-out infinite',
+                        'float-delayed': 'float 9s ease-in-out infinite',
+                        'pulse-glow': 'pulse-glow 4s ease-in-out infinite'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-18px)' }
+                        },
+                        'pulse-glow': {
+                            '0%, 100%': { boxShadow: '0 0 0 rgba(224, 122, 95, 0)' },
+                            '50%': { boxShadow: '0 18px 40px rgba(224, 122, 95, 0.18)' }
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+        }
+
+        body {
+            min-height: 100vh;
+        }
+
+        .grain-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 40;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        .code-font {
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .shape-blob {
+            border-radius: 36% 64% 58% 42% / 44% 34% 66% 56%;
+        }
+
+        .sanctum-shadow {
+            box-shadow:
+                0 30px 80px rgba(61, 64, 91, 0.14),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        .tool-card {
+            min-height: 124px;
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0));
+            opacity: 0;
+            transition: opacity 300ms ease;
+        }
+
+        .tool-card:hover::before {
+            opacity: 1;
+        }
+
+        .install-shell::after {
+            content: '';
+            position: absolute;
+            inset: auto 14% -18% 14%;
+            height: 30px;
+            background: radial-gradient(circle, rgba(224, 122, 95, 0.2), transparent 72%);
+            filter: blur(16px);
+            pointer-events: none;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                overflow: hidden;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .tool-card {
+                min-height: 112px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-sand text-charcoal font-body overflow-x-hidden selection:bg-terracotta selection:text-white">
+    <div class="grain-overlay"></div>
+
+    <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <div class="shape-blob absolute -top-16 -left-16 h-[34rem] w-[34rem] bg-terracotta/12 blur-[90px] animate-float"></div>
+        <div class="shape-blob absolute right-[-8rem] top-[18%] h-[26rem] w-[26rem] bg-sage/14 blur-[85px] animate-float-delayed"></div>
+        <div class="shape-blob absolute bottom-[-6rem] left-[28%] h-[18rem] w-[18rem] bg-gold/10 blur-[70px] animate-float"></div>
+    </div>
+
+    <main class="relative min-h-screen md:h-screen px-4 py-4 md:px-6 md:py-6 flex items-center justify-center">
+        <section class="sanctum-shadow relative w-full max-w-7xl rounded-[2rem] border border-white/70 bg-cream/85 backdrop-blur-md overflow-hidden md:h-[calc(100dvh-3rem)] md:max-h-[920px]">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.75),transparent_42%),linear-gradient(180deg,rgba(255,255,255,0.12),rgba(244,241,222,0.58))]"></div>
+            <div class="absolute right-0 top-0 h-48 w-48 translate-x-12 -translate-y-10 rounded-full bg-terracotta/10 blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 h-48 w-48 -translate-x-10 translate-y-10 rounded-full bg-sage/10 blur-3xl"></div>
+
+            <div class="relative z-10 grid h-full grid-rows-[auto_auto_1fr_auto] gap-4 p-5 md:gap-5 md:p-8">
+                <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-[0.65rem] font-bold uppercase tracking-[0.34em] text-charcoal/55">Claude Code Framework</p>
+                        <h1 class="mt-1 font-serif text-2xl md:text-3xl lg:text-[2rem] leading-tight">The Sanctum opens in a single, luminous breath.</h1>
+                    </div>
+                    <div class="inline-flex items-center gap-2 self-start rounded-full border border-charcoal/15 bg-white/60 px-3 py-1 text-[0.7rem] font-bold uppercase tracking-[0.24em] text-charcoal/55">
+                        <span class="h-2 w-2 rounded-full bg-sage"></span>
+                        Almost no scroll
+                    </div>
+                </header>
+
+                <div class="grid gap-4 lg:grid-cols-[1.05fr_0.95fr] lg:gap-5">
+                    <div class="rounded-[1.75rem] border border-charcoal/10 bg-white/45 p-5 md:p-6">
+                        <p class="mb-3 inline-flex items-center gap-2 rounded-full border border-terracotta/20 bg-terracotta/10 px-3 py-1 text-[0.68rem] font-bold uppercase tracking-[0.28em] text-terracotta">
+                            <span class="h-2 w-2 rounded-full bg-terracotta"></span>
+                            Chapter I: The Invitation
+                        </p>
+                        <h2 class="font-serif text-4xl leading-[0.95] text-charcoal md:text-5xl lg:text-6xl">
+                            A quiet ritual
+                            <span class="italic text-terracotta">for makers.</span>
+                        </h2>
+                        <p class="mt-4 max-w-2xl text-base leading-relaxed text-charcoal/75 md:text-lg">
+                            Install the artifact, gather the eight gifts, and begin with a terminal that feels less like a tool and more like a studio.
+                        </p>
+                    </div>
+
+                    <div id="install" class="install-shell relative rounded-[1.75rem] border border-charcoal/10 bg-charcoal text-sand shadow-xl animate-pulse-glow">
+                        <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold/70 to-transparent"></div>
+                        <div class="p-4 md:p-5">
+                            <div class="mb-3 flex items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-[0.65rem] font-bold uppercase tracking-[0.32em] text-sand/45">Begin the Ritual</p>
+                                    <p class="mt-1 font-serif text-lg text-sand">Install command</p>
+                                </div>
+                                <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-[0.24em] text-sand/50">Node 18+</span>
+                            </div>
+
+                            <div class="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                                <div class="grid grid-cols-3 border-b border-white/10 text-sm">
+                                    <button onclick="switchTab('mac')" id="tab-mac" class="tab-button border-b-2 border-terracotta bg-white/10 px-3 py-3 font-bold text-sand transition-all">macOS</button>
+                                    <button onclick="switchTab('linux')" id="tab-linux" class="tab-button border-b-2 border-transparent px-3 py-3 font-bold text-sand/55 transition-all hover:text-sand">Linux</button>
+                                    <button onclick="switchTab('win')" id="tab-win" class="tab-button border-b-2 border-transparent px-3 py-3 font-bold text-sand/55 transition-all hover:text-sand">Windows</button>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 md:p-4">
+                                    <code id="command-text" class="code-font min-w-0 flex-1 overflow-x-auto whitespace-nowrap text-sm text-sand md:text-[0.95rem]">curl -sL https://ccf.dev/install | sh</code>
+                                    <button onclick="copyCommand()" class="group relative inline-flex h-11 w-11 flex-none items-center justify-center rounded-full border border-white/10 bg-white/5 transition-colors hover:bg-white/10" aria-label="Copy install command">
+                                        <svg id="copy-icon" xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-terracotta"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                        <span class="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 rounded-md bg-sand px-2 py-1 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-charcoal opacity-0 transition-opacity group-hover:opacity-100">Copy</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <p class="mt-3 text-sm italic text-sand/55">A small invocation for macOS, Linux, or Windows.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+                    <article class="tool-card group relative overflow-hidden rounded-[1.5rem] border border-terracotta/15 bg-gradient-to-br from-white/65 to-white/35 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-terracotta/35 hover:shadow-lg hover:shadow-terracotta/10">
+                        <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-terracotta/12 text-terracotta transition-transform duration-300 group-hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                        </div>
+                        <h3 class="font-serif text-xl text-charcoal">The Voice</h3>
+                        <p class="mt-1 text-sm leading-snug text-charcoal/65">Claude Code CLI, speaking directly through the terminal.</p>
+                    </article>
+
+                    <article class="tool-card group relative overflow-hidden rounded-[1.5rem] border border-sage/15 bg-gradient-to-br from-white/65 to-white/35 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-sage/35 hover:shadow-lg hover:shadow-sage/10">
+                        <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-sage/12 text-sage transition-transform duration-300 group-hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                        </div>
+                        <h3 class="font-serif text-xl text-charcoal">The Canvas</h3>
+                        <p class="mt-1 text-sm leading-snug text-charcoal/65">VS Code, the place where ideas take visible form.</p>
+                    </article>
+
+                    <article class="tool-card group relative overflow-hidden rounded-[1.5rem] border border-gold/15 bg-gradient-to-br from-white/65 to-white/35 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-gold/35 hover:shadow-lg hover:shadow-gold/10">
+                        <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-gold/15 text-gold transition-transform duration-300 group-hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        </div>
+                        <h3 class="font-serif text-xl text-charcoal">The Bridge</h3>
+                        <p class="mt-1 text-sm leading-snug text-charcoal/65">Claude Extension, carrying context into your editor.</p>
+                    </article>
+
+                    <article class="tool-card group relative overflow-hidden rounded-[1.5rem] border border-terracotta/15 bg-gradient-to-br from-white/65 to-white/35 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-terracotta/35 hover:shadow-lg hover:shadow-terracotta/10">
+                        <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-terracotta/12 text-terracotta transition-transform duration-300 group-hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        </div>
+                        <h3 class="font-serif text-xl text-charcoal">Web of Thought</h3>
+                        <p class="mt-1 text-sm leading-snug text-charcoal/65">Foam, linking notes and sparks into a living map.</p>
+                    </article>
+
+                    <article class="tool-card group relative overflow-hidden rounded-[1.5rem] border border-sage/15 bg-gradient-to-br from-white/65 to-white/35 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-sage/35 hover:shadow-lg hover:shadow-sage/10">
+                        <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-sage/12 text-sage transition-transform duration-300 group-hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                        </div>
+                        <h3 class="font-serif text-xl text-charcoal">The Heartbeat</h3>
+                        <p class="mt-1 text-sm leading-snug text-charcoal/65">Node.js, the pulse beneath the artifact.</p>
+                    </article>
+
+                    <article class="tool-card group relative overflow-hidden rounded-[1.5rem] border border-gold/15 bg-gradient-to-br from-white/65 to-white/35 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-gold/35 hover:shadow-lg hover:shadow-gold/10">
+                        <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-gold/15 text-gold transition-transform duration-300 group-hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.01"></path><path d="M10 14v.01"></path><path d="M14 10v.01"></path><path d="M14 14v.01"></path><path d="M5 2l14 20"></path><path d="M19 2L5 22"></path></svg>
+                        </div>
+                        <h3 class="font-serif text-xl text-charcoal">The Serpent</h3>
+                        <p class="mt-1 text-sm leading-snug text-charcoal/65">Python, optional but elegant when complexity coils.</p>
+                    </article>
+
+                    <article class="tool-card group relative overflow-hidden rounded-[1.5rem] border border-terracotta/15 bg-gradient-to-br from-white/65 to-white/35 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-terracotta/35 hover:shadow-lg hover:shadow-terracotta/10">
+                        <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-terracotta/12 text-terracotta transition-transform duration-300 group-hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        </div>
+                        <h3 class="font-serif text-xl text-charcoal">The Memory</h3>
+                        <p class="mt-1 text-sm leading-snug text-charcoal/65">Git, preserving each draft, detour, and return.</p>
+                    </article>
+
+                    <article class="tool-card group relative overflow-hidden rounded-[1.5rem] border border-sage/15 bg-gradient-to-br from-white/65 to-white/35 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-sage/35 hover:shadow-lg hover:shadow-sage/10">
+                        <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-sage/12 text-sage transition-transform duration-300 group-hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                        </div>
+                        <h3 class="font-serif text-xl text-charcoal">Ancient Scrolls</h3>
+                        <p class="mt-1 text-sm leading-snug text-charcoal/65">Starter Skills, ready-made spells for faster beginnings.</p>
+                    </article>
+                </div>
+
+                <footer class="flex flex-col gap-3 rounded-[1.5rem] border border-charcoal/10 bg-charcoal px-5 py-4 text-sand sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-sand/45">Chapter II: Your First Wish</p>
+                        <p class="mt-1 font-serif text-2xl">What will you create?</p>
+                    </div>
+                    <a href="https://github.com/anthropics/claude-code" target="_blank" rel="noreferrer" class="inline-flex items-center justify-center rounded-full border border-terracotta/30 bg-terracotta px-6 py-3 text-sm font-bold uppercase tracking-[0.24em] text-white transition-all hover:-translate-y-0.5 hover:bg-sage hover:text-charcoal">
+                        Begin
+                    </a>
+                </footer>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const commands = {
+            mac: 'curl -sL https://ccf.dev/install | sh',
+            linux: 'curl -sL https://ccf.dev/install | sh',
+            win: 'iwr https://ccf.dev/install.ps1 | iex'
+        };
+
+        let currentPlatform = 'mac';
+
+        function copyCommand() {
+            const command = commands[currentPlatform];
+            navigator.clipboard.writeText(command);
+
+            const icon = document.getElementById('copy-icon');
+            icon.innerHTML = '<path d="M20 6L9 17l-5-5"></path>';
+            icon.classList.remove('text-terracotta');
+            icon.classList.add('text-sage');
+
+            window.setTimeout(() => {
+                icon.innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>';
+                icon.classList.remove('text-sage');
+                icon.classList.add('text-terracotta');
+            }, 2000);
+        }
+
+        function switchTab(platform) {
+            currentPlatform = platform;
+            document.getElementById('command-text').innerText = commands[platform];
+
+            ['mac', 'linux', 'win'].forEach((name) => {
+                const button = document.getElementById(`tab-${name}`);
+                button.className = 'tab-button border-b-2 border-transparent px-3 py-3 font-bold text-sand/55 transition-all hover:text-sand';
+            });
+
+            document.getElementById(`tab-${platform}`).className = 'tab-button border-b-2 border-terracotta bg-white/10 px-3 py-3 font-bold text-sand transition-all';
+        }
+    </script>
+</body>
+</html>

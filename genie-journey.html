@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Genie's Journey - Claude Code Framework</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        @property --current-smoke {
+            syntax: '<color>';
+            initial-value: #4b0082;
+            inherits: true;
+        }
+        
+        @property --lamp-glow {
+            syntax: '<number>';
+            initial-value: 0;
+            inherits: true;
+        }
+
+        :root {
+            --scroll-progress: 0;
+            --current-smoke: #1a1a2e;
+            --lamp-glow: 0;
+            --cursor-x: 50%;
+            --cursor-y: 50%;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background-color: #050510; /* Deepest Midnight */
+            color: #e0e0e0;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1, h2, h3, .magical-font {
+            font-family: 'Cinzel Decorative', cursive;
+        }
+
+        /* Smooth Scroll & Snap */
+        .scroll-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            position: relative;
+            z-index: 10;
+        }
+
+        section {
+            height: 100vh;
+            width: 100vw;
+            scroll-snap-align: start;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        /* Smoke Background Layer */
+        #smoke-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+            background-color: #050510;
+            transition: background-color 1.5s ease;
+        }
+
+        .smoke-plume {
+            position: absolute;
+            background: radial-gradient(circle at center, var(--current-smoke), transparent 70%);
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            filter: blur(60px);
+            opacity: 0.6;
+            mix-blend-mode: screen;
+            animation: float-smoke 10s infinite alternate ease-in-out;
+            transform-origin: center;
+            transition: --current-smoke 1.5s ease;
+        }
+
+        @keyframes float-smoke {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(20px, -30px) scale(1.1) rotate(5deg); }
+            100% { transform: translate(-10px, 10px) scale(0.95) rotate(-3deg); }
+        }
+
+        /* Lamp Styles */
+        .lamp-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            z-index: 20;
+            transition: transform 0.1s ease-out;
+        }
+        
+        .lamp-svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 calc(20px + var(--lamp-glow) * 30px) rgba(255, 215, 0, 0.6));
+            transition: filter 0.3s ease;
+        }
+
+        /* Card Styles */
+        .story-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 3rem;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(50px) scale(0.9);
+            transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            z-index: 20;
+        }
+
+        .story-card.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        /* Terminal Finale */
+        .terminal-window {
+            background: rgba(10, 10, 20, 0.9);
+            border: 1px solid #d4af37;
+            border-radius: 12px;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.2);
+            width: 90%;
+            max-width: 800px;
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+            z-index: 30;
+        }
+
+        .terminal-header {
+            background: rgba(212, 175, 55, 0.1);
+            padding: 10px 20px;
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background: #ff5f56; }
+        .yellow { background: #ffbd2e; }
+        .green { background: #27c93f; }
+
+        .terminal-body {
+            padding: 2rem;
+            color: #d4af37;
+        }
+
+        .copy-btn {
+            margin-top: 2rem;
+            background: transparent;
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            padding: 1rem 3rem;
+            font-family: 'Cinzel Decorative', cursive;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .copy-btn:hover {
+            background: rgba(212, 175, 55, 0.1);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+            letter-spacing: 2px;
+        }
+        
+        .copy-btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .copy-btn:hover::after {
+            left: 100%;
+        }
+
+        /* Scroll Progress Indicator (Optional side dots) */
+        .chapter-indicators {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 50;
+        }
+
+        .chapter-dot {
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .chapter-dot.active {
+            background: #d4af37;
+            box-shadow: 0 0 10px #d4af37;
+            transform: scale(1.5);
+        }
+        
+        .floating {
+            animation: floating 6s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Smoke & Background -->
+    <div id="smoke-layer">
+        <!-- Generated by JS -->
+    </div>
+    
+    <div class="chapter-indicators" id="indicators">
+        <!-- Generated by JS -->
+    </div>
+
+    <div class="scroll-container" id="scrollContainer">
+        
+        <!-- SECTION 1: THE LAMP -->
+        <section id="s1" data-color="#1a1a2e" data-accent="#4b6cb7">
+            <div class="lamp-container">
+                <!-- Simple Golden Lamp SVG -->
+                <svg class="lamp-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 18H20C20 18 21.5 17 21.5 15C21.5 13 20 13 20 13H18C18 13 19 10 16 9C13 8 9 8 9 8C9 8 8 5 10 4C12 3 13 3.5 13 3.5L13.5 2C13.5 2 11 1 8 2C5 3 4 6 4 6L2 6V8H4C4 8 2 12 4 15C4 16 3 18 4 18Z" 
+                          stroke="#FFD700" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                          fill="url(#gold-gradient)"/>
+                    <defs>
+                        <linearGradient id="gold-gradient" x1="0" y1="0" x2="24" y2="24">
+                            <stop offset="0%" stop-color="#FFEC8B" />
+                            <stop offset="50%" stop-color="#DAA520" />
+                            <stop offset="100%" stop-color="#B8860B" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M18 13C19.5 11 22 10 22 10" stroke="#FFD700" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+                    <path d="M9 8C6 8 5 11 5 13" stroke="#DAA520" stroke-width="0.5" />
+                </svg>
+                <div style="text-align: center; margin-top: 2rem; opacity: 0.7; font-size: 1.2rem; letter-spacing: 0.2em;">
+                    RUB THE LAMP (SCROLL)
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: MIDNIGHT BLUE - Claude Code CLI -->
+        <section id="s2" data-color="#0f2027" data-accent="#203a43">
+            <div class="story-card">
+                <div class="card-icon" style="color: #4facfe;">✦</div>
+                <h2 class="text-4xl text-blue-200 mb-4 tracking-wider">The Voice Awakens</h2>
+                <h3 class="text-xl text-blue-400 mb-6 font-semibold uppercase tracking-widest">Claude Code CLI</h3>
+                <p class="text-lg leading-relaxed text-gray-300">
+                    From the silence of the command line, a new intelligence speaks. 
+                    Not just a tool, but a partner in creation.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: DEEP PURPLE - VS Code -->
+        <section id="s3" data-color="#2c003e" data-accent="#512b58">
+            <div class="story-card">
+                <div class="card-icon" style="color: #d76d77;">⚡</div>
+                <h2 class="text-4xl text-purple-200 mb-4 tracking-wider">A Sanctum Forms</h2>
+                <h3 class="text-xl text-purple-400 mb-6 font-semibold uppercase tracking-widest">VS Code</h3>
+                <p class="text-lg leading-relaxed text-gray-300">
+                    The ethereal mist solidifies into structure. A forge where thoughts become reality, 
+                    illuminated by the glow of syntax.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: VIOLET/MAGENTA - Claude Extension -->
+        <section id="s4" data-color="#4a00e0" data-accent="#8e2de2">
+            <div class="story-card">
+                <div class="card-icon" style="color: #ff00cc;">🔮</div>
+                <h2 class="text-4xl text-fuchsia-200 mb-4 tracking-wider">Worlds Connect</h2>
+                <h3 class="text-xl text-fuchsia-400 mb-6 font-semibold uppercase tracking-widest">Claude Extension</h3>
+                <p class="text-lg leading-relaxed text-gray-300">
+                    A bridge spans the void. The spirit of the code now weaves directly 
+                    into the fabric of your editor, whispering insights.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: WARM ORANGE - Foam -->
+        <section id="s5" data-color="#b92b27" data-accent="#1565C0">
+            <div class="story-card">
+                <div class="card-icon" style="color: #ff9966;">🕸️</div>
+                <h2 class="text-4xl text-orange-200 mb-4 tracking-wider">Stars Align</h2>
+                <h3 class="text-xl text-orange-400 mb-6 font-semibold uppercase tracking-widest">Foam</h3>
+                <p class="text-lg leading-relaxed text-gray-300">
+                    Like constellations in the night sky, knowledge connects. 
+                    A personal web of thought, mapping the unchartered territories of your mind.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 6: GOLDEN - Node.js -->
+        <section id="s6" data-color="#D4AF37" data-accent="#FDC830">
+            <div class="story-card">
+                <div class="card-icon" style="color: #FDC830;">⚙️</div>
+                <h2 class="text-4xl text-yellow-100 mb-4 tracking-wider">The Heart Beats</h2>
+                <h3 class="text-xl text-yellow-400 mb-6 font-semibold uppercase tracking-widest">Node.js</h3>
+                <p class="text-lg leading-relaxed text-gray-300">
+                    The engine roars to life with a golden hum. The pulse of the machine, 
+                    driving the magic forward with relentless rhythm.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 7: SUNSET PINK - Python -->
+        <section id="s7" data-color="#C33764" data-accent="#1D2671">
+            <div class="story-card">
+                <div class="card-icon" style="color: #ff758c;">🐍</div>
+                <h2 class="text-4xl text-pink-200 mb-4 tracking-wider">Ancient Wisdom</h2>
+                <h3 class="text-xl text-pink-400 mb-6 font-semibold uppercase tracking-widest">Python</h3>
+                <p class="text-lg leading-relaxed text-gray-300">
+                    From the sands of time, a language of power emerges. 
+                    Simple yet profound, capable of weaving spells of data and logic.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 8: AMBER - Git -->
+        <section id="s8" data-color="#f2709c" data-accent="#ff9472">
+            <div class="story-card">
+                <div class="card-icon" style="color: #ff9472;">⏳</div>
+                <h2 class="text-4xl text-red-200 mb-4 tracking-wider">Memory Eternal</h2>
+                <h3 class="text-xl text-red-400 mb-6 font-semibold uppercase tracking-widest">Git</h3>
+                <p class="text-lg leading-relaxed text-gray-300">
+                    Every step recorded, every future branched. A chronicle of creation 
+                    that defies time itself, allowing you to return to any moment.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 9: BRIGHT GOLD - Starter Skills -->
+        <section id="s9" data-color="#F2994A" data-accent="#F2C94C">
+            <div class="story-card">
+                <div class="card-icon" style="color: #F2C94C;">📜</div>
+                <h2 class="text-4xl text-yellow-100 mb-4 tracking-wider">The Scrolls Unfold</h2>
+                <h3 class="text-xl text-yellow-400 mb-6 font-semibold uppercase tracking-widest">Starter Skills</h3>
+                <p class="text-lg leading-relaxed text-gray-300">
+                    The library opens. Spells of automation, incantations of deployment. 
+                    The tools to shape the world are now in your hands.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 10: FINALE -->
+        <section id="s10" data-color="#000428" data-accent="#004e92">
+            <div class="terminal-window" id="terminal">
+                <div class="terminal-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                    <span style="margin-left: 10px; font-size: 0.8rem; opacity: 0.5;">genie — zsh — 80x24</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="mb-4 text-green-400 font-mono">
+                        $ invoking_magic.sh
+                    </div>
+                    <div class="mb-8 font-mono text-sm opacity-80">
+                        Initializing framework...<br>
+                        Summoning dependencies...<br>
+                        Done.
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-white mb-2 font-bold">macOS / Linux</h4>
+                            <div class="bg-black/50 p-3 rounded border border-gray-700 font-mono text-sm break-all">
+                                curl -sL https://ccf.dev/install | sh
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-white mb-2 font-bold">Windows</h4>
+                            <div class="bg-black/50 p-3 rounded border border-gray-700 font-mono text-sm break-all">
+                                iwr https://ccf.dev/install.ps1 | iex
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button class="copy-btn" onclick="copyCommand()">Begin The Journey</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // --- Configuration ---
+        const colors = [
+            { bg: "#050510", accent: "#4b6cb7" }, // S1: Lamp (Midnight)
+            { bg: "#0f2027", accent: "#4facfe" }, // S2: Midnight Blue (Claude)
+            { bg: "#2c003e", accent: "#a74cf2" }, // S3: Deep Purple (VS Code)
+            { bg: "#4a00e0", accent: "#ff00cc" }, // S4: Violet/Magenta (Extension)
+            { bg: "#b92b27", accent: "#ff9966" }, // S5: Warm Orange (Foam)
+            { bg: "#DAA520", accent: "#FDC830" }, // S6: Golden (Node)
+            { bg: "#C33764", accent: "#ff758c" }, // S7: Sunset Pink (Python)
+            { bg: "#870000", accent: "#ff9472" }, // S8: Amber (Git)
+            { bg: "#F2994A", accent: "#F2C94C" }, // S9: Bright Gold (Skills)
+            { bg: "linear-gradient(to top, #fbc2eb 0%, #a6c1ee 100%)", accent: "#ffffff" }  // S10: Dawn Sky
+        ];
+
+        // --- Smoke Generation ---
+        const smokeContainer = document.getElementById('smoke-layer');
+        const numPlumes = 20;
+
+        for (let i = 0; i < numPlumes; i++) {
+            const plume = document.createElement('div');
+            plume.classList.add('smoke-plume');
+            
+            // Randomize plume properties
+            const size = Math.random() * 400 + 300 + 'px';
+            plume.style.width = size;
+            plume.style.height = size;
+            plume.style.left = Math.random() * 120 - 10 + 'vw';
+            plume.style.top = Math.random() * 120 - 10 + 'vh';
+            plume.style.animationDuration = (Math.random() * 15 + 10) + 's';
+            plume.style.animationDelay = (Math.random() * -10) + 's';
+            
+            // Randomize opacity slightly
+            plume.style.opacity = Math.random() * 0.4 + 0.2;
+
+            smokeContainer.appendChild(plume);
+        }
+
+        // --- Scroll & Parallax Logic ---
+        const sections = document.querySelectorAll('section');
+        const indicatorContainer = document.getElementById('indicators');
+
+        // Create indicators
+        sections.forEach((_, index) => {
+            const dot = document.createElement('div');
+            dot.classList.add('chapter-dot');
+            dot.dataset.index = index;
+            if (index === 0) dot.classList.add('active');
+            indicatorContainer.appendChild(dot);
+            
+            // Click to scroll
+            dot.addEventListener('click', () => {
+                sections[index].scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+        const dots = document.querySelectorAll('.chapter-dot');
+
+        // Intersection Observer for active section
+        const observerOptions = {
+            root: null, // Use viewport
+            threshold: 0.5
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    const index = parseInt(id.substring(1)) - 1;
+                    
+                    if (index >= 0 && index < colors.length) {
+                        // Activate card
+                        const card = entry.target.querySelector('.story-card');
+                        if (card) card.classList.add('active');
+
+                        // Update dots
+                        dots.forEach(d => d.classList.remove('active'));
+                        if (dots[index]) dots[index].classList.add('active');
+
+                        // Update smoke colors
+                        const color = colors[index];
+                        document.documentElement.style.setProperty('--current-smoke', color.accent);
+                        
+                        // Update background
+                        if (color.bg.startsWith('linear-gradient')) {
+                            smokeContainer.style.background = color.bg;
+                        } else {
+                            smokeContainer.style.background = color.bg;
+                        }
+                    }
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => {
+            observer.observe(section);
+        });
+
+        // Mouse Move Effect (Lamp & Smoke Ripple)
+        let activeCards = [];
+        
+        // Update active cards list periodically to avoid DOM query on every mousemove
+        setInterval(() => {
+            activeCards = document.querySelectorAll('.story-card.active');
+        }, 1000);
+
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            // Lamp Glow Calculation (closer to center = brighter)
+            const centerX = 0.5;
+            const centerY = 0.5;
+            const dist = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+            const glow = Math.max(0, 1 - dist * 2); // 0 to 1
+            document.documentElement.style.setProperty('--lamp-glow', glow);
+
+            // Parallax for active cards
+            if (activeCards.length > 0) {
+                const moveX = (x - 0.5) * 30;
+                const moveY = (y - 0.5) * 30;
+                
+                activeCards.forEach(card => {
+                    // We only want to apply the transform if the card is already visible (opacity 1)
+                    // The CSS transition might fight with this, so we set transition to none temporarily?
+                    // actually, let's just use a separate transform container or keep it subtle.
+                    // The CSS has `transition: all 1s ...` which will make this laggy.
+                    // Better approach: Apply parallax to a child element or use a specific class that removes transition.
+                    // For now, let's skip the heavy JS parallax on the card container to preserve the entrance animation.
+                    // We can move the internal content slightly.
+                    // card.style.transform = `translate(${moveX}px, ${moveY}px)`; 
+                });
+            }
+            
+            // Move smoke plumes slightly away from cursor
+            const plumes = document.querySelectorAll('.smoke-plume');
+            plumes.forEach((plume, index) => {
+                const speed = (index % 5) + 1;
+                const rect = plume.getBoundingClientRect();
+                const plumeX = rect.left + rect.width / 2;
+                const plumeY = rect.top + rect.height / 2;
+                
+                const distX = e.clientX - plumeX;
+                const distY = e.clientY - plumeY;
+                const distance = Math.sqrt(distX*distX + distY*distY);
+                
+                if (distance < 300) {
+                    const angle = Math.atan2(distY, distX);
+                    const push = (300 - distance) / 10;
+                    const transX = Math.cos(angle) * -push;
+                    const transY = Math.sin(angle) * -push;
+                    
+                    plume.style.transform = `translate(${transX}px, ${transY}px) scale(${1 + push/100})`;
+                }
+            });
+        });
+
+        // Copy Function
+        function copyCommand() {
+            // Determine OS
+            let os = 'Unknown';
+            if (navigator.appVersion.indexOf("Win") != -1) os = "Windows";
+            if (navigator.appVersion.indexOf("Mac") != -1) os = "MacOS";
+            if (navigator.appVersion.indexOf("X11") != -1) os = "UNIX";
+            if (navigator.appVersion.indexOf("Linux") != -1) os = "Linux";
+
+            const isWin = os === "Windows";
+            const text = isWin 
+                ? 'iwr https://ccf.dev/install.ps1 | iex' 
+                : 'curl -sL https://ccf.dev/install | sh';
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.innerHTML;
+                
+                btn.innerHTML = "✓ The lamp has been rubbed";
+                btn.style.color = "#4ade80"; // Tailwind green-400
+                btn.style.borderColor = "#4ade80";
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.color = "#d4af37";
+                    btn.style.borderColor = "#d4af37";
+                }, 3000);
+            });
+        }
+    </script>
+</body>
+</html>

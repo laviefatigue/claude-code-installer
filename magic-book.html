@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code | The Living Storybook</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --progress: 0;
+            --open-ratio: 0;
+            --open-angle: 0;
+            --finale: 0;
+            --glow-strength: 0.4;
+            --book-float: 0px;
+            --light-opacity: 0.15;
+            --surface-shadow: 0.35;
+            --vignette-opacity: 0.8;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            overscroll-behavior: none;
+            touch-action: none;
+        }
+
+        body {
+            font-family: "Cormorant Garamond", serif;
+            background:
+                radial-gradient(circle at 50% 72%, rgba(246, 190, 97, calc(var(--light-opacity) * 0.95)) 0%, rgba(246, 190, 97, 0) 38%),
+                radial-gradient(circle at 50% 35%, rgba(105, 70, 180, 0.18) 0%, rgba(105, 70, 180, 0) 40%),
+                linear-gradient(180deg, #090612 0%, #0a0815 45%, #05030b 100%);
+            color: #f7ead0;
+            letter-spacing: 0.01em;
+        }
+
+        button,
+        code {
+            font-family: "Fira Code", monospace;
+        }
+
+        .viewport {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .vignette,
+        .grain,
+        .dust-layer,
+        .aurora-layer,
+        .constellation-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .vignette {
+            background:
+                radial-gradient(circle at center, rgba(0, 0, 0, 0) 48%, rgba(0, 0, 0, calc(var(--vignette-opacity) * 0.88)) 100%),
+                linear-gradient(180deg, rgba(4, 2, 10, 0.18) 0%, rgba(4, 2, 10, 0.45) 100%);
+            z-index: 20;
+        }
+
+        .grain {
+            z-index: 19;
+            opacity: 0.08;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23noise)' opacity='0.7'/%3E%3C/svg%3E");
+        }
+
+        .aurora-layer {
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .aurora {
+            position: absolute;
+            border-radius: 999px;
+            filter: blur(70px);
+            mix-blend-mode: screen;
+            opacity: 0.3;
+            animation: drift 18s ease-in-out infinite;
+        }
+
+        .aurora.one {
+            width: 36vw;
+            height: 28vw;
+            top: 10%;
+            left: -8%;
+            background: rgba(114, 88, 230, 0.4);
+        }
+
+        .aurora.two {
+            width: 32vw;
+            height: 22vw;
+            top: 12%;
+            right: -6%;
+            background: rgba(255, 154, 76, 0.22);
+            animation-delay: -6s;
+        }
+
+        .aurora.three {
+            width: 28vw;
+            height: 18vw;
+            bottom: 14%;
+            left: 20%;
+            background: rgba(89, 181, 255, 0.18);
+            animation-delay: -11s;
+        }
+
+        .dust-layer {
+            z-index: 8;
+            overflow: hidden;
+        }
+
+        .dust {
+            position: absolute;
+            inset: auto auto 18% 50%;
+            width: var(--size);
+            height: var(--size);
+            margin-left: calc(var(--x) * 1vw);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 238, 199, 0.95) 0%, rgba(255, 209, 120, 0.25) 60%, rgba(255, 209, 120, 0) 100%);
+            opacity: calc(0.18 + var(--spark) * 0.28);
+            animation: float-dust var(--duration) linear infinite;
+            animation-delay: var(--delay);
+        }
+
+        .frame {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            place-items: center;
+            padding: 2rem;
+        }
+
+        .heading {
+            position: absolute;
+            top: clamp(1.25rem, 2vw, 2rem);
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(92vw, 64rem);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+            z-index: 14;
+            color: rgba(247, 234, 208, 0.92);
+        }
+
+        .heading-copy {
+            max-width: 30rem;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+            color: rgba(246, 214, 148, 0.9);
+        }
+
+        .eyebrow::before {
+            content: "";
+            width: 0.6rem;
+            height: 0.6rem;
+            border-radius: 999px;
+            background: radial-gradient(circle, #ffe3a1 0%, #d6a74e 100%);
+            box-shadow: 0 0 16px rgba(255, 213, 118, 0.65);
+        }
+
+        .heading h1 {
+            margin: 0;
+            font-family: "Cinzel Decorative", serif;
+            font-size: clamp(2rem, 4vw, 3.8rem);
+            line-height: 0.94;
+            text-shadow: 0 0 28px rgba(255, 205, 112, 0.24);
+        }
+
+        .heading p {
+            margin: 0.9rem 0 0;
+            font-size: clamp(1rem, 1.5vw, 1.25rem);
+            color: rgba(239, 226, 200, 0.75);
+        }
+
+        .progress-shell {
+            min-width: 11rem;
+            padding: 1rem 1.15rem;
+            border: 1px solid rgba(255, 229, 178, 0.18);
+            border-radius: 1.25rem;
+            background: rgba(14, 10, 24, 0.6);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.24);
+            backdrop-filter: blur(14px);
+        }
+
+        .progress-shell span {
+            display: block;
+            font-size: 0.75rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(245, 220, 167, 0.72);
+        }
+
+        .progress-shell strong {
+            display: block;
+            margin-top: 0.35rem;
+            font-family: "Fira Code", monospace;
+            font-size: clamp(1rem, 1.4vw, 1.1rem);
+        }
+
+        .progress-bar {
+            margin-top: 0.85rem;
+            width: 100%;
+            height: 0.35rem;
+            overflow: hidden;
+            border-radius: 999px;
+            background: rgba(255, 240, 214, 0.12);
+        }
+
+        .progress-fill {
+            width: calc(var(--progress) * 100%);
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #7155ff 0%, #cc84ff 35%, #ffb95a 100%);
+            box-shadow: 0 0 20px rgba(255, 193, 98, 0.45);
+        }
+
+        .book-stage {
+            position: relative;
+            width: min(88vw, 74rem);
+            height: min(72vh, 44rem);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            perspective: 2400px;
+            perspective-origin: 50% 30%;
+        }
+
+        .surface {
+            position: absolute;
+            left: 50%;
+            bottom: clamp(1rem, 4vh, 2.2rem);
+            width: min(70vw, 58rem);
+            height: min(16vh, 8rem);
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 50% 30%, rgba(255, 216, 131, calc(var(--glow-strength) * 0.25)) 0%, rgba(255, 216, 131, 0) 58%),
+                linear-gradient(180deg, rgba(48, 31, 18, 0.48) 0%, rgba(12, 9, 16, 0.18) 100%);
+            box-shadow:
+                0 30px 60px rgba(0, 0, 0, calc(0.28 + var(--surface-shadow) * 0.3)),
+                inset 0 1px 0 rgba(255, 231, 184, 0.1);
+            filter: blur(1px);
+        }
+
+        .light-bloom {
+            position: absolute;
+            left: 50%;
+            bottom: 18%;
+            width: min(58vw, 48rem);
+            height: min(40vw, 30rem);
+            transform: translateX(-50%);
+            background: radial-gradient(circle, rgba(255, 201, 113, calc(0.28 + var(--glow-strength) * 0.34)) 0%, rgba(255, 201, 113, 0.12) 35%, rgba(255, 201, 113, 0) 72%);
+            filter: blur(34px);
+            opacity: calc(0.25 + var(--open-ratio) * 0.55);
+        }
+
+        .book {
+            position: relative;
+            width: min(78vw, 46rem);
+            aspect-ratio: 1.6 / 1;
+            transform-style: preserve-3d;
+            transform:
+                translateY(calc(var(--book-float) * -1))
+                rotateX(63deg)
+                rotateZ(-5deg);
+            filter: drop-shadow(0 26px 36px rgba(0, 0, 0, 0.3));
+        }
+
+        .book-core {
+            position: absolute;
+            inset: 9% 10% 10%;
+            transform-style: preserve-3d;
+        }
+
+        .spine {
+            position: absolute;
+            top: 1%;
+            left: calc(50% - 1.55rem);
+            width: 3.1rem;
+            height: 92%;
+            border-radius: 0.8rem;
+            background:
+                linear-gradient(90deg, #4d1f1a 0%, #6d281f 24%, #a3472b 50%, #6f281f 76%, #4d1f1a 100%);
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 212, 133, 0.14),
+                inset 0 0 28px rgba(18, 7, 6, 0.55),
+                0 0 24px rgba(0, 0, 0, 0.18);
+            transform: translateZ(9px);
+        }
+
+        .page-spread,
+        .cover {
+            position: absolute;
+            top: 3%;
+            width: 50%;
+            height: 88%;
+            transform-style: preserve-3d;
+        }
+
+        .left-pages,
+        .back-cover {
+            left: 0;
+            transform-origin: right center;
+        }
+
+        .right-pages,
+        .front-cover {
+            left: 50%;
+            transform-origin: left center;
+        }
+
+        .page-spread {
+            overflow: hidden;
+            border-radius: 1rem;
+            background:
+                repeating-linear-gradient(90deg, rgba(183, 153, 112, 0.09) 0, rgba(183, 153, 112, 0.09) 1px, transparent 1px, transparent 12px),
+                linear-gradient(180deg, #fff9e9 0%, #f5edd7 100%);
+            box-shadow:
+                inset 0 0 0 1px rgba(113, 86, 48, 0.18),
+                inset 0 0 38px rgba(122, 90, 54, 0.18);
+        }
+
+        .page-spread::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(90deg, rgba(83, 53, 23, 0.18), rgba(83, 53, 23, 0) 18%, rgba(83, 53, 23, 0) 82%, rgba(83, 53, 23, 0.16)),
+                radial-gradient(circle at 50% 40%, rgba(255, 252, 245, 0.85), rgba(255, 252, 245, 0) 58%);
+            opacity: 0.86;
+        }
+
+        .left-pages {
+            transform:
+                rotateY(calc(4deg + var(--open-angle) * 0.49deg))
+                translateZ(7px);
+        }
+
+        .right-pages {
+            transform:
+                rotateY(calc(-4deg - var(--open-angle) * 0.49deg))
+                translateZ(7px);
+        }
+
+        .page-gild {
+            position: absolute;
+            top: 6%;
+            width: 0.55rem;
+            height: 82%;
+            border-radius: 0.3rem;
+            background: linear-gradient(180deg, #ffe5a5 0%, #d49b36 50%, #83551c 100%);
+            box-shadow: 0 0 14px rgba(233, 183, 80, 0.24);
+        }
+
+        .page-gild.left {
+            right: 1rem;
+        }
+
+        .page-gild.right {
+            left: 1rem;
+        }
+
+        .cover {
+            transform-style: preserve-3d;
+        }
+
+        .back-cover {
+            transform:
+                translateZ(-12px)
+                rotateY(calc(5deg + var(--open-angle) * 0.48deg));
+        }
+
+        .front-cover {
+            transform:
+                translateZ(16px)
+                rotateY(calc(var(--open-angle) * -1deg));
+        }
+
+        .cover-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            border-radius: 0.95rem;
+            border: 1px solid rgba(255, 222, 161, 0.14);
+            overflow: hidden;
+        }
+
+        .cover-face::before,
+        .cover-face::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .cover-face--outer {
+            background:
+                radial-gradient(circle at 30% 28%, rgba(255, 220, 152, 0.18) 0%, rgba(255, 220, 152, 0) 24%),
+                linear-gradient(135deg, #5f1715 0%, #71231c 18%, #8b2c21 50%, #4d1210 100%);
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 216, 151, 0.14),
+                inset 0 0 42px rgba(29, 9, 7, 0.62),
+                0 18px 32px rgba(0, 0, 0, 0.24);
+        }
+
+        .cover-face--outer::before {
+            inset: 8%;
+            border: 1px solid rgba(255, 214, 122, 0.3);
+            border-radius: 0.7rem;
+        }
+
+        .cover-face--outer::after {
+            inset: 16%;
+            border: 1px solid rgba(255, 214, 122, 0.18);
+            border-radius: 0.4rem;
+        }
+
+        .cover-face--inner {
+            background:
+                radial-gradient(circle at 50% 20%, rgba(255, 239, 208, 0.35), rgba(255, 239, 208, 0) 46%),
+                linear-gradient(180deg, #f7ecd2 0%, #e9ddc1 100%);
+            box-shadow: inset 0 0 0 1px rgba(129, 99, 60, 0.12);
+            transform: rotateY(180deg);
+        }
+
+        .cover-ornaments {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            padding: 2rem;
+            color: #ffe6a6;
+            text-shadow: 0 0 18px rgba(255, 207, 118, 0.25);
+        }
+
+        .cover-ornaments .glyph {
+            font-size: clamp(2.3rem, 4vw, 3.2rem);
+            line-height: 1;
+        }
+
+        .cover-ornaments h2 {
+            margin: 0.9rem 0 0.25rem;
+            font-family: "Cinzel Decorative", serif;
+            font-size: clamp(1.4rem, 2.6vw, 2.2rem);
+            letter-spacing: 0.08em;
+        }
+
+        .cover-ornaments p {
+            margin: 0;
+            font-size: 0.95rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(255, 232, 175, 0.8);
+        }
+
+        .filigree {
+            position: absolute;
+            inset: 14%;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 213, 118, 0.25);
+            box-shadow: inset 0 0 0 1px rgba(255, 213, 118, 0.1);
+        }
+
+        .filigree::before,
+        .filigree::after {
+            content: "";
+            position: absolute;
+            width: 3.2rem;
+            height: 3.2rem;
+            border: 1px solid rgba(255, 213, 118, 0.25);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.55;
+        }
+
+        .filigree::after {
+            width: 5rem;
+            height: 5rem;
+            opacity: 0.22;
+        }
+
+        .page-gleam {
+            position: absolute;
+            left: 50%;
+            top: 18%;
+            width: min(44vw, 28rem);
+            height: min(28vw, 18rem);
+            transform: translateX(-50%);
+            background: radial-gradient(circle, rgba(255, 220, 138, calc(0.1 + var(--open-ratio) * 0.4)) 0%, rgba(255, 220, 138, 0) 72%);
+            filter: blur(28px);
+            opacity: calc(var(--open-ratio) * 0.9);
+            z-index: 3;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            left: 50%;
+            bottom: clamp(1rem, 4vh, 2rem);
+            transform: translateX(-50%);
+            z-index: 14;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.8rem 1rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 224, 164, 0.14);
+            background: rgba(10, 7, 18, 0.58);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18);
+            color: rgba(246, 230, 190, 0.84);
+            opacity: calc(1 - min(var(--progress) * 3.2, 1));
+            transition: opacity 300ms ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .scroll-wheel {
+            width: 1.1rem;
+            height: 1.8rem;
+            border: 1px solid rgba(255, 221, 161, 0.7);
+            border-radius: 999px;
+            position: relative;
+        }
+
+        .scroll-wheel::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 0.28rem;
+            width: 0.25rem;
+            height: 0.45rem;
+            border-radius: 999px;
+            background: rgba(255, 226, 165, 0.9);
+            transform: translateX(-50%);
+            animation: mouse-wheel 1.7s ease-in-out infinite;
+        }
+
+        .constellation-layer {
+            z-index: 11;
+        }
+
+        .milestone {
+            position: absolute;
+            left: 50%;
+            top: 48%;
+            width: min(18rem, 28vw);
+            padding: 1rem 1.15rem;
+            border-radius: 1.1rem;
+            background:
+                linear-gradient(180deg, rgba(14, 10, 25, 0.76), rgba(10, 7, 18, 0.45));
+            border: 1px solid rgba(255, 230, 183, 0.13);
+            box-shadow:
+                0 12px 28px rgba(0, 0, 0, 0.18),
+                inset 0 1px 0 rgba(255, 247, 227, 0.05);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8);
+            will-change: transform, opacity;
+        }
+
+        .milestone::before {
+            content: "";
+            position: absolute;
+            left: 1rem;
+            right: 1rem;
+            top: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
+            opacity: 0.6;
+        }
+
+        .milestone .label {
+            margin: 0;
+            font-family: "Cinzel Decorative", serif;
+            font-size: clamp(1rem, 1.8vw, 1.35rem);
+            color: var(--accent);
+            filter: drop-shadow(0 0 10px var(--accent));
+        }
+
+        .milestone .detail {
+            margin: 0.3rem 0 0;
+            color: rgba(248, 239, 220, 0.84);
+            font-size: 1rem;
+        }
+
+        .milestone .sparkline {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            margin-top: 0.8rem;
+            font-size: 0.82rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(245, 228, 193, 0.6);
+        }
+
+        .milestone .sparkline::before {
+            content: "";
+            width: 2.6rem;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--accent) 100%);
+        }
+
+        .terminal-card {
+            position: absolute;
+            left: 50%;
+            top: 44%;
+            width: min(88vw, 38rem);
+            transform: translate(-50%, -50%);
+            z-index: 13;
+            padding: 1.2rem;
+            border-radius: 1.6rem;
+            background:
+                linear-gradient(180deg, rgba(18, 13, 30, 0.92), rgba(9, 7, 16, 0.92));
+            border: 1px solid rgba(255, 226, 163, 0.16);
+            box-shadow:
+                0 28px 70px rgba(0, 0, 0, 0.34),
+                0 0 42px rgba(255, 205, 112, 0.08);
+            opacity: 0;
+            pointer-events: none;
+            backdrop-filter: blur(18px);
+            will-change: transform, opacity;
+        }
+
+        .terminal-shell {
+            overflow: hidden;
+            border-radius: 1.1rem;
+            background: rgba(7, 5, 12, 0.72);
+            border: 1px solid rgba(255, 236, 199, 0.08);
+        }
+
+        .terminal-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid rgba(255, 236, 199, 0.08);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .terminal-dots {
+            display: inline-flex;
+            gap: 0.45rem;
+        }
+
+        .terminal-dots span {
+            width: 0.65rem;
+            height: 0.65rem;
+            border-radius: 50%;
+        }
+
+        .terminal-dots span:nth-child(1) { background: #ff7b72; }
+        .terminal-dots span:nth-child(2) { background: #f2cc60; }
+        .terminal-dots span:nth-child(3) { background: #58d68d; }
+
+        .terminal-caption {
+            font-size: 0.78rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(241, 224, 189, 0.55);
+        }
+
+        .terminal-body {
+            padding: 1.2rem;
+        }
+
+        .terminal-body h3 {
+            margin: 0;
+            font-family: "Cinzel Decorative", serif;
+            font-size: clamp(1.2rem, 2vw, 1.7rem);
+            color: #f9e4ad;
+        }
+
+        .terminal-body p {
+            margin: 0.55rem 0 0;
+            font-size: clamp(1rem, 1.5vw, 1.1rem);
+            color: rgba(240, 228, 204, 0.72);
+        }
+
+        .platform-tabs {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.65rem;
+            margin-top: 1.15rem;
+        }
+
+        .platform-tab {
+            border: 1px solid rgba(255, 233, 188, 0.12);
+            border-radius: 0.95rem;
+            background: rgba(255, 255, 255, 0.03);
+            color: rgba(245, 230, 197, 0.72);
+            padding: 0.8rem 0.9rem;
+            text-align: center;
+            transition: background 220ms ease, border-color 220ms ease, color 220ms ease, transform 220ms ease;
+        }
+
+        .platform-tab.active,
+        .platform-tab:hover {
+            background: rgba(255, 197, 96, 0.12);
+            border-color: rgba(255, 209, 114, 0.36);
+            color: #fbedc7;
+            transform: translateY(-1px);
+        }
+
+        .command-shell {
+            margin-top: 1rem;
+            padding: 1rem 1.1rem;
+            border-radius: 1rem;
+            background:
+                linear-gradient(180deg, rgba(255, 249, 233, 0.05), rgba(255, 249, 233, 0.02));
+            border: 1px solid rgba(255, 233, 188, 0.1);
+        }
+
+        .command-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.7rem;
+            font-size: 0.78rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(243, 227, 194, 0.56);
+        }
+
+        .command-shell code {
+            display: block;
+            font-size: clamp(0.92rem, 1.55vw, 1.02rem);
+            line-height: 1.65;
+            color: #fef3d3;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .terminal-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .cta-button {
+            border: none;
+            border-radius: 999px;
+            padding: 0.95rem 1.45rem;
+            color: #281406;
+            background: linear-gradient(135deg, #ffdf98 0%, #f1b54a 45%, #c17b18 100%);
+            box-shadow:
+                0 12px 30px rgba(193, 123, 24, 0.26),
+                inset 0 1px 0 rgba(255, 243, 211, 0.8);
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+        }
+
+        .cta-button:hover,
+        .cta-button:focus-visible {
+            transform: translateY(-1px);
+            filter: brightness(1.06);
+            box-shadow:
+                0 16px 34px rgba(193, 123, 24, 0.32),
+                inset 0 1px 0 rgba(255, 243, 211, 0.9);
+            outline: none;
+        }
+
+        .terminal-status {
+            font-size: 0.98rem;
+            color: rgba(241, 229, 205, 0.72);
+        }
+
+        .story-guide {
+            position: absolute;
+            right: clamp(1rem, 2vw, 2rem);
+            bottom: clamp(1rem, 2vw, 1.75rem);
+            z-index: 14;
+            padding: 1rem 1.1rem;
+            border-radius: 1.15rem;
+            width: min(21rem, calc(100vw - 2rem));
+            border: 1px solid rgba(255, 226, 163, 0.14);
+            background: rgba(12, 8, 19, 0.6);
+            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.24);
+            backdrop-filter: blur(10px);
+        }
+
+        .story-guide strong {
+            display: block;
+            font-family: "Cinzel Decorative", serif;
+            font-size: 0.95rem;
+            color: #f7dfa5;
+        }
+
+        .story-guide p {
+            margin: 0.45rem 0 0;
+            font-size: 0.95rem;
+            color: rgba(245, 233, 205, 0.72);
+        }
+
+        @keyframes drift {
+            0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+            50% { transform: translate3d(3vw, -2vh, 0) scale(1.05); }
+        }
+
+        @keyframes float-dust {
+            0% {
+                transform: translate3d(0, 0, 0) scale(0.7);
+                opacity: 0;
+            }
+            12% {
+                opacity: calc(0.12 + var(--spark) * 0.36);
+            }
+            88% {
+                opacity: calc(0.08 + var(--spark) * 0.2);
+            }
+            100% {
+                transform: translate3d(calc(var(--drift-x) * 1vw), calc(var(--drift-y) * -1vh), 0) scale(1.25);
+                opacity: 0;
+            }
+        }
+
+        @keyframes mouse-wheel {
+            0% { transform: translate(-50%, 0); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translate(-50%, 0.7rem); opacity: 0; }
+        }
+
+        @media (max-width: 980px) {
+            .heading {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .progress-shell {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .book-stage {
+                width: min(95vw, 54rem);
+                height: min(68vh, 38rem);
+            }
+
+            .milestone {
+                width: min(15rem, 46vw);
+            }
+
+            .story-guide {
+                display: none;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .frame {
+                padding: 1rem;
+            }
+
+            .heading {
+                top: 1rem;
+                width: calc(100vw - 2rem);
+            }
+
+            .heading h1 {
+                font-size: clamp(1.5rem, 9vw, 2.35rem);
+            }
+
+            .heading p {
+                font-size: 1rem;
+            }
+
+            .book-stage {
+                height: min(62vh, 30rem);
+                align-items: center;
+            }
+
+            .book {
+                width: min(92vw, 31rem);
+                transform: translateY(calc(var(--book-float) * -1)) rotateX(65deg) rotateZ(-4deg);
+            }
+
+            .milestone {
+                width: min(78vw, 18rem);
+                padding: 0.85rem 0.95rem;
+            }
+
+            .milestone .detail {
+                font-size: 0.92rem;
+            }
+
+            .terminal-card {
+                width: calc(100vw - 1.5rem);
+            }
+
+            .platform-tabs {
+                grid-template-columns: 1fr;
+            }
+
+            .story-guide {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="selection:bg-amber-300/40 selection:text-amber-50">
+    <main class="viewport" id="viewport">
+        <div class="aurora-layer" aria-hidden="true">
+            <div class="aurora one"></div>
+            <div class="aurora two"></div>
+            <div class="aurora three"></div>
+        </div>
+        <div class="dust-layer" id="dustLayer" aria-hidden="true"></div>
+        <div class="grain" aria-hidden="true"></div>
+        <div class="vignette" aria-hidden="true"></div>
+
+        <header class="heading">
+            <div class="heading-copy">
+                <div class="eyebrow">The ancient installation</div>
+                <h1>Open the Claude Code grimoire.</h1>
+                <p>Scroll without moving the page and let the storybook reveal the eight artifacts that prepare the framework to awaken.</p>
+            </div>
+            <div class="progress-shell">
+                <span>Opening progress</span>
+                <strong id="progressLabel">00% · Closed cover</strong>
+                <div class="progress-bar" aria-hidden="true">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+        </header>
+
+        <section class="frame">
+            <div class="book-stage">
+                <div class="surface" aria-hidden="true"></div>
+                <div class="light-bloom" aria-hidden="true"></div>
+                <div class="page-gleam" aria-hidden="true"></div>
+
+                <div class="book" aria-label="A magical book slowly opening">
+                    <div class="book-core">
+                        <div class="spine" aria-hidden="true"></div>
+
+                        <div class="page-spread left-pages" aria-hidden="true">
+                            <span class="page-gild left"></span>
+                        </div>
+                        <div class="page-spread right-pages" aria-hidden="true">
+                            <span class="page-gild right"></span>
+                        </div>
+
+                        <div class="cover back-cover" aria-hidden="true">
+                            <div class="cover-face cover-face--outer"></div>
+                            <div class="cover-face cover-face--inner"></div>
+                        </div>
+
+                        <div class="cover front-cover">
+                            <div class="cover-face cover-face--outer">
+                                <div class="cover-ornaments">
+                                    <div class="filigree"></div>
+                                    <div>
+                                        <div class="glyph">✦</div>
+                                        <h2>Claude Code</h2>
+                                        <p>The Living Storybook</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cover-face cover-face--inner"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="constellation-layer" id="constellationLayer">
+                    <article class="milestone" data-start="0.10" data-end="0.30" data-x="-33" data-y="-26" style="--accent:#5ab8ff;">
+                        <h2 class="label">The Voice</h2>
+                        <p class="detail">Claude Code CLI</p>
+                        <div class="sparkline">First whisper</div>
+                    </article>
+                    <article class="milestone" data-start="0.25" data-end="0.45" data-x="-8" data-y="-34" style="--accent:#bb7bff;">
+                        <h2 class="label">The Sanctum</h2>
+                        <p class="detail">VS Code</p>
+                        <div class="sparkline">A place to dwell</div>
+                    </article>
+                    <article class="milestone" data-start="0.25" data-end="0.45" data-x="18" data-y="-28" style="--accent:#f973ff;">
+                        <h2 class="label">The Bridge</h2>
+                        <p class="detail">Claude Extension</p>
+                        <div class="sparkline">Connection made luminous</div>
+                    </article>
+                    <article class="milestone" data-start="0.40" data-end="0.58" data-x="-37" data-y="-8" style="--accent:#ff9770;">
+                        <h2 class="label">The Stars</h2>
+                        <p class="detail">Foam</p>
+                        <div class="sparkline">Ideas map the sky</div>
+                    </article>
+                    <article class="milestone" data-start="0.40" data-end="0.58" data-x="31" data-y="-6" style="--accent:#7dff9c;">
+                        <h2 class="label">The Heartbeat</h2>
+                        <p class="detail">Node.js</p>
+                        <div class="sparkline">The pulse of the ritual</div>
+                    </article>
+                    <article class="milestone" data-start="0.55" data-end="0.73" data-x="-20" data-y="12" style="--accent:#ffe26a;">
+                        <h2 class="label">The Serpent</h2>
+                        <p class="detail">Python</p>
+                        <div class="sparkline">Optional, ancient, wise</div>
+                    </article>
+                    <article class="milestone" data-start="0.55" data-end="0.73" data-x="6" data-y="16" style="--accent:#ffb25e;">
+                        <h2 class="label">The Memory</h2>
+                        <p class="detail">Git</p>
+                        <div class="sparkline">Every step remembered</div>
+                    </article>
+                    <article class="milestone" data-start="0.70" data-end="0.88" data-x="34" data-y="10" style="--accent:#ffd76f;">
+                        <h2 class="label">The Scrolls</h2>
+                        <p class="detail">Starter Skills</p>
+                        <div class="sparkline">Templates for the quest</div>
+                    </article>
+                </div>
+
+                <aside class="terminal-card" id="terminalCard" aria-live="polite">
+                    <div class="terminal-shell">
+                        <div class="terminal-topbar">
+                            <div class="terminal-dots" aria-hidden="true">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <div class="terminal-caption">terminal / installation / ready</div>
+                        </div>
+                        <div class="terminal-body">
+                            <h3>The final incantation appears.</h3>
+                            <p>The floating names become one clear path forward. Choose your platform, copy the command, and begin.</p>
+
+                            <div class="platform-tabs" role="tablist" aria-label="Platform command tabs">
+                                <button type="button" class="platform-tab active" data-platform="unix" aria-selected="true">macOS / Linux</button>
+                                <button type="button" class="platform-tab" data-platform="windows" aria-selected="false">Windows</button>
+                            </div>
+
+                            <div class="command-shell">
+                                <div class="command-meta">
+                                    <span>Command</span>
+                                    <span id="platformLabel">macOS / Linux</span>
+                                </div>
+                                <code id="commandText">curl -sL https://ccf.dev/install | sh</code>
+                            </div>
+
+                            <div class="terminal-actions">
+                                <button type="button" class="cta-button" id="copyButton">Begin The Journey</button>
+                                <div class="terminal-status" id="terminalStatus">The command waits in the light.</div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <div class="scroll-hint" id="scrollHint">
+            <span class="scroll-wheel" aria-hidden="true"></span>
+            <span>Scroll to open</span>
+        </div>
+
+        <aside class="story-guide">
+            <strong id="storyTitle">Closed cover</strong>
+            <p id="storyBody">Golden light sleeps inside the leather-bound tome. Turn the wheel and wake the journey.</p>
+        </aside>
+    </main>
+
+    <script>
+        const root = document.documentElement;
+        const milestones = [...document.querySelectorAll(".milestone")];
+        const terminalCard = document.getElementById("terminalCard");
+        const progressLabel = document.getElementById("progressLabel");
+        const storyTitle = document.getElementById("storyTitle");
+        const storyBody = document.getElementById("storyBody");
+        const platformLabel = document.getElementById("platformLabel");
+        const commandText = document.getElementById("commandText");
+        const copyButton = document.getElementById("copyButton");
+        const terminalStatus = document.getElementById("terminalStatus");
+        const platformTabs = [...document.querySelectorAll(".platform-tab")];
+        const dustLayer = document.getElementById("dustLayer");
+
+        const platformCommands = {
+            unix: {
+                label: "macOS / Linux",
+                command: "curl -sL https://ccf.dev/install | sh"
+            },
+            windows: {
+                label: "Windows",
+                command: "iwr https://ccf.dev/install.ps1 | iex"
+            }
+        };
+
+        const storyMoments = [
+            {
+                until: 0.1,
+                title: "Closed cover",
+                body: "Golden light sleeps inside the leather-bound tome. Turn the wheel and wake the journey."
+            },
+            {
+                until: 0.25,
+                title: "A first whisper",
+                body: "The cover lifts. The Voice rises first, and dust motes begin to shimmer above the pages."
+            },
+            {
+                until: 0.4,
+                title: "The sanctum revealed",
+                body: "The book opens to the middle arc. The Sanctum and the Bridge step into the glow."
+            },
+            {
+                until: 0.55,
+                title: "Constellations forming",
+                body: "The Stars and the Heartbeat join, each artifact hovering like a guide above the parchment."
+            },
+            {
+                until: 0.7,
+                title: "Ancient helpers",
+                body: "The Serpent and the Memory arrive, filling the room with warm, practical magic."
+            },
+            {
+                until: 0.85,
+                title: "The book lies open",
+                body: "All eight names glow together above the spread, ready to transform into action."
+            },
+            {
+                until: 1.01,
+                title: "The command descends",
+                body: "The floating names merge into a clean terminal card. Copy the incantation and let the story begin."
+            }
+        ];
+
+        let activePlatform = "unix";
+        let targetProgress = 0;
+        let currentProgress = 0;
+        let touchStartY = null;
+
+        function clamp(value, min, max) {
+            return Math.min(max, Math.max(min, value));
+        }
+
+        function smoothstep(start, end, value) {
+            const amount = clamp((value - start) / (end - start || 1), 0, 1);
+            return amount * amount * (3 - 2 * amount);
+        }
+
+        function lerp(start, end, factor) {
+            return start + (end - start) * factor;
+        }
+
+        function updatePlatform(platform) {
+            activePlatform = platform;
+            platformLabel.textContent = platformCommands[platform].label;
+            commandText.textContent = platformCommands[platform].command;
+            platformTabs.forEach((tab) => {
+                const active = tab.dataset.platform === platform;
+                tab.classList.toggle("active", active);
+                tab.setAttribute("aria-selected", active ? "true" : "false");
+            });
+            terminalStatus.textContent = "The command waits in the light.";
+        }
+
+        function createDust() {
+            const dustCount = 22;
+            for (let index = 0; index < dustCount; index += 1) {
+                const particle = document.createElement("span");
+                particle.className = "dust";
+                particle.style.setProperty("--size", `${(Math.random() * 0.45 + 0.18).toFixed(2)}rem`);
+                particle.style.setProperty("--x", (Math.random() * 80 - 40).toFixed(2));
+                particle.style.setProperty("--drift-x", (Math.random() * 18 - 9).toFixed(2));
+                particle.style.setProperty("--drift-y", (Math.random() * 22 + 18).toFixed(2));
+                particle.style.setProperty("--spark", Math.random().toFixed(2));
+                particle.style.setProperty("--duration", `${Math.round(7000 + Math.random() * 7000)}ms`);
+                particle.style.setProperty("--delay", `${Math.round(Math.random() * -12000)}ms`);
+                dustLayer.appendChild(particle);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.setAttribute("readonly", "");
+            textarea.style.position = "absolute";
+            textarea.style.left = "-9999px";
+            document.body.appendChild(textarea);
+            textarea.select();
+            const copied = document.execCommand("copy");
+            document.body.removeChild(textarea);
+            return copied;
+        }
+
+        async function copyCommand() {
+            const text = platformCommands[activePlatform].command;
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                } else if (!fallbackCopy(text)) {
+                    throw new Error("Clipboard unavailable");
+                }
+
+                terminalStatus.textContent = "The story begins...";
+                copyButton.textContent = "Copied";
+                window.setTimeout(() => {
+                    terminalStatus.textContent = "The command waits in the light.";
+                    copyButton.textContent = "Begin The Journey";
+                }, 2200);
+            } catch (error) {
+                terminalStatus.textContent = "Clipboard magic failed. Copy the command manually.";
+            }
+        }
+
+        function updateMilestones(progress, time) {
+            const constellation = smoothstep(0.68, 0.84, progress);
+            const merge = smoothstep(0.85, 1, progress);
+
+            milestones.forEach((milestone, index) => {
+                const start = Number(milestone.dataset.start);
+                const end = Number(milestone.dataset.end);
+                const baseX = Number(milestone.dataset.x);
+                const baseY = Number(milestone.dataset.y);
+                const appear = smoothstep(start, start + 0.08, progress);
+                const linger = 1 - smoothstep(end, end + 0.12, progress);
+                const presence = clamp(Math.max(appear * 0.92, appear * linger), 0, 1);
+                const orbitScale = lerp(0.52, 1, constellation);
+                const wave = Math.sin(time / 900 + index * 0.9) * lerp(2.5, 9, presence) * (1 - merge * 0.75);
+                const x = baseX * orbitScale * (1 - merge);
+                const y = baseY * orbitScale * (1 - merge) + wave;
+                const scale = 0.76 + presence * 0.24 + constellation * 0.12 - merge * 0.14;
+                const opacity = clamp(presence * (1 - merge * 0.92), 0, 1);
+
+                milestone.style.opacity = opacity.toFixed(3);
+                milestone.style.transform = `translate(calc(-50% + ${x}%), calc(-50% + ${y}%)) scale(${scale.toFixed(3)})`;
+                milestone.style.filter = `drop-shadow(0 0 ${Math.round(18 + presence * 26)}px rgba(255, 212, 123, ${Math.min(0.28, presence * 0.28).toFixed(3)}))`;
+            });
+        }
+
+        function updateTerminal(progress) {
+            const reveal = smoothstep(0.86, 0.95, progress);
+            terminalCard.style.opacity = reveal.toFixed(3);
+            terminalCard.style.pointerEvents = reveal > 0.45 ? "auto" : "none";
+            terminalCard.style.transform = `translate(-50%, calc(-50% + ${(1 - reveal) * 40}px)) scale(${(0.92 + reveal * 0.08).toFixed(3)})`;
+        }
+
+        function updateNarration(progress) {
+            const stage = storyMoments.find((moment) => progress <= moment.until) || storyMoments[storyMoments.length - 1];
+            storyTitle.textContent = stage.title;
+            storyBody.textContent = stage.body;
+            progressLabel.textContent = `${String(Math.round(progress * 100)).padStart(2, "0")}% · ${stage.title}`;
+        }
+
+        function render(progress, time) {
+            const openRatio = smoothstep(0, 0.85, progress);
+            const openAngle = lerp(0, 178, openRatio);
+            const finale = smoothstep(0.85, 1, progress);
+            const glowStrength = lerp(0.28, 1, smoothstep(0.02, 0.85, progress));
+            const lightOpacity = lerp(0.08, 0.5, smoothstep(0, 0.75, progress));
+            const bookFloat = Math.sin(time / 1100) * lerp(1.5, 6, openRatio) + finale * 4;
+            const surfaceShadow = lerp(0.24, 0.8, openRatio);
+
+            root.style.setProperty("--progress", progress.toFixed(4));
+            root.style.setProperty("--open-ratio", openRatio.toFixed(4));
+            root.style.setProperty("--open-angle", openAngle.toFixed(2));
+            root.style.setProperty("--finale", finale.toFixed(4));
+            root.style.setProperty("--glow-strength", glowStrength.toFixed(4));
+            root.style.setProperty("--light-opacity", lightOpacity.toFixed(4));
+            root.style.setProperty("--book-float", `${bookFloat.toFixed(2)}px`);
+            root.style.setProperty("--surface-shadow", surfaceShadow.toFixed(4));
+            root.style.setProperty("--vignette-opacity", lerp(0.7, 0.9, progress).toFixed(4));
+
+            updateMilestones(progress, time);
+            updateTerminal(progress);
+            updateNarration(progress);
+        }
+
+        function animate(time) {
+            currentProgress += (targetProgress - currentProgress) * 0.09;
+            if (Math.abs(targetProgress - currentProgress) < 0.0003) {
+                currentProgress = targetProgress;
+            }
+
+            render(currentProgress, time);
+            window.requestAnimationFrame(animate);
+        }
+
+        function nudgeProgress(delta) {
+            targetProgress = clamp(targetProgress + delta, 0, 1);
+        }
+
+        window.addEventListener("wheel", (event) => {
+            event.preventDefault();
+            nudgeProgress(event.deltaY * 0.00032);
+        }, { passive: false });
+
+        window.addEventListener("keydown", (event) => {
+            if (["ArrowDown", "PageDown", " ", "ArrowRight"].includes(event.key)) {
+                event.preventDefault();
+                nudgeProgress(0.04);
+            }
+
+            if (["ArrowUp", "PageUp", "ArrowLeft"].includes(event.key)) {
+                event.preventDefault();
+                nudgeProgress(-0.04);
+            }
+
+            if (event.key === "Home") {
+                event.preventDefault();
+                targetProgress = 0;
+            }
+
+            if (event.key === "End") {
+                event.preventDefault();
+                targetProgress = 1;
+            }
+        });
+
+        window.addEventListener("touchstart", (event) => {
+            touchStartY = event.touches[0]?.clientY ?? null;
+        }, { passive: true });
+
+        window.addEventListener("touchmove", (event) => {
+            if (touchStartY === null) {
+                return;
+            }
+
+            const currentY = event.touches[0]?.clientY ?? touchStartY;
+            const delta = touchStartY - currentY;
+            if (Math.abs(delta) > 4) {
+                nudgeProgress(delta * 0.0009);
+                touchStartY = currentY;
+            }
+        }, { passive: true });
+
+        window.addEventListener("touchend", () => {
+            touchStartY = null;
+        }, { passive: true });
+
+        platformTabs.forEach((tab) => {
+            tab.addEventListener("click", () => updatePlatform(tab.dataset.platform));
+        });
+
+        copyButton.addEventListener("click", copyCommand);
+
+        createDust();
+        updatePlatform(activePlatform);
+        render(0, 0);
+        window.requestAnimationFrame(animate);
+    </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+You are a world-class frontend designer creating a CINEMATIC, scroll-driven landing page for Claude Code Framework.
+
+CONCEPT: 'The Cave of Wonders' - Aladdin/Arabian Nights theme
+- The install command is the LAMP - rubbing it awakens the genie (Claude)
+- As user scrolls, the journey INTO the cave unfolds
+- Deep midnight purples, magical golds, twinkling stars, mystical atmosphere
+- Disney animated film quality storytelling through visuals
+
+STORY STRUCTURE (5 scroll sections):
+
+1. THE ENTRANCE - Standing before the cave mouth. Stars twinkle. The install command glows like a golden lamp artifact. 'Only one may enter' mystique.
+
+2. THE DESCENT - Scrolling triggers falling into the cave. Floating magical dust particles. System checks appear like ancient inscriptions being revealed (Node.js, Git, Python detected).
+
+3. THE TREASURE CHAMBER - 8 tools appear as magical artifacts/treasures on pedestals. Each glows with its own color. Cards with poetic names:
+   - Claude Code CLI = 'The Voice' (speaks your will)
+   - VS Code = 'The Sanctum' (where magic happens)
+   - Claude Extension = 'The Bridge' (connects worlds)
+   - Foam = 'The Web of Stars' (knowledge constellation)
+   - Node.js = 'The Heartbeat' (life force)
+   - Python = 'The Serpent' (ancient power)
+   - Git = 'The Memory' (nothing forgotten)
+   - Starter Skills = 'The Scrolls' (ancient wisdom)
+
+4. THE AWAKENING - Everything connects. A dramatic moment where all 8 artifacts orbit together, forming a unified system. Typography: 'YOUR POWER AWAKENS'
+
+5. THE FIRST WISH - Back to light. Clean. 'What will you create?' with blinking cursor. The genie awaits your command.
+
+TECHNICAL REQUIREMENTS:
+- Single HTML file with embedded CSS/JS
+- Tailwind CSS via CDN
+- Google Fonts: Cinzel (display/headers), Cormorant Gainsborough (body)
+- Platform tabs: macOS, Linux, Windows with real commands
+- macOS/Linux: curl -sL https://ccf.dev/install | sh
+- Windows: iwr https://ccf.dev/install.ps1 | iex
+- Copy button with 'Rub the Lamp' tooltip
+- IntersectionObserver for scroll-triggered animations
+- CSS-only starfield (200+ twinkling stars)
+- Floating dust/particle effects
+- Smooth scroll between sections
+- Each section is full viewport height (min-h-screen)
+
+VISUAL STYLE:
+- Color palette: midnight purple (#0d0a1a), deep purple (#1a1030), magic gold (#d4a853), warm gold (#f0d78c), sand (#f5f0e1), star white (#faf8f5)
+- Layered shadows for depth
+- Subtle grain texture overlay
+- Organic, flowing animations (not mechanical)
+
+OUTPUT: Generate complete, production-ready HTML. Save to cave-of-wonders.html. Make it ART, not marketing. Every scroll should feel like turning a page in a storybook.

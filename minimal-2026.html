@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code Framework - Start building with AI</title>
+    <meta name="description" content="The 'npm create' moment for AI development. One command, and you're ready to build.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Config for Custom Colors/Fonts -->
+    <script>
+        tailwind.config = {
+            darkMode: 'media', // Use system preference
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#1a1a2e',
+                        bgLight: '#FAFAF8',
+                        accent: '#E07A5F', // Muted Coral
+                        sage: '#81B29A',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Styles for nuances not easily done with utility classes alone */
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Subtle gradient background */
+        .bg-subtle-gradient {
+            background: radial-gradient(circle at 50% 0%, rgba(224, 122, 95, 0.05) 0%, transparent 40%),
+                        var(--bg-color);
+        }
+
+        /* Smooth tab transition */
+        .tab-content {
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        /* Custom underline animation */
+        .hover-underline {
+            position: relative;
+            text-decoration: none;
+        }
+
+        .hover-underline::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            transform: scaleX(0);
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: currentColor;
+            transform-origin: bottom right;
+            transition: transform 0.25s ease-out;
+        }
+
+        .hover-underline:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+
+        /* Copy button success animation */
+        @keyframes success-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .animate-success {
+            animation: success-pop 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-[#FAFAF8] text-[#1a1a2e] dark:bg-[#1a1a2e] dark:text-[#FAFAF8] min-h-screen flex flex-col items-center justify-center transition-colors duration-300 selection:bg-accent selection:text-white">
+
+    <main class="w-full max-w-3xl px-6 py-12 md:py-20 text-center space-y-12">
+
+        <!-- Header -->
+        <header class="space-y-6">
+            <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
+                Claude Code Framework
+            </h1>
+            <p class="font-sans text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-xl mx-auto font-light">
+                Start building with AI. One command.
+            </p>
+        </header>
+
+        <!-- Install Section -->
+        <div class="w-full max-w-xl mx-auto space-y-4">
+
+            <!-- Code Window -->
+            <div class="bg-white dark:bg-[#252540] rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden relative group transition-all duration-300 hover:shadow-xl">
+                <!-- Mac/Linux/Win Tabs -->
+                <div class="flex items-center justify-center border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/30">
+                    <button class="platform-tab px-6 py-3 text-sm font-medium text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white transition-colors border-b-2 border-transparent relative" data-platform="macos" onclick="switchPlatform('macos')">
+                        macOS
+                    </button>
+                    <button class="platform-tab px-6 py-3 text-sm font-medium text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white transition-colors border-b-2 border-transparent relative" data-platform="windows" onclick="switchPlatform('windows')">
+                        Windows
+                    </button>
+                    <button class="platform-tab px-6 py-3 text-sm font-medium text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white transition-colors border-b-2 border-transparent relative" data-platform="linux" onclick="switchPlatform('linux')">
+                        Linux
+                    </button>
+                </div>
+
+                <!-- Command Area -->
+                <div class="p-6 md:p-8 flex items-center justify-between gap-4 bg-gray-50 dark:bg-[#1e1e2e]">
+                    <code id="install-command" class="font-mono text-sm md:text-base text-left flex-1 break-all text-gray-800 dark:text-gray-200">
+                        curl -sL https://ccf.dev/install | sh
+                    </code>
+
+                    <button id="copy-btn" onclick="copyCommand()" class="flex-shrink-0 p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-accent/50" aria-label="Copy to clipboard">
+                        <!-- Copy Icon -->
+                        <svg id="icon-copy" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+
+                        <!-- Check Icon (Hidden by default) -->
+                        <svg id="icon-check" class="hidden text-green-500" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </button>
+                </div>
+
+                <!-- Copied Toast (Absolute positioning) -->
+                <div id="copy-toast" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-primary text-white text-xs px-3 py-1.5 rounded-full opacity-0 pointer-events-none transition-opacity duration-200 shadow-sm">
+                    Copied!
+                </div>
+            </div>
+
+            <p class="text-xs text-gray-400 dark:text-gray-500 font-mono">
+                Requires Node.js 18+ · Open Source · MIT License
+            </p>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="grid grid-cols-2 gap-y-4 gap-x-8 max-w-lg mx-auto py-8 border-t border-b border-gray-100 dark:border-gray-800/50">
+            <div class="flex items-center gap-3 text-sm md:text-base text-gray-700 dark:text-gray-300">
+                <svg class="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span>Claude Code CLI</span>
+            </div>
+            <div class="flex items-center gap-3 text-sm md:text-base text-gray-700 dark:text-gray-300">
+                <svg class="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span>VS Code + Extensions</span>
+            </div>
+            <div class="flex items-center gap-3 text-sm md:text-base text-gray-700 dark:text-gray-300">
+                <svg class="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span>Node.js & Python</span>
+            </div>
+            <div class="flex items-center gap-3 text-sm md:text-base text-gray-700 dark:text-gray-300">
+                <svg class="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span>Starter templates</span>
+            </div>
+        </div>
+
+        <!-- Links -->
+        <div class="flex items-center justify-center gap-8 text-sm font-medium">
+            <a href="#" class="text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-white transition-colors hover-underline">
+                View on GitHub
+            </a>
+            <a href="#" class="text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-white transition-colors hover-underline">
+                Read Documentation
+            </a>
+        </div>
+
+    </main>
+
+    <footer class="absolute bottom-6 w-full text-center">
+        <p class="text-xs text-gray-400 dark:text-gray-600 font-sans">
+            Made for builders.
+        </p>
+    </footer>
+
+    <script>
+        // Commands for different platforms
+        const commands = {
+            macos: 'curl -sL https://ccf.dev/install | sh',
+            linux: 'curl -sL https://ccf.dev/install | sh',
+            windows: 'iwr https://ccf.dev/install.ps1 | iex'
+        };
+
+        let currentPlatform = 'macos';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Detect OS mostly for default selection, though we default to macOS in UI
+            const userAgent = window.navigator.userAgent.toLowerCase();
+            if (userAgent.includes('win')) {
+                switchPlatform('windows');
+            } else if (userAgent.includes('linux')) {
+                switchPlatform('linux');
+            } else {
+                switchPlatform('macos');
+            }
+        });
+
+        function switchPlatform(platform) {
+            currentPlatform = platform;
+
+            // Update command text
+            const cmdElement = document.getElementById('install-command');
+            cmdElement.style.opacity = '0';
+
+            setTimeout(() => {
+                cmdElement.textContent = commands[platform];
+                cmdElement.style.opacity = '1';
+            }, 150); // Fast fade out/in
+
+            // Update active tab styling
+            document.querySelectorAll('.platform-tab').forEach(tab => {
+                const isSelected = tab.dataset.platform === platform;
+                if (isSelected) {
+                    tab.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-transparent');
+                    tab.classList.add('text-primary', 'dark:text-white', 'border-accent');
+                } else {
+                    tab.classList.add('text-gray-500', 'dark:text-gray-400', 'border-transparent');
+                    tab.classList.remove('text-primary', 'dark:text-white', 'border-accent');
+                }
+            });
+        }
+
+        function copyCommand() {
+            const commandText = commands[currentPlatform];
+
+            navigator.clipboard.writeText(commandText).then(() => {
+                // Show success state
+                const copyBtn = document.getElementById('copy-btn');
+                const iconCopy = document.getElementById('icon-copy');
+                const iconCheck = document.getElementById('icon-check');
+                const toast = document.getElementById('copy-toast');
+
+                // Toggle icons
+                iconCopy.classList.add('hidden');
+                iconCheck.classList.remove('hidden');
+
+                // Show toast
+                toast.style.opacity = '1';
+                toast.style.transform = 'translate(-50%, -60%)'; // slight move up
+
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    iconCopy.classList.remove('hidden');
+                    iconCheck.classList.add('hidden');
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translate(-50%, -50%)';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+    </script>
+</body>
+</html>

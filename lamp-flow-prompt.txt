@@ -1,0 +1,118 @@
+Create a FIXED VIEWPORT experience where SCROLL CONTROLS AN ANIMATION, not page navigation.
+
+CRITICAL CONCEPT:
+- The page does NOT scroll vertically
+- The viewport is FIXED at 100vh
+- The scroll wheel CONTROLS an animation timeline (0% to 100%)
+- As user scrolls, colors POUR OUT of a lamp graphic like liquid light
+- overflow: hidden on body - no scrollbars, no page movement
+
+THE EXPERIENCE:
+
+INITIAL STATE (scroll 0%):
+- Pure black/midnight background (#0a0612)
+- A beautiful golden lamp centered in viewport
+- Lamp should be CSS-drawn or SVG - elegant, ornate, Aladdin-style
+- Subtle glow around lamp
+- Small text: "Scroll to awaken" with gentle pulse
+
+AS USER SCROLLS (0-100%):
+- Luminous colored SMOKE/LIQUID LIGHT pours from lamp spout
+- Colors flow OUTWARD from lamp, filling the screen
+- Use CSS radial gradients that EXPAND based on scroll position
+- The color transitions through this journey:
+
+  0-12%: Deep midnight BLUE smoke emerges
+         Card 1 fades in: "The Voice" - Claude Code CLI
+
+  12-25%: Blue shifts to deep PURPLE
+          Card 2: "The Sanctum" - VS Code
+
+  25-37%: Purple bleeds into MAGENTA
+          Card 3: "The Bridge" - Claude Extension
+
+  37-50%: Magenta warms to CORAL/ORANGE
+          Card 4: "The Stars" - Foam
+
+  50-62%: Orange brightens to warm GOLD
+          Card 5: "The Heartbeat" - Node.js
+
+  62-75%: Gold shifts to sunset PINK
+          Card 6: "The Serpent" - Python
+
+  75-87%: Pink deepens to AMBER
+          Card 7: "The Memory" - Git
+
+  87-100%: Amber brightens to brilliant SUNRISE GOLD
+           Card 8: "The Scrolls" - Starter Skills
+
+FINAL STATE (scroll 100%):
+- Screen filled with warm dawn light gradient
+- Lamp still visible but surrounded by golden glow
+- Clean terminal card appears center:
+  - Platform tabs (macOS/Linux/Windows)
+  - Commands: curl -sL https://ccf.dev/install | sh (unix) / iwr https://ccf.dev/install.ps1 | iex (windows)
+  - Button: "Begin The Journey" - copies command
+  - On copy: "The lamp has been rubbed" confirmation
+
+TECHNICAL IMPLEMENTATION:
+
+```javascript
+// Capture scroll without moving page
+let scrollProgress = 0;
+const maxScroll = 5000; // Total "scroll distance" for full animation
+
+window.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  scrollProgress = Math.max(0, Math.min(maxScroll, scrollProgress + e.deltaY));
+  const progress = scrollProgress / maxScroll; // 0 to 1
+  updateAnimation(progress);
+}, { passive: false });
+```
+
+CSS APPROACH FOR FLOWING COLORS:
+```css
+.color-flow {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 60%, /* origin at lamp spout */
+    var(--current-color) 0%,
+    var(--current-color) calc(var(--flow-radius) * 1%),
+    transparent calc(var(--flow-radius) * 1% + 20%)
+  );
+}
+```
+
+- Use CSS custom properties (--flow-radius, --current-color) updated by JS
+- Multiple layered gradients for depth
+- Add subtle noise/grain texture
+- Floating particle effects that drift outward with the flow
+
+LAMP DESIGN (CSS/SVG):
+- Ornate golden lamp silhouette
+- Inner glow that pulses subtly
+- Spout pointing upward (where smoke originates)
+- Use gradients: deep gold (#8B6914) to bright gold (#FFD700)
+- Decorative curves and arabesques
+
+CARD DESIGN:
+- Glass morphism: backdrop-filter: blur(10px)
+- Semi-transparent background matching current flow color
+- Appear with scale + fade animation
+- Float slightly above the color flow
+- Icon + Title + Short description
+- Cards should feel like they're emerging FROM the smoke
+
+VISUAL POLISH:
+- Smooth easing on all transitions (cubic-bezier for organic feel)
+- Particles floating outward from lamp
+- Subtle screen shake/pulse at key moments
+- The whole thing should feel ALIVE
+
+FONTS:
+- Cinzel Decorative for titles
+- Cormorant Garamond for body text
+- Fira Code for terminal
+
+OUTPUT: Save as lamp-pour.html. This should feel like controlling a Disney animation with your scroll wheel. No jerky movements, pure smooth magic.

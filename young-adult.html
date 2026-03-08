@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code - The Process</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;400;600;700&family=Spectral:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#FDFBF7',
+                        charcoal: '#2D2D2D',
+                        coral: '#FF7F50',
+                        peach: '#FFBE98',
+                        lavender: '#C4B5FD',
+                        mint: '#86EFAC',
+                        'soft-gray': '#E5E7EB',
+                    },
+                    fontFamily: {
+                        body: ['Spectral', 'serif'],
+                        heading: ['Fraunces', 'serif'],
+                    },
+                    borderRadius: {
+                        'organic': '2rem',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Spectral', serif;
+            background-color: #FDFBF7;
+            color: #2D2D2D;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Fraunces', serif;
+        }
+
+        .card-organic {
+            border-radius: 24px 8px 24px 8px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .card-organic:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-radius: 8px 24px 8px 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .card-alt-1 { background-color: #FFF0EB; border: 1px solid #FFBE98; }
+        .card-alt-2 { background-color: #F3F0FF; border: 1px solid #C4B5FD; }
+        .card-alt-3 { background-color: #F0FDF4; border: 1px solid #86EFAC; }
+        .card-alt-4 { background-color: #FFF7ED; border: 1px solid #FDBA74; }
+
+        .tab-active {
+            background-color: #2D2D2D;
+            color: #FDFBF7;
+        }
+
+        .tab-inactive {
+            background-color: transparent;
+            color: #6B7280;
+        }
+
+        .blob-shape {
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Hero Section -->
+    <header class="pt-24 pb-16 px-4 sm:px-6 lg:px-8 text-center max-w-5xl mx-auto w-full relative z-10">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-peach/20 blob-shape blur-3xl -z-10"></div>
+
+        <h1 class="text-6xl md:text-7xl font-bold tracking-tight mb-6 text-charcoal">
+            Code with <span class="text-coral italic">soul</span>.
+        </h1>
+        <p class="text-2xl text-charcoal/80 max-w-2xl mx-auto mb-10 font-light italic">
+            A developer environment that feels like an art studio.
+        </p>
+
+        <!-- Install Box -->
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 max-w-3xl mx-auto overflow-hidden">
+            <div class="flex p-2 bg-gray-50/50 gap-2">
+                <button onclick="switchTab('macos')" id="tab-macos" class="flex-1 py-3 px-4 rounded-xl text-lg font-medium transition-all duration-300 tab-active flex items-center justify-center gap-2">
+                    <i data-lucide="command" class="w-4 h-4"></i> macOS
+                </button>
+                <button onclick="switchTab('linux')" id="tab-linux" class="flex-1 py-3 px-4 rounded-xl text-lg font-medium transition-all duration-300 tab-inactive flex items-center justify-center gap-2">
+                    <i data-lucide="terminal" class="w-4 h-4"></i> Linux
+                </button>
+                <button onclick="switchTab('windows')" id="tab-windows" class="flex-1 py-3 px-4 rounded-xl text-lg font-medium transition-all duration-300 tab-inactive flex items-center justify-center gap-2">
+                    <i data-lucide="monitor" class="w-4 h-4"></i> Windows
+                </button>
+            </div>
+            <div class="p-8 bg-white relative group">
+                <div class="font-mono text-base md:text-lg text-charcoal break-all text-center bg-cream py-6 px-8 rounded-xl border-2 border-dashed border-gray-200 transition-opacity duration-300" id="install-command">
+                    curl -sL https://ccf.dev/install | sh
+                </div>
+                <button onclick="copyCommand()" class="absolute right-6 top-1/2 -translate-y-1/2 p-3 bg-white rounded-full border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors hover:scale-110 active:scale-95" title="Copy to clipboard">
+                    <i data-lucide="copy" class="w-5 h-5 text-gray-400"></i>
+                </button>
+                <div id="copy-feedback" class="absolute left-1/2 -translate-x-1/2 bottom-2 text-xs text-mint font-bold tracking-widest uppercase opacity-0 transition-opacity">Copied to clipboard</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Ecosystem Grid -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">The Ecosystem</h2>
+            <p class="text-xl text-charcoal/70 font-light italic">Everything you need, nothing you don't.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Item 1: Claude Code CLI (Coral) -->
+            <div class="p-8 h-full flex flex-col items-center text-center card-organic card-alt-1">
+                <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 shadow-sm text-coral">
+                    <i data-lucide="bot" class="w-8 h-8"></i>
+                </div>
+                <h3 class="font-bold text-xl mb-2">Claude Code CLI</h3>
+                <p class="text-base text-charcoal/80">Your AI partner in the terminal.</p>
+            </div>
+
+            <!-- Item 2: VS Code (Lavender) -->
+            <div class="p-8 h-full flex flex-col items-center text-center card-organic card-alt-2">
+                <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 shadow-sm text-purple-500">
+                    <i data-lucide="code-2" class="w-8 h-8"></i>
+                </div>
+                <h3 class="font-bold text-xl mb-2">VS Code</h3>
+                <p class="text-base text-charcoal/80">The canvas where you create.</p>
+            </div>
+
+            <!-- Item 3: Claude Extension (Mint) -->
+            <div class="p-8 h-full flex flex-col items-center text-center card-organic card-alt-3">
+                <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 shadow-sm text-green-500">
+                    <i data-lucide="puzzle" class="w-8 h-8"></i>
+                </div>
+                <h3 class="font-bold text-xl mb-2">Claude Extension</h3>
+                <p class="text-base text-charcoal/80">Intelligence woven into your editor.</p>
+            </div>
+
+            <!-- Item 4: Foam (Peach) -->
+            <div class="p-8 h-full flex flex-col items-center text-center card-organic card-alt-4">
+                <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 shadow-sm text-orange-500">
+                    <i data-lucide="network" class="w-8 h-8"></i>
+                </div>
+                <h3 class="font-bold text-xl mb-2">Foam</h3>
+                <p class="text-base text-charcoal/80">Map your thoughts visually.</p>
+            </div>
+
+            <!-- Item 5: Node.js (Coral) -->
+            <div class="p-8 h-full flex flex-col items-center text-center card-organic card-alt-1">
+                <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 shadow-sm text-coral">
+                    <i data-lucide="box" class="w-8 h-8"></i>
+                </div>
+                <h3 class="font-bold text-xl mb-2">Node.js</h3>
+                <p class="text-base text-charcoal/80">The engine running the show.</p>
+            </div>
+
+            <!-- Item 6: Python (Lavender) -->
+            <div class="p-8 h-full flex flex-col items-center text-center card-organic card-alt-2">
+                <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 shadow-sm text-purple-500">
+                    <i data-lucide="file-code" class="w-8 h-8"></i>
+                </div>
+                <h3 class="font-bold text-xl mb-2">Python</h3>
+                <p class="text-base text-charcoal/80">For data, automation, and magic.</p>
+            </div>
+
+            <!-- Item 7: Git (Mint) -->
+            <div class="p-8 h-full flex flex-col items-center text-center card-organic card-alt-3">
+                <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 shadow-sm text-green-500">
+                    <i data-lucide="git-branch" class="w-8 h-8"></i>
+                </div>
+                <h3 class="font-bold text-xl mb-2">Git</h3>
+                <p class="text-base text-charcoal/80">History of your masterpiece.</p>
+            </div>
+
+            <!-- Item 8: Starter Skills (Peach) -->
+            <div class="p-8 h-full flex flex-col items-center text-center card-organic card-alt-4">
+                <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 shadow-sm text-orange-500">
+                    <i data-lucide="zap" class="w-8 h-8"></i>
+                </div>
+                <h3 class="font-bold text-xl mb-2">Starter Skills</h3>
+                <p class="text-base text-charcoal/80">Ready-made superpowers.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Process -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">The Process</h2>
+            <p class="text-xl text-charcoal/70 font-light italic">From zero to shipped in four movements.</p>
+        </div>
+
+        <div class="relative">
+            <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-200 hidden md:block"></div>
+
+            <!-- Step 1 -->
+            <div class="mb-12 relative pl-0 md:pl-24 group">
+                <div class="hidden md:flex absolute left-0 top-0 w-16 h-16 rounded-full bg-cream border-2 border-coral items-center justify-center z-10 font-bold text-coral text-xl group-hover:scale-110 transition-transform">1</div>
+                <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm group-hover:shadow-md transition-shadow">
+                    <div class="md:hidden w-12 h-12 rounded-full bg-cream border border-coral flex items-center justify-center font-bold text-coral mb-4">1</div>
+                    <h3 class="text-2xl font-bold mb-3">Discovery</h3>
+                    <p class="text-lg text-gray-600 leading-relaxed">
+                        The installer observes your environment. It sees what tools you cherish and what tools you lack. It respects your existing setup, never overwriting, only understanding.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="mb-12 relative pl-0 md:pl-24 group">
+                <div class="hidden md:flex absolute left-0 top-0 w-16 h-16 rounded-full bg-cream border-2 border-lavender items-center justify-center z-10 font-bold text-purple-500 text-xl group-hover:scale-110 transition-transform">2</div>
+                <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm group-hover:shadow-md transition-shadow">
+                     <div class="md:hidden w-12 h-12 rounded-full bg-cream border border-lavender flex items-center justify-center font-bold text-purple-500 mb-4">2</div>
+                    <h3 class="text-2xl font-bold mb-3">Gathering</h3>
+                    <p class="text-lg text-gray-600 leading-relaxed">
+                        Like gathering ingredients for a meal, it fetches exactly what is missing. Efficient, precise, and lightweight. It only takes what is needed to complete the picture.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="mb-12 relative pl-0 md:pl-24 group">
+                <div class="hidden md:flex absolute left-0 top-0 w-16 h-16 rounded-full bg-cream border-2 border-mint items-center justify-center z-10 font-bold text-green-600 text-xl group-hover:scale-110 transition-transform">3</div>
+                <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm group-hover:shadow-md transition-shadow">
+                     <div class="md:hidden w-12 h-12 rounded-full bg-cream border border-mint flex items-center justify-center font-bold text-green-600 mb-4">3</div>
+                    <h3 class="text-2xl font-bold mb-3">Weaving</h3>
+                    <p class="text-lg text-gray-600 leading-relaxed">
+                        Connections are made. Paths are cleared. Configurations are harmonized. It weaves your tools together into a seamless tapestry, ready for your creative input.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="relative pl-0 md:pl-24 group">
+                <div class="hidden md:flex absolute left-0 top-0 w-16 h-16 rounded-full bg-charcoal text-white items-center justify-center z-10 font-bold text-xl group-hover:scale-110 transition-transform">4</div>
+                <div class="bg-charcoal text-white p-8 rounded-3xl shadow-xl group-hover:shadow-2xl transition-shadow">
+                     <div class="md:hidden w-12 h-12 rounded-full bg-white/20 flex items-center justify-center font-bold text-white mb-4">4</div>
+                    <h3 class="text-2xl font-bold mb-3">Launch</h3>
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        The curtain rises. Claude Code opens, fully prepped and waiting for your first command. No restarts, no friction. Just you and the code.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-100 py-16 px-4 mt-12">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="text-charcoal/60 font-body">
+                <p>&copy; 2026 Claude Code. Crafted with care.</p>
+            </div>
+            <div class="flex gap-8">
+                <a href="#" class="text-charcoal/40 hover:text-coral transition-colors transform hover:scale-110">
+                    <span class="sr-only">GitHub</span>
+                    <i data-lucide="github" class="w-6 h-6"></i>
+                </a>
+                <a href="#" class="text-charcoal/40 hover:text-coral transition-colors transform hover:scale-110">
+                    <span class="sr-only">Twitter</span>
+                    <i data-lucide="twitter" class="w-6 h-6"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Platform Tabs
+        const commands = {
+            macos: 'curl -sL https://ccf.dev/install | sh',
+            linux: 'curl -sL https://ccf.dev/install | sh',
+            windows: 'iwr https://ccf.dev/install.ps1 | iex'
+        };
+
+        let currentPlatform = 'macos';
+
+        function switchTab(platform) {
+            currentPlatform = platform;
+
+            // Update tabs UI
+            ['windows', 'macos', 'linux'].forEach(p => {
+                const tab = document.getElementById(`tab-${p}`);
+                if (p === platform) {
+                    tab.classList.remove('tab-inactive');
+                    tab.classList.add('tab-active');
+                } else {
+                    tab.classList.remove('tab-active');
+                    tab.classList.add('tab-inactive');
+                }
+            });
+
+            // Update command
+            const cmdBox = document.getElementById('install-command');
+            // Fade out
+            cmdBox.style.opacity = '0.5';
+            setTimeout(() => {
+                cmdBox.textContent = commands[platform];
+                cmdBox.style.opacity = '1';
+            }, 150);
+
+            // Reset copy feedback
+            document.getElementById('copy-feedback').style.opacity = '0';
+        }
+
+        // Copy functionality
+        function copyCommand() {
+            const command = commands[currentPlatform];
+            navigator.clipboard.writeText(command).then(() => {
+                const feedback = document.getElementById('copy-feedback');
+                feedback.style.opacity = '1';
+                setTimeout(() => {
+                    feedback.style.opacity = '0';
+                }, 2000);
+            });
+        }
+
+        // Init default tab
+        switchTab('macos');
+    </script>
+</body>
+</html>

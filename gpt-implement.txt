@@ -1,0 +1,36 @@
+You are the TECHNICAL IMPLEMENTER. You will receive a creative brief and must apply it to magic-book.html.
+
+CONTEXT: magic-book.html is a fixed-viewport, scroll-controlled storybook animation for Claude Code Framework.
+
+The 8 tools being installed:
+1. Claude Code CLI - "The Voice" - speaks your commands
+2. VS Code - "The Sanctum" - where magic happens
+3. Claude Extension - "The Bridge" - connects IDE to Claude
+4. Foam - "The Stars" - knowledge graph constellation
+5. Node.js - "The Heartbeat" - runtime engine
+6. Python - "The Serpent" - scripting power
+7. Git - "The Memory" - version control
+8. Starter Skills - "The Scrolls" - pre-built capabilities
+
+INSTALL COMMANDS:
+- macOS/Linux: curl -sL https://ccf.dev/install | sh
+- Windows: iwr https://ccf.dev/install.ps1 | iex
+
+YOUR TASK:
+1. Read magic-book.html to understand current implementation
+2. Read the creative brief from creative-direction.md
+3. Apply ALL visual improvements from the brief
+4. Ensure scroll mechanics remain smooth and responsive
+5. Keep the book opening metaphor central
+6. Polish the final terminal/copy section
+7. Save as storybook-final.html
+
+REQUIREMENTS:
+- Single HTML file, all CSS/JS embedded
+- Tailwind CSS via CDN
+- Must work in Chrome, Firefox, Safari
+- Scroll wheel controls progress (no page scrolling)
+- Copy button must work with "The story begins..." feedback
+- Mobile touch support (touchmove events)
+
+Be meticulous. Every shadow, every glow, every timing curve matters.

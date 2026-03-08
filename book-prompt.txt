@@ -1,0 +1,115 @@
+Create a FIXED VIEWPORT experience where SCROLL CONTROLS A BOOK OPENING ANIMATION.
+
+CONCEPT: A magical storybook that reveals the Claude Code Framework installation journey.
+
+CRITICAL MECHANICS:
+- Page does NOT scroll vertically - viewport locked at 100vh
+- overflow: hidden on body - no scrollbars
+- Scroll wheel controls animation timeline (0% to 100%)
+- A beautifully illustrated BOOK in center of screen
+- As user scrolls, the book SLOWLY OPENS from closed to fully open
+- Text/cards HOVER ABOVE the book pages as it opens
+
+THE BOOK:
+- CSS 3D transformed book with two covers and spine
+- Leather-bound aesthetic - rich burgundy/brown with gold accents
+- Gold filigree decorations on cover
+- When closed: shows ornate front cover with title "Claude Code"
+- Use CSS perspective and rotateY for realistic page-turning feel
+- Book sits on a subtle surface/table with soft shadow beneath
+
+SCROLL JOURNEY (0% to 100%):
+
+0%: Book closed, resting. Soft glow. Text: "Scroll to open"
+
+0-10%: Book cover begins to lift, golden light peeks from inside
+
+10-25%: Book opens ~45 degrees
+- First text floats up: "The Voice" - Claude Code CLI
+- Ethereal, glowing text that hovers above the pages
+- Subtle particle effects rising from pages
+
+25-40%: Book opens ~90 degrees
+- Second text: "The Sanctum" - VS Code
+- Third text: "The Bridge" - Claude Extension
+
+40-55%: Book opens ~120 degrees
+- Fourth text: "The Stars" - Foam
+- Fifth text: "The Heartbeat" - Node.js
+
+55-70%: Book opens ~150 degrees
+- Sixth text: "The Serpent" - Python
+- Seventh text: "The Memory" - Git
+
+70-85%: Book fully open flat ~180 degrees
+- Eighth text: "The Scrolls" - Starter Skills
+- All 8 texts now visible, floating in constellation above book
+
+85-100%: Texts converge and transform
+- The 8 floating texts gracefully merge/fade
+- Clean terminal card materializes above the open book
+- Platform tabs: macOS/Linux | Windows
+- Commands displayed elegantly
+- Golden button: "Begin The Journey"
+- Click copies command, shows "The story begins..."
+
+BOOK CSS APPROACH:
+```css
+.book {
+  position: relative;
+  transform-style: preserve-3d;
+  perspective: 1500px;
+}
+
+.book-cover {
+  position: absolute;
+  width: 300px;
+  height: 400px;
+  background: linear-gradient(135deg, #8B4513, #654321);
+  border-radius: 0 8px 8px 0;
+  transform-origin: left center;
+  transform: rotateY(calc(var(--open-angle) * 1deg));
+  box-shadow: 2px 2px 20px rgba(0,0,0,0.4);
+}
+
+.book-pages {
+  /* Stack of pages visible when book opens */
+  background: linear-gradient(to right, #f5f0e1, #fff9e6);
+}
+```
+
+FLOATING TEXT STYLE:
+- Cinzel Decorative font for titles
+- Glowing effect: text-shadow with multiple layers
+- Subtle float animation (gentle up/down)
+- Each text has unique accent color:
+  - CLI: electric blue
+  - VS Code: purple
+  - Extension: magenta
+  - Foam: coral
+  - Node: green
+  - Python: yellow
+  - Git: orange
+  - Skills: gold
+
+VISUAL ATMOSPHERE:
+- Deep midnight background (#0a0815)
+- Warm candlelight glow emanating from book
+- Dust motes floating in the light
+- Subtle vignette around edges
+- The book should feel MAGICAL, ancient, powerful
+
+FONTS:
+- Cinzel Decorative: titles, floating text
+- Cormorant Garamond: descriptions
+- Fira Code: terminal/commands
+
+TECHNICAL:
+- Single HTML file
+- Tailwind via CDN
+- CSS 3D transforms for book
+- JS scroll listener (wheel event, preventDefault)
+- Smooth transitions with cubic-bezier easing
+- CSS custom properties for animation state
+
+OUTPUT: Save as magic-book.html. This should feel like opening an ancient tome of power. Every scroll increment should feel intentional and magical.

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code - Join the Community</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF7; /* Soft cream background */
+            color: #1F2937;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .accent-text {
+            color: #DA7756; /* Coral accent */
+        }
+        .accent-bg {
+            background-color: #DA7756;
+        }
+        .accent-border {
+            border-color: #DA7756;
+        }
+        .hover-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        .tab-active {
+            border-bottom: 2px solid #DA7756;
+            color: #1F2937;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-bottom: 2px solid transparent;
+            color: #6B7280;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-active .accordion-content {
+            max-height: 200px; /* Approximate max height */
+        }
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+        .accordion-active .accordion-icon {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Hero Section -->
+    <header class="pt-20 pb-16 px-4 sm:px-6 lg:px-8 text-center max-w-5xl mx-auto w-full">
+        <h1 class="text-5xl md:text-6xl font-bold tracking-tight mb-6">
+            Join the <span class="accent-text">Claude Code</span> community
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto mb-8">
+            You've seen the tweets. You've watched the demos. Now you want to try it yourself.
+        </p>
+        <p class="text-lg font-medium text-gray-800 mb-12">
+            One command. Five minutes. You're building with AI.
+        </p>
+
+        <!-- Install Box -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 max-w-2xl mx-auto overflow-hidden">
+            <div class="flex border-b border-gray-100">
+                <button onclick="switchTab('windows')" id="tab-windows" class="flex-1 py-4 text-sm font-medium transition-colors tab-active flex items-center justify-center gap-2">
+                    <i data-lucide="monitor" class="w-4 h-4"></i> Windows
+                </button>
+                <button onclick="switchTab('macos')" id="tab-macos" class="flex-1 py-4 text-sm font-medium transition-colors tab-inactive flex items-center justify-center gap-2">
+                    <i data-lucide="command" class="w-4 h-4"></i> macOS
+                </button>
+                <button onclick="switchTab('linux')" id="tab-linux" class="flex-1 py-4 text-sm font-medium transition-colors tab-inactive flex items-center justify-center gap-2">
+                    <i data-lucide="terminal" class="w-4 h-4"></i> Linux
+                </button>
+            </div>
+            <div class="p-6 md:p-8 bg-gray-50 relative group">
+                <div class="font-mono text-sm md:text-base text-gray-800 break-all text-left bg-white p-4 rounded border border-gray-200" id="install-command">
+                    npm init @anthropic-ai/claude-code@latest
+                </div>
+                <button onclick="copyCommand()" class="absolute right-8 top-8 md:top-10 p-2 bg-white rounded-md border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors" title="Copy to clipboard">
+                    <i data-lucide="copy" class="w-5 h-5 text-gray-500"></i>
+                </button>
+                <div id="copy-feedback" class="absolute right-20 top-10 text-xs text-green-600 font-medium opacity-0 transition-opacity">Copied!</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- What You Get Section -->
+    <section class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold mb-4">What happens when you run it?</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Transparency first. We install exactly what you need to start building, and nothing you don't.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Item 1 -->
+            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover-card transition-all duration-300">
+                <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mb-4 text-orange-600">
+                    <i data-lucide="bot" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-bold text-lg mb-1">Claude Code CLI</h3>
+                <p class="text-sm font-medium text-gray-900 mb-2">The AI coding assistant itself</p>
+                <p class="text-sm text-gray-500">Talk to Claude directly from your terminal.</p>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover-card transition-all duration-300">
+                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-4 text-blue-600">
+                    <i data-lucide="code-2" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-bold text-lg mb-1">VS Code</h3>
+                <p class="text-sm font-medium text-gray-900 mb-2">Modern code editor</p>
+                <p class="text-sm text-gray-500">The industry standard editor where you'll write code.</p>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover-card transition-all duration-300">
+                <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mb-4 text-purple-600">
+                    <i data-lucide="puzzle" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-bold text-lg mb-1">Claude Extension</h3>
+                <p class="text-sm font-medium text-gray-900 mb-2">VS Code plugin</p>
+                <p class="text-sm text-gray-500">Use Claude's capabilities directly inside your editor.</p>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover-card transition-all duration-300">
+                <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center mb-4 text-indigo-600">
+                    <i data-lucide="network" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-bold text-lg mb-1">Foam Extension</h3>
+                <p class="text-sm font-medium text-gray-900 mb-2">Knowledge graph</p>
+                <p class="text-sm text-gray-500">Connect your notes and ideas visually.</p>
+            </div>
+
+            <!-- Item 5 -->
+            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover-card transition-all duration-300">
+                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-4 text-green-600">
+                    <i data-lucide="box" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-bold text-lg mb-1">Node.js</h3>
+                <p class="text-sm font-medium text-gray-900 mb-2">JavaScript runtime</p>
+                <p class="text-sm text-gray-500">Runs Claude Code under the hood.</p>
+            </div>
+
+            <!-- Item 6 -->
+            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover-card transition-all duration-300">
+                <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mb-4 text-yellow-600">
+                    <i data-lucide="file-code" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-bold text-lg mb-1">Python</h3>
+                <p class="text-sm font-medium text-gray-900 mb-2">Programming language</p>
+                <p class="text-sm text-gray-500">Essential for data science and automation tasks.</p>
+            </div>
+
+            <!-- Item 7 -->
+            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover-card transition-all duration-300">
+                <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4 text-red-600">
+                    <i data-lucide="git-branch" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-bold text-lg mb-1">Git</h3>
+                <p class="text-sm font-medium text-gray-900 mb-2">Version control</p>
+                <p class="text-sm text-gray-500">Track changes and collaborate with others.</p>
+            </div>
+
+            <!-- Item 8 -->
+            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover-card transition-all duration-300">
+                <div class="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center mb-4 text-teal-600">
+                    <i data-lucide="zap" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-bold text-lg mb-1">Starter Skills</h3>
+                <p class="text-sm font-medium text-gray-900 mb-2">Pre-built commands</p>
+                <p class="text-sm text-gray-500">Use /help, /commit, /review and more instantly.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="py-16 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto w-full bg-white rounded-2xl shadow-sm border border-gray-100 my-8">
+        <div class="text-center mb-10">
+            <h2 class="text-3xl font-bold mb-4">The Journey</h2>
+            <p class="text-gray-600">We thought of everything so you don't have to.</p>
+        </div>
+
+        <div class="space-y-4">
+            <!-- Step 1 -->
+            <div class="border border-gray-200 rounded-lg overflow-hidden cursor-pointer" onclick="toggleAccordion(1)">
+                <div class="p-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-600 text-sm">1</div>
+                        <h3 class="font-semibold text-gray-900">Checks what you already have</h3>
+                    </div>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 accordion-icon" id="icon-1"></i>
+                </div>
+                <div class="accordion-content bg-white" id="content-1">
+                    <div class="p-4 text-gray-600 text-sm border-t border-gray-100">
+                        The installer scans your system to see if you already have tools like Git, VS Code, or Node.js installed. It skips anything you already have, saving you time and bandwidth.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="border border-gray-200 rounded-lg overflow-hidden cursor-pointer" onclick="toggleAccordion(2)">
+                <div class="p-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-600 text-sm">2</div>
+                        <h3 class="font-semibold text-gray-900">Downloads only what's missing</h3>
+                    </div>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 accordion-icon" id="icon-2"></i>
+                </div>
+                <div class="accordion-content bg-white" id="content-2">
+                    <div class="p-4 text-gray-600 text-sm border-t border-gray-100">
+                        Efficient and respectful of your resources. We only fetch the components you need to complete the setup, ensuring a fast installation process without bloat.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="border border-gray-200 rounded-lg overflow-hidden cursor-pointer" onclick="toggleAccordion(3)">
+                <div class="p-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-600 text-sm">3</div>
+                        <h3 class="font-semibold text-gray-900">Configures everything automatically</h3>
+                    </div>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 accordion-icon" id="icon-3"></i>
+                </div>
+                <div class="accordion-content bg-white" id="content-3">
+                    <div class="p-4 text-gray-600 text-sm border-t border-gray-100">
+                        No more wrestling with PATH variables or config files. We handle all the wiring under the hood so all your tools talk to each other perfectly from the start.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="border border-gray-200 rounded-lg overflow-hidden cursor-pointer" onclick="toggleAccordion(4)">
+                <div class="p-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full accent-bg flex items-center justify-center font-bold text-white text-sm">4</div>
+                        <h3 class="font-semibold text-gray-900">Opens Claude Code ready to go</h3>
+                    </div>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 accordion-icon" id="icon-4"></i>
+                </div>
+                <div class="accordion-content bg-white" id="content-4">
+                    <div class="p-4 text-gray-600 text-sm border-t border-gray-100">
+                        The moment installation finishes, Claude Code launches. You can start building immediately with your first command. No restarts required.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Open Source Trust -->
+    <section class="py-12 px-4 text-center bg-gray-900 text-white mt-8">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl font-bold mb-4">The installer is open source</h2>
+            <p class="text-gray-300 mb-8 max-w-2xl mx-auto">
+                Trust through openness. Read every line before you run it. We believe in complete transparency about what runs on your machine.
+            </p>
+            <a href="#" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-gray-900 rounded-full font-medium hover:bg-gray-100 transition-colors">
+                <i data-lucide="github" class="w-5 h-5"></i>
+                View Installation Script
+            </a>
+        </div>
+    </section>
+
+    <!-- Community CTA -->
+    <section class="py-20 px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">Join thousands learning to build with AI</h2>
+        <div class="flex flex-col md:flex-row items-center justify-center gap-6 mb-8">
+            <div class="flex items-center gap-2 text-gray-700">
+                <i data-lucide="star" class="w-5 h-5 fill-yellow-400 text-yellow-400"></i>
+                <span class="font-bold">12k+</span> GitHub Stars
+            </div>
+            <span class="hidden md:block text-gray-300">|</span>
+            <div class="flex items-center gap-2 text-gray-700">
+                <i data-lucide="users" class="w-5 h-5 text-indigo-500"></i>
+                <span class="font-bold">5k+</span> Community Members
+            </div>
+        </div>
+        <a href="#" class="inline-flex items-center gap-2 px-8 py-4 accent-bg text-white rounded-full font-bold text-lg hover:opacity-90 transition-opacity shadow-lg hover:shadow-xl">
+            Join the Discord
+            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </a>
+        <p class="mt-6 text-sm text-gray-500">Built by the community, for the community.</p>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-100 py-12 px-4">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="text-gray-500 text-sm">
+                <p>&copy; 2024 Claude Code Community. Open Source · MIT License</p>
+            </div>
+            <div class="flex gap-6">
+                <a href="#" class="text-gray-400 hover:text-gray-900 transition-colors">
+                    <span class="sr-only">GitHub</span>
+                    <i data-lucide="github" class="w-5 h-5"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-gray-900 transition-colors">
+                    <span class="sr-only">Twitter</span>
+                    <i data-lucide="twitter" class="w-5 h-5"></i>
+                </a>
+            </div>
+        </div>
+        <div class="max-w-6xl mx-auto mt-8 pt-8 border-t border-gray-50 text-center md:text-left">
+            <p class="text-xs text-gray-400">
+                Requirements: Windows 10+, macOS 12+, or Linux. Needs Claude Pro, Max, or Teams subscription.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Platform Tabs
+        const commands = {
+            windows: 'npm init @anthropic-ai/claude-code@latest',
+            macos: 'npm init @anthropic-ai/claude-code@latest',
+            linux: 'npm init @anthropic-ai/claude-code@latest'
+        };
+
+        function switchTab(platform) {
+            // Update tabs UI
+            ['windows', 'macos', 'linux'].forEach(p => {
+                const tab = document.getElementById(`tab-${p}`);
+                if (p === platform) {
+                    tab.classList.remove('tab-inactive');
+                    tab.classList.add('tab-active');
+                } else {
+                    tab.classList.remove('tab-active');
+                    tab.classList.add('tab-inactive');
+                }
+            });
+
+            // Update command (currently they are the same, but structure allows for diffs)
+            const cmdBox = document.getElementById('install-command');
+            cmdBox.textContent = commands[platform];
+
+            // Reset copy feedback
+            document.getElementById('copy-feedback').style.opacity = '0';
+        }
+
+        // Copy functionality
+        function copyCommand() {
+            const command = document.getElementById('install-command').textContent.trim();
+            navigator.clipboard.writeText(command).then(() => {
+                const feedback = document.getElementById('copy-feedback');
+                feedback.style.opacity = '1';
+                setTimeout(() => {
+                    feedback.style.opacity = '0';
+                }, 2000);
+            });
+        }
+
+        // Accordion functionality
+        function toggleAccordion(index) {
+            const content = document.getElementById(`content-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+            const parent = content.parentElement;
+
+            // Close others (optional, keeps it clean)
+            // document.querySelectorAll('.accordion-content').forEach(c => {
+            //     if (c !== content) {
+            //         c.style.maxHeight = null;
+            //         c.parentElement.classList.remove('accordion-active');
+            //     }
+            // });
+
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+                parent.classList.remove('accordion-active');
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+                parent.classList.add('accordion-active');
+            }
+        }
+    </script>
+</body>
+</html>
