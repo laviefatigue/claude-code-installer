@@ -435,6 +435,14 @@
         .syntax-keyword { color: #c586c0; }
         .syntax-function { color: #dcdcaa; }
 
+        /* Markdown syntax colors */
+        .md-h1 { color: #569cd6; font-weight: 600; }
+        .md-h2 { color: #569cd6; }
+        .md-bold { color: #dcdcaa; }
+        .md-em { color: #ce9178; font-style: italic; }
+        .md-list { color: #d97757; }
+        .md-link { color: #4fc1ff; text-decoration: underline; }
+
         /* Claude Panel */
         .vscode-claude-panel {
             width: 380px;
@@ -585,15 +593,15 @@
             color: var(--vscode-text-dim);
         }
 
-        /* Status Bar */
+        /* Status Bar - orange/yellow when Claude is active */
         .vscode-statusbar {
             height: 22px;
-            background: var(--vscode-statusbar);
+            background: #d97757;
             display: flex;
             align-items: center;
             padding: 0 8px;
             font-size: 12px;
-            color: var(--vscode-statusbar-text);
+            color: #fff;
         }
 
         .statusbar-item {
@@ -979,8 +987,8 @@
                 </div>
             </div>
 
-            <!-- Sidebar -->
-            <div class="vscode-sidebar">
+            <!-- Sidebar (hidden by default, shown in step 3) -->
+            <div class="vscode-sidebar" id="vscode-sidebar" style="display: none;">
                 <div class="sidebar-header">Explorer</div>
                 <div class="sidebar-content">
                     <div class="tree-section">
@@ -988,17 +996,9 @@
                             <i class="codicon codicon-chevron-down"></i>
                             <span>MY-PROJECT</span>
                         </div>
-                        <div class="tree-item">
-                            <i class="codicon codicon-file icon-html"></i>
-                            <span>index.html</span>
-                        </div>
-                        <div class="tree-item">
-                            <i class="codicon codicon-file icon-css"></i>
-                            <span>style.css</span>
-                        </div>
-                        <div class="tree-item">
-                            <i class="codicon codicon-file icon-js"></i>
-                            <span>script.js</span>
+                        <div class="tree-item selected">
+                            <i class="codicon codicon-markdown"></i>
+                            <span>Welcome.md</span>
                         </div>
                     </div>
                 </div>
@@ -1008,8 +1008,8 @@
             <div class="vscode-editor">
                 <div class="editor-tabs">
                     <div class="editor-tab active">
-                        <i class="codicon codicon-file" style="color: #e37933;"></i>
-                        <span>index.html</span>
+                        <i class="codicon codicon-markdown"></i>
+                        <span>Welcome.md</span>
                         <i class="codicon codicon-close close"></i>
                     </div>
                 </div>
@@ -1025,18 +1025,34 @@
                         <div class="line-number">8</div>
                         <div class="line-number">9</div>
                         <div class="line-number">10</div>
+                        <div class="line-number">11</div>
+                        <div class="line-number">12</div>
+                        <div class="line-number">13</div>
+                        <div class="line-number">14</div>
+                        <div class="line-number">15</div>
+                        <div class="line-number">16</div>
+                        <div class="line-number">17</div>
+                        <div class="line-number">18</div>
                     </div>
                     <div class="editor-code">
-                        <div class="code-line"><span class="syntax-tag">&lt;!DOCTYPE html&gt;</span></div>
-                        <div class="code-line"><span class="syntax-tag">&lt;html</span> <span class="syntax-attr">lang</span>=<span class="syntax-string">"en"</span><span class="syntax-tag">&gt;</span></div>
-                        <div class="code-line"><span class="syntax-tag">&lt;head&gt;</span></div>
-                        <div class="code-line">    <span class="syntax-tag">&lt;meta</span> <span class="syntax-attr">charset</span>=<span class="syntax-string">"UTF-8"</span><span class="syntax-tag">&gt;</span></div>
-                        <div class="code-line">    <span class="syntax-tag">&lt;title&gt;</span>My Project<span class="syntax-tag">&lt;/title&gt;</span></div>
-                        <div class="code-line"><span class="syntax-tag">&lt;/head&gt;</span></div>
-                        <div class="code-line"><span class="syntax-tag">&lt;body&gt;</span></div>
-                        <div class="code-line">    <span class="syntax-comment">&lt;!-- Your content here --&gt;</span></div>
-                        <div class="code-line"><span class="syntax-tag">&lt;/body&gt;</span></div>
-                        <div class="code-line"><span class="syntax-tag">&lt;/html&gt;</span></div>
+                        <div class="code-line"><span class="md-h1"># Welcome to Claude</span></div>
+                        <div class="code-line"></div>
+                        <div class="code-line">This is your creative workspace.</div>
+                        <div class="code-line"></div>
+                        <div class="code-line"><span class="md-h2">## What you can do</span></div>
+                        <div class="code-line"></div>
+                        <div class="code-line"><span class="md-list">-</span> Ask Claude to build things for you</div>
+                        <div class="code-line"><span class="md-list">-</span> Research and organize your ideas</div>
+                        <div class="code-line"><span class="md-list">-</span> Write, edit, and explore files</div>
+                        <div class="code-line"><span class="md-list">-</span> Automate tasks you do repeatedly</div>
+                        <div class="code-line"></div>
+                        <div class="code-line"><span class="md-h2">## Getting started</span></div>
+                        <div class="code-line"></div>
+                        <div class="code-line"><span class="md-bold">1.</span> Click the <span class="md-bold">Claude icon</span> in the sidebar</div>
+                        <div class="code-line"><span class="md-bold">2.</span> Sign in with your account</div>
+                        <div class="code-line"><span class="md-bold">3.</span> Type what you want to create</div>
+                        <div class="code-line"></div>
+                        <div class="code-line"><span class="md-em">You don't need to know how to code. Just describe what you want.</span></div>
                     </div>
                 </div>
             </div>
@@ -1084,14 +1100,11 @@
                 <i class="codicon codicon-source-control"></i>
                 main
             </div>
-            <div class="statusbar-item">
-                <i class="codicon codicon-sync"></i>
-            </div>
             <div class="statusbar-spacer"></div>
             <div class="statusbar-item">Ln 1, Col 1</div>
-            <div class="statusbar-item">Spaces: 4</div>
+            <div class="statusbar-item">Spaces: 2</div>
             <div class="statusbar-item">UTF-8</div>
-            <div class="statusbar-item">HTML</div>
+            <div class="statusbar-item">Markdown</div>
         </div>
     </div>
 
@@ -1110,37 +1123,42 @@
         const steps = [
             {
                 title: "Find Claude",
-                description: "Look at the bottom of the Activity Bar (the icons on the left). The Claude icon is there. In your VS Code, click it to open the Claude panel.",
+                description: "Look at the bottom of the Activity Bar (the icons on the left). The Claude icon is there. Click it to open the Claude panel.",
                 target: ".claude-icon",
-                position: "right"
+                position: "right",
+                showSidebar: false
             },
             {
                 title: "Sign in",
                 description: "When you click Claude, you'll see this panel. Click 'Sign in with Anthropic' to connect your account. A browser window will open.",
                 target: ".claude-signin-btn",
                 position: "left",
-                showClaudePanel: true
+                showClaudePanel: true,
+                showSidebar: false
             },
             {
                 title: "Open a folder",
-                description: "Claude works best when you open a project folder. Go to File → Open Folder, or drag a folder into VS Code. This lets Claude see your files.",
-                target: ".sidebar-header",
+                description: "Go to File → Open Folder, or drag a folder into VS Code. Claude can then read your files and help you work on them.",
+                target: ".vscode-sidebar",
                 position: "right",
-                hideClaudePanel: true
+                hideClaudePanel: true,
+                showSidebar: true
             },
             {
                 title: "Start a conversation",
-                description: "Once signed in, just type what you want to create. Try: \"Help me build a personal website\" or \"Organize my notes into a system\"",
+                description: "Just type what you want. Try: \"Help me build a personal website\" or \"I want to organize my notes and ideas\"",
                 target: ".claude-input-box",
                 position: "left",
-                showChat: true
+                showChat: true,
+                showSidebar: false
             },
             {
-                title: "Add context with @",
-                description: "Type @ to reference specific files. Select code in the editor to ask about it. The more context you give Claude, the better it helps.",
+                title: "Add context",
+                description: "Type @ to reference files. Select text to ask about it. The more context you share, the better Claude can help.",
                 target: ".claude-input-box",
                 position: "left",
-                showChat: true
+                showChat: true,
+                showSidebar: false
             }
         ];
 
@@ -1172,6 +1190,10 @@
                 document.getElementById('completion-screen').classList.remove('hidden');
                 return;
             }
+
+            // Show/hide sidebar
+            const sidebar = document.getElementById('vscode-sidebar');
+            sidebar.style.display = config.showSidebar ? 'flex' : 'none';
 
             // Show/hide Claude panel based on step
             const claudePanel = document.getElementById('claude-panel');
