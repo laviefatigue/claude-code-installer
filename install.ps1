@@ -357,38 +357,43 @@ foreach ($item in $results.Failed) {
 Write-Host ""
 Write-Host "  -----------------------------------------" -ForegroundColor DarkGray
 Write-Host ""
-Write-Host "  What's next:" -ForegroundColor White
+Write-Host "  NEXT: Watch the 2-minute visual guide" -ForegroundColor White
 Write-Host ""
-Write-Host "    1. Open a " -NoNewline -ForegroundColor Gray
-Write-Host "new terminal window" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "    2. Type " -NoNewline -ForegroundColor Gray
-Write-Host "claude" -NoNewline -ForegroundColor Cyan
-Write-Host " to start a conversation" -ForegroundColor Gray
-Write-Host ""
-Write-Host "    3. Try " -NoNewline -ForegroundColor Gray
-Write-Host "/help" -NoNewline -ForegroundColor Cyan
-Write-Host " to see available commands" -ForegroundColor Gray
+Write-Host "  We'll open VS Code and the tutorial." -ForegroundColor Gray
+Write-Host "  Follow along to learn where everything is." -ForegroundColor Gray
 Write-Host ""
 Write-Host "  -----------------------------------------" -ForegroundColor DarkGray
-Write-Host ""
-Write-Host "  First thing to try:" -ForegroundColor White
-Write-Host ""
-Write-Host '    claude "Help me create my first project"' -ForegroundColor Cyan
-Write-Host ""
-Write-Host "  -----------------------------------------" -ForegroundColor DarkGray
-Write-Host ""
-Write-Host "  What will you create?" -ForegroundColor Yellow
 Write-Host ""
 
-# Optionally launch Claude
-$launch = Read-Host "  Press ENTER to open Claude Code (or type 'skip')"
+$onboardingUrl = "https://laviefatigue.github.io/claude-code-installer/onboarding.html"
+
+$launch = Read-Host "  Press ENTER to continue (or type 'skip')"
 if ($launch -ne "skip") {
-    if (Get-Command claude -ErrorAction SilentlyContinue) {
-        Write-Host ""
-        Write-Host "  Opening Claude Code..." -ForegroundColor Gray
-        Start-Process "claude"
+    Write-Host ""
+    Write-Host "  Opening VS Code..." -ForegroundColor Gray
+
+    # Open VS Code
+    if (Get-Command code -ErrorAction SilentlyContinue) {
+        Start-Process "code"
     }
+
+    Start-Sleep -Seconds 1
+
+    Write-Host "  Opening visual guide..." -ForegroundColor Gray
+    Start-Process $onboardingUrl
+
+    Write-Host ""
+    Write-Host "  -----------------------------------------" -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "  The guide will show you:" -ForegroundColor White
+    Write-Host "    - Where to find Claude in VS Code" -ForegroundColor Gray
+    Write-Host "    - How to sign in" -ForegroundColor Gray
+    Write-Host "    - How to start your first conversation" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "  Guide URL (bookmark this!):" -ForegroundColor DarkGray
+    Write-Host "  $onboardingUrl" -ForegroundColor Cyan
+    Write-Host ""
 }
 
+Write-Host "  What will you create?" -ForegroundColor Yellow
 Write-Host ""

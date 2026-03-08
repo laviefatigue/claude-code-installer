@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code - Interactive Onboarding</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* VS Code Dark Theme */
+            --vsc-bg: #1e1e1e;
+            --vsc-sidebar: #252526;
+            --vsc-panel: #1e1e1e;
+            --vsc-border: #3c3c3c;
+            --vsc-text: #cccccc;
+            --vsc-text-dim: #858585;
+            --vsc-accent: #007acc;
+            --vsc-activity: #333333;
+
+            /* Claude colors */
+            --claude-orange: #da7756;
+            --claude-bg: #2d2a2e;
+
+            /* Tutorial */
+            --highlight: #fbbf24;
+            --highlight-glow: rgba(251, 191, 36, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0b;
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ================================================================
+           TUTORIAL WRAPPER
+           ================================================================ */
+
+        .tutorial {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .tutorial-header {
+            padding: 20px 32px;
+            background: linear-gradient(180deg, rgba(30,30,30,0.95), rgba(10,10,11,0.98));
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .tutorial-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .tutorial-logo svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .tutorial-progress {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #444;
+            transition: all 0.3s ease;
+        }
+
+        .progress-dot.active {
+            background: var(--highlight);
+            box-shadow: 0 0 12px var(--highlight-glow);
+        }
+
+        .progress-dot.complete {
+            background: #4ade80;
+        }
+
+        .tutorial-skip {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .tutorial-skip:hover {
+            color: #ccc;
+        }
+
+        /* ================================================================
+           STEP CONTAINER
+           ================================================================ */
+
+        .step {
+            display: none;
+            flex: 1;
+            padding: 40px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .step.active {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .step-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .step-number {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--highlight);
+            margin-bottom: 12px;
+        }
+
+        .step-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step-subtitle {
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+        /* ================================================================
+           VS CODE MOCKUP
+           ================================================================ */
+
+        .vscode-frame {
+            background: var(--vsc-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+            border: 1px solid #444;
+        }
+
+        .vscode-titlebar {
+            height: 32px;
+            background: #3c3c3c;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 8px;
+        }
+
+        .titlebar-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .titlebar-dot.red { background: #ff5f57; }
+        .titlebar-dot.yellow { background: #febc2e; }
+        .titlebar-dot.green { background: #28c840; }
+
+        .titlebar-title {
+            flex: 1;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .vscode-main {
+            display: flex;
+            height: 500px;
+        }
+
+        /* Activity Bar */
+        .vscode-activity {
+            width: 48px;
+            background: var(--vsc-activity);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 0;
+            gap: 4px;
+        }
+
+        .activity-icon {
+            width: 48px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .activity-icon:hover {
+            color: #fff;
+        }
+
+        .activity-icon.active {
+            color: #fff;
+        }
+
+        .activity-icon.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 24px;
+            background: #fff;
+        }
+
+        .activity-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Sidebar */
+        .vscode-sidebar {
+            width: 240px;
+            background: var(--vsc-sidebar);
+            border-right: 1px solid var(--vsc-border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 10px 16px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #bbb;
+        }
+
+        .sidebar-tree {
+            flex: 1;
+            padding: 0 8px;
+        }
+
+        .tree-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            font-size: 0.85rem;
+            color: var(--vsc-text);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .tree-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .tree-item.folder {
+            color: #dcb67a;
+        }
+
+        .tree-item.file {
+            padding-left: 24px;
+        }
+
+        .tree-item .icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.8;
+        }
+
+        /* Editor Area */
+        .vscode-editor {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--vsc-bg);
+        }
+
+        .editor-tabs {
+            display: flex;
+            background: var(--vsc-sidebar);
+            border-bottom: 1px solid var(--vsc-border);
+        }
+
+        .editor-tab {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            color: #888;
+            border-right: 1px solid var(--vsc-border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .editor-tab.active {
+            background: var(--vsc-bg);
+            color: #fff;
+        }
+
+        .editor-content {
+            flex: 1;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--vsc-text);
+            overflow: auto;
+        }
+
+        .editor-line {
+            display: flex;
+        }
+
+        .line-number {
+            width: 40px;
+            color: #555;
+            text-align: right;
+            padding-right: 16px;
+            user-select: none;
+        }
+
+        .line-content {
+            flex: 1;
+        }
+
+        /* Claude Panel */
+        .vscode-claude {
+            width: 350px;
+            background: var(--claude-bg);
+            border-left: 1px solid var(--vsc-border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .claude-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--vsc-border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .claude-logo {
+            width: 24px;
+            height: 24px;
+            background: var(--claude-orange);
+            border-radius: 6px;
+        }
+
+        .claude-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .claude-chat {
+            flex: 1;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow: auto;
+        }
+
+        .chat-message {
+            max-width: 90%;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            background: #3a3a3c;
+            padding: 10px 14px;
+            border-radius: 16px 16px 4px 16px;
+        }
+
+        .chat-message.claude {
+            align-self: flex-start;
+        }
+
+        .chat-message.claude .content {
+            background: rgba(218, 119, 86, 0.1);
+            border: 1px solid rgba(218, 119, 86, 0.2);
+            padding: 12px 16px;
+            border-radius: 4px 16px 16px 16px;
+        }
+
+        .claude-input {
+            padding: 12px 16px;
+            border-top: 1px solid var(--vsc-border);
+        }
+
+        .input-box {
+            background: #3a3a3c;
+            border: 1px solid #555;
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        /* ================================================================
+           HOTSPOT HIGHLIGHTS
+           ================================================================ */
+
+        .hotspot {
+            position: relative;
+        }
+
+        .hotspot::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border: 2px solid var(--highlight);
+            border-radius: 8px;
+            animation: pulse 2s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--highlight-glow); }
+            50% { opacity: 0.8; box-shadow: 0 0 0 8px transparent; }
+        }
+
+        .hotspot-label {
+            position: absolute;
+            background: var(--highlight);
+            color: #000;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 6px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .hotspot-label::before {
+            content: '';
+            position: absolute;
+            border: 6px solid transparent;
+        }
+
+        .hotspot-label.top {
+            bottom: calc(100% + 12px);
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .hotspot-label.top::before {
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-top-color: var(--highlight);
+        }
+
+        .hotspot-label.right {
+            left: calc(100% + 12px);
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .hotspot-label.right::before {
+            right: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border-right-color: var(--highlight);
+        }
+
+        /* ================================================================
+           INSTRUCTION PANEL
+           ================================================================ */
+
+        .instruction {
+            background: #1a1a1c;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 24px 32px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .instruction h3 {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .instruction p {
+            color: #999;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .instruction ul {
+            color: #999;
+            padding-left: 20px;
+            margin-bottom: 16px;
+        }
+
+        .instruction li {
+            margin-bottom: 8px;
+        }
+
+        .instruction code {
+            background: #2a2a2c;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            color: #e5c07b;
+        }
+
+        /* ================================================================
+           BUTTONS
+           ================================================================ */
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--highlight);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background: #fcd34d;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #888;
+            border: 1px solid #444;
+        }
+
+        .btn-secondary:hover {
+            border-color: #666;
+            color: #ccc;
+        }
+
+        .btn-confirm {
+            background: #4ade80;
+            color: #000;
+        }
+
+        .btn-confirm:hover {
+            background: #6ee7a0;
+        }
+
+        /* ================================================================
+           CONFIRMATION STEP
+           ================================================================ */
+
+        .confirm-box {
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(74, 222, 128, 0.05));
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .confirm-box h3 {
+            color: #4ade80;
+            margin-bottom: 12px;
+        }
+
+        .confirm-box p {
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        /* ================================================================
+           COMPLETION
+           ================================================================ */
+
+        .completion {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .completion-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 2.5rem;
+        }
+
+        .completion h2 {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .completion p {
+            color: #888;
+            font-size: 1.1rem;
+            max-width: 500px;
+            margin: 0 auto 32px;
+        }
+
+        .ideas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            max-width: 800px;
+            margin: 0 auto 32px;
+        }
+
+        .idea-card {
+            background: #1a1a1c;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 16px 20px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .idea-card:hover {
+            border-color: var(--highlight);
+            transform: translateY(-2px);
+        }
+
+        .idea-card h4 {
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+        }
+
+        .idea-card p {
+            font-size: 0.85rem;
+            color: #666;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="tutorial">
+        <header class="tutorial-header">
+            <div class="tutorial-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                Claude Code Framework
+            </div>
+            <div class="tutorial-progress">
+                <div class="progress-dot active" data-step="1"></div>
+                <div class="progress-dot" data-step="2"></div>
+                <div class="progress-dot" data-step="3"></div>
+                <div class="progress-dot" data-step="4"></div>
+                <div class="progress-dot" data-step="5"></div>
+                <div class="progress-dot" data-step="6"></div>
+            </div>
+            <a href="#" class="tutorial-skip" onclick="skipToEnd()">Skip tutorial</a>
+        </header>
+
+        <!-- STEP 1: Find Claude -->
+        <section class="step active" data-step="1">
+            <div class="step-content">
+                <div class="step-header">
+                    <span class="step-number">Step 1 of 6</span>
+                    <h1 class="step-title">Find Claude in VS Code</h1>
+                    <p class="step-subtitle">Claude lives in the left sidebar. Let's open it.</p>
+                </div>
+
+                <div class="vscode-frame">
+                    <div class="vscode-titlebar">
+                        <div class="titlebar-dot red"></div>
+                        <div class="titlebar-dot yellow"></div>
+                        <div class="titlebar-dot green"></div>
+                        <span class="titlebar-title">my-project - Visual Studio Code</span>
+                    </div>
+                    <div class="vscode-main">
+                        <div class="vscode-activity">
+                            <div class="activity-icon active">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                                </svg>
+                            </div>
+                            <div class="activity-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                                </svg>
+                            </div>
+                            <div class="activity-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+                                </svg>
+                            </div>
+                            <div class="activity-icon hotspot" style="margin-top: auto;">
+                                <span class="hotspot-label right">Click here!</span>
+                                <svg viewBox="0 0 24 24" fill="var(--claude-orange)" stroke="none">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path fill="#fff" d="M8 9a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H9a1 1 0 01-1-1V9z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="vscode-sidebar">
+                            <div class="sidebar-header">Explorer</div>
+                            <div class="sidebar-tree">
+                                <div class="tree-item folder">📁 my-project</div>
+                                <div class="tree-item file">📄 index.html</div>
+                                <div class="tree-item file">📄 style.css</div>
+                                <div class="tree-item file">📄 script.js</div>
+                            </div>
+                        </div>
+                        <div class="vscode-editor">
+                            <div class="editor-tabs">
+                                <div class="editor-tab active">
+                                    <span>index.html</span>
+                                </div>
+                            </div>
+                            <div class="editor-content">
+                                <div class="editor-line"><span class="line-number">1</span><span class="line-content" style="color:#569cd6">&lt;!DOCTYPE html&gt;</span></div>
+                                <div class="editor-line"><span class="line-number">2</span><span class="line-content" style="color:#569cd6">&lt;html&gt;</span></div>
+                                <div class="editor-line"><span class="line-number">3</span><span class="line-content" style="color:#569cd6">  &lt;head&gt;</span></div>
+                                <div class="editor-line"><span class="line-number">4</span><span class="line-content" style="color:#569cd6">    &lt;title&gt;</span><span style="color:#ce9178">My Project</span><span style="color:#569cd6">&lt;/title&gt;</span></div>
+                                <div class="editor-line"><span class="line-number">5</span><span class="line-content" style="color:#569cd6">  &lt;/head&gt;</span></div>
+                                <div class="editor-line"><span class="line-number">6</span><span class="line-content" style="color:#569cd6">  &lt;body&gt;</span></div>
+                                <div class="editor-line"><span class="line-number">7</span><span class="line-content"></span></div>
+                                <div class="editor-line"><span class="line-number">8</span><span class="line-content" style="color:#569cd6">  &lt;/body&gt;</span></div>
+                                <div class="editor-line"><span class="line-number">9</span><span class="line-content" style="color:#569cd6">&lt;/html&gt;</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="instruction">
+                    <h3>🎯 The Claude Icon</h3>
+                    <p>Look for the <strong>Claude icon</strong> in the Activity Bar (the vertical bar on the far left). It's usually at the bottom.</p>
+                    <p>In your VS Code, click it now to open the Claude panel.</p>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-primary" onclick="nextStep()">I found it → Next</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 2: Sign In -->
+        <section class="step" data-step="2">
+            <div class="step-content">
+                <div class="step-header">
+                    <span class="step-number">Step 2 of 6</span>
+                    <h1 class="step-title">Sign in to Claude</h1>
+                    <p class="step-subtitle">Connect your Anthropic account.</p>
+                </div>
+
+                <div class="vscode-frame">
+                    <div class="vscode-titlebar">
+                        <div class="titlebar-dot red"></div>
+                        <div class="titlebar-dot yellow"></div>
+                        <div class="titlebar-dot green"></div>
+                        <span class="titlebar-title">my-project - Visual Studio Code</span>
+                    </div>
+                    <div class="vscode-main">
+                        <div class="vscode-activity">
+                            <div class="activity-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                                </svg>
+                            </div>
+                            <div class="activity-icon active" style="margin-top: auto;">
+                                <svg viewBox="0 0 24 24" fill="var(--claude-orange)" stroke="none">
+                                    <circle cx="12" cy="12" r="10"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="vscode-sidebar" style="display: none;"></div>
+                        <div class="vscode-editor" style="flex: 1;">
+                            <div class="editor-content" style="display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px;">
+                                <div style="text-align: center;">
+                                    <div style="width: 60px; height: 60px; background: var(--claude-orange); border-radius: 12px; margin: 0 auto 16px;"></div>
+                                    <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Welcome to Claude Code</h2>
+                                    <p style="color: #888; margin-bottom: 24px;">Sign in to start coding with Claude</p>
+                                    <div class="hotspot" style="display: inline-block;">
+                                        <span class="hotspot-label top">Click this button!</span>
+                                        <button style="background: var(--claude-orange); color: #fff; border: none; padding: 12px 32px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                                            Sign in with Anthropic
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="instruction">
+                    <h3>🔐 What happens when you sign in</h3>
+                    <ul>
+                        <li>A browser window opens</li>
+                        <li>Sign in with your <strong>Claude Pro</strong>, <strong>Max</strong>, or <strong>Teams</strong> account</li>
+                        <li>Return to VS Code — you're connected!</li>
+                    </ul>
+                    <p>Go ahead and sign in now. Once you're done, click the button below.</p>
+                </div>
+
+                <div class="confirm-box">
+                    <h3>✓ Confirm you're signed in</h3>
+                    <p>Have you completed the sign-in process?</p>
+                    <button class="btn btn-confirm" onclick="nextStep()">Yes, I'm signed in</button>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-secondary" onclick="prevStep()">← Back</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 3: Open a Folder -->
+        <section class="step" data-step="3">
+            <div class="step-content">
+                <div class="step-header">
+                    <span class="step-number">Step 3 of 6</span>
+                    <h1 class="step-title">Open a project folder</h1>
+                    <p class="step-subtitle">Claude works best when it can see your files.</p>
+                </div>
+
+                <div class="vscode-frame">
+                    <div class="vscode-titlebar">
+                        <div class="titlebar-dot red"></div>
+                        <div class="titlebar-dot yellow"></div>
+                        <div class="titlebar-dot green"></div>
+                        <span class="titlebar-title">Visual Studio Code</span>
+                    </div>
+                    <div class="vscode-main">
+                        <div class="vscode-activity">
+                            <div class="activity-icon active">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="vscode-editor" style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                            <div style="text-align: center;">
+                                <p style="color: #888; margin-bottom: 20px;">No folder opened</p>
+                                <div class="hotspot" style="display: inline-block;">
+                                    <span class="hotspot-label top">Click to open a folder</span>
+                                    <button style="background: var(--vsc-accent); color: #fff; border: none; padding: 10px 24px; border-radius: 4px; font-size: 0.95rem; cursor: pointer;">
+                                        Open Folder
+                                    </button>
+                                </div>
+                                <p style="color: #666; margin-top: 20px; font-size: 0.9rem;">
+                                    Or use: <code style="background: #2a2a2c; padding: 2px 8px; border-radius: 4px;">Ctrl+K Ctrl+O</code>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="instruction">
+                    <h3>📁 Why folders matter</h3>
+                    <p>When you open a folder, Claude can:</p>
+                    <ul>
+                        <li><strong>Read your files</strong> — understand your code</li>
+                        <li><strong>Create new files</strong> — in the right location</li>
+                        <li><strong>Edit existing code</strong> — make changes for you</li>
+                        <li><strong>Run commands</strong> — from your project directory</li>
+                    </ul>
+                    <p><strong>Tip:</strong> Create a new folder called <code>my-first-project</code> if you don't have one yet.</p>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-secondary" onclick="prevStep()">← Back</button>
+                    <button class="btn btn-primary" onclick="nextStep()">I opened a folder → Next</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 4: Start a Conversation -->
+        <section class="step" data-step="4">
+            <div class="step-content">
+                <div class="step-header">
+                    <span class="step-number">Step 4 of 6</span>
+                    <h1 class="step-title">Start your first conversation</h1>
+                    <p class="step-subtitle">Just type what you want to build.</p>
+                </div>
+
+                <div class="vscode-frame">
+                    <div class="vscode-titlebar">
+                        <div class="titlebar-dot red"></div>
+                        <div class="titlebar-dot yellow"></div>
+                        <div class="titlebar-dot green"></div>
+                        <span class="titlebar-title">my-project - Visual Studio Code</span>
+                    </div>
+                    <div class="vscode-main">
+                        <div class="vscode-activity">
+                            <div class="activity-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                                </svg>
+                            </div>
+                            <div class="activity-icon active" style="margin-top: auto;">
+                                <svg viewBox="0 0 24 24" fill="var(--claude-orange)" stroke="none">
+                                    <circle cx="12" cy="12" r="10"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="vscode-sidebar">
+                            <div class="sidebar-header">Explorer</div>
+                            <div class="sidebar-tree">
+                                <div class="tree-item folder">📁 my-project</div>
+                            </div>
+                        </div>
+                        <div class="vscode-editor" style="flex: 1;"></div>
+                        <div class="vscode-claude">
+                            <div class="claude-header">
+                                <div class="claude-logo"></div>
+                                <span class="claude-title">Claude</span>
+                            </div>
+                            <div class="claude-chat">
+                                <p style="color: #666; text-align: center; margin-top: 40px;">Start a conversation...</p>
+                            </div>
+                            <div class="claude-input">
+                                <div class="input-box hotspot">
+                                    <span class="hotspot-label top">Type here!</span>
+                                    Ask Claude anything...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="instruction">
+                    <h3>💬 Try one of these</h3>
+                    <p>Click in the input box and type:</p>
+                    <ul>
+                        <li><code>Create a simple webpage that says Hello World</code></li>
+                        <li><code>What can you help me build?</code></li>
+                        <li><code>Explain what files are in this project</code></li>
+                    </ul>
+                    <p>Claude will write code, create files, and explain everything along the way.</p>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-secondary" onclick="prevStep()">← Back</button>
+                    <button class="btn btn-primary" onclick="nextStep()">I sent a message → Next</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 5: Adding Context -->
+        <section class="step" data-step="5">
+            <div class="step-content">
+                <div class="step-header">
+                    <span class="step-number">Step 5 of 6</span>
+                    <h1 class="step-title">Adding files as context</h1>
+                    <p class="step-subtitle">Help Claude understand what you're working on.</p>
+                </div>
+
+                <div class="vscode-frame">
+                    <div class="vscode-titlebar">
+                        <div class="titlebar-dot red"></div>
+                        <div class="titlebar-dot yellow"></div>
+                        <div class="titlebar-dot green"></div>
+                        <span class="titlebar-title">my-project - Visual Studio Code</span>
+                    </div>
+                    <div class="vscode-main">
+                        <div class="vscode-activity">
+                            <div class="activity-icon active">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="vscode-sidebar">
+                            <div class="sidebar-header">Explorer</div>
+                            <div class="sidebar-tree">
+                                <div class="tree-item folder">📁 my-project</div>
+                                <div class="tree-item file hotspot" style="background: rgba(251, 191, 36, 0.1);">
+                                    <span class="hotspot-label right">Select a file</span>
+                                    📄 index.html
+                                </div>
+                                <div class="tree-item file">📄 style.css</div>
+                            </div>
+                        </div>
+                        <div class="vscode-editor" style="flex: 1;">
+                            <div class="editor-content">
+                                <p style="color: #888; padding: 40px; text-align: center;">
+                                    <strong>Two ways to add context:</strong><br><br>
+                                    1. <span style="color: #4ade80;">Select code</span> in the editor, then ask about it<br><br>
+                                    2. Mention files by name: <code style="background: #2a2a2c; padding: 2px 6px; border-radius: 4px;">@index.html</code>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="vscode-claude">
+                            <div class="claude-header">
+                                <div class="claude-logo"></div>
+                                <span class="claude-title">Claude</span>
+                            </div>
+                            <div class="claude-chat">
+                                <div class="chat-message user">
+                                    Fix the bug in @index.html
+                                </div>
+                                <div class="chat-message claude">
+                                    <div class="content">
+                                        I'll look at index.html and find the issue...
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="claude-input">
+                                <div class="input-box">Type @ to reference files...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="instruction">
+                    <h3>📎 Ways to add context</h3>
+                    <ul>
+                        <li><strong>@filename</strong> — Type <code>@</code> to reference specific files</li>
+                        <li><strong>Select code</strong> — Highlight code in the editor before asking</li>
+                        <li><strong>Paste errors</strong> — Copy error messages directly into the chat</li>
+                        <li><strong>Describe the goal</strong> — "I'm building a todo app" gives Claude context</li>
+                    </ul>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-secondary" onclick="prevStep()">← Back</button>
+                    <button class="btn btn-primary" onclick="nextStep()">Got it → Next</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 6: Complete -->
+        <section class="step" data-step="6">
+            <div class="step-content">
+                <div class="completion">
+                    <div class="completion-icon">🎉</div>
+                    <h2>You're ready to create!</h2>
+                    <p>You now know how to use Claude Code. The more you use it, the more natural it becomes.</p>
+
+                    <div class="ideas-grid">
+                        <div class="idea-card">
+                            <h4>🌐 "Build me a portfolio website"</h4>
+                            <p>Claude will create HTML, CSS, and help you customize it.</p>
+                        </div>
+                        <div class="idea-card">
+                            <h4>🔧 "Help me fix this error"</h4>
+                            <p>Paste any error message and Claude will debug it.</p>
+                        </div>
+                        <div class="idea-card">
+                            <h4>📚 "Explain how this code works"</h4>
+                            <p>Select confusing code and ask for an explanation.</p>
+                        </div>
+                        <div class="idea-card">
+                            <h4>⚡ "Automate this task"</h4>
+                            <p>Describe a repetitive task and Claude will script it.</p>
+                        </div>
+                    </div>
+
+                    <div class="btn-row">
+                        <button class="btn btn-primary" onclick="window.close()">Start Creating</button>
+                        <button class="btn btn-secondary" onclick="location.reload()">Restart Tutorial</button>
+                    </div>
+
+                    <p style="color: #666; margin-top: 32px; font-size: 0.9rem;">
+                        Bookmark this page to revisit anytime: <code style="background: #2a2a2c; padding: 2px 8px; border-radius: 4px;">ccf.dev/onboarding</code>
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 6;
+
+        function updateProgress() {
+            document.querySelectorAll('.progress-dot').forEach((dot, index) => {
+                const stepNum = index + 1;
+                dot.classList.remove('active', 'complete');
+                if (stepNum < currentStep) {
+                    dot.classList.add('complete');
+                } else if (stepNum === currentStep) {
+                    dot.classList.add('active');
+                }
+            });
+
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+                if (parseInt(step.dataset.step) === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateProgress();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateProgress();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function skipToEnd() {
+            currentStep = totalSteps;
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Enter') {
+                nextStep();
+            } else if (e.key === 'ArrowLeft') {
+                prevStep();
+            }
+        });
+    </script>
+</body>
+</html>
