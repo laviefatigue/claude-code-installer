@@ -5,456 +5,213 @@ $ErrorActionPreference = "SilentlyContinue"
 $ProgressPreference = "SilentlyContinue"
 
 # ============================================================================
-# Output Helpers
+# Setup
 # ============================================================================
 
-function Write-Logo {
-    Clear-Host
-    Write-Host ""
-    Write-Host "    =============================================" -ForegroundColor DarkCyan
-    Write-Host ""
-    Write-Host "       Claude Code Framework" -ForegroundColor White
-    Write-Host ""
-    Write-Host "       Your creative journey begins." -ForegroundColor Gray
-    Write-Host ""
-    Write-Host "    =============================================" -ForegroundColor DarkCyan
-    Write-Host ""
+$tempDir = Join-Path $env:TEMP "claude-setup"
+New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
+
+# Known install locations (don't rely on PATH)
+$nodePath = "$env:ProgramFiles\nodejs"
+$npmExe = "$env:ProgramFiles\nodejs\npm.cmd"
+$gitExe = "$env:ProgramFiles\Git\cmd\git.exe"
+$codeExe = "$env:LOCALAPPDATA\Programs\Microsoft VS Code\bin\code.cmd"
+$codeExeAlt = "$env:ProgramFiles\Microsoft VS Code\bin\code.cmd"
+
+# ============================================================================
+# Helpers
+# ============================================================================
+
+function Write-Status { param([string]$Msg); Write-Host "  $Msg" -ForegroundColor Gray }
+function Write-Done { param([string]$Msg); Write-Host "  [OK] $Msg" -ForegroundColor Green }
+function Write-Warn { param([string]$Msg); Write-Host "  [!] $Msg" -ForegroundColor Yellow }
+function Write-Step { param([int]$N, [string]$Name); Write-Host "`n  [$N/4] $Name" -ForegroundColor Cyan }
+
+function Get-Code {
+    if (Test-Path $codeExe) { return $codeExe }
+    if (Test-Path $codeExeAlt) { return $codeExeAlt }
+    $cmd = Get-Command code -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
+    return $null
 }
 
-function Write-Step {
-    param([string]$Number, [string]$Title, [string]$Description)
-    Write-Host ""
-    Write-Host "  [$Number] " -NoNewline -ForegroundColor DarkYellow
-    Write-Host "$Title" -ForegroundColor White
-    Write-Host "        $Description" -ForegroundColor DarkGray
+function Get-Npm {
+    if (Test-Path $npmExe) { return $npmExe }
+    $cmd = Get-Command npm -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
+    return $null
 }
 
-function Write-Status {
-    param([string]$Message)
-    Write-Host "        $Message" -ForegroundColor Gray
+function Test-HasNode {
+    (Test-Path "$nodePath\node.exe") -or (Get-Command node -ErrorAction SilentlyContinue)
 }
-
-function Write-OK {
-    param([string]$Message)
-    Write-Host "        [OK] " -NoNewline -ForegroundColor Green
-    Write-Host "$Message" -ForegroundColor White
+function Test-HasGit {
+    (Test-Path $gitExe) -or (Get-Command git -ErrorAction SilentlyContinue)
 }
-
-function Write-Already {
-    param([string]$Message, [string]$Version)
-    Write-Host "        [OK] " -NoNewline -ForegroundColor Green
-    Write-Host "$Message " -NoNewline -ForegroundColor White
-    Write-Host "$Version" -ForegroundColor DarkGray
+function Test-HasCode {
+    (Get-Code) -ne $null
 }
-
-function Write-Fail {
-    param([string]$Message)
-    Write-Host "        [X]  " -NoNewline -ForegroundColor Red
-    Write-Host "$Message" -ForegroundColor Red
-}
-
-function Write-Skip {
-    param([string]$Message)
-    Write-Host "        [--] " -NoNewline -ForegroundColor DarkGray
-    Write-Host "$Message" -ForegroundColor DarkGray
-}
-
-function Refresh-Path {
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+function Test-HasClaude {
+    (Get-Command claude -ErrorAction SilentlyContinue) -or
+    (Test-Path "$env:APPDATA\npm\claude.cmd") -or
+    (Test-Path "$env:USERPROFILE\.local\bin\claude.exe")
 }
 
 # ============================================================================
-# Installation Functions
+# Welcome
 # ============================================================================
 
-function Install-NodeJS {
-    Write-Step "1/5" "Node.js" "The engine that powers Claude Code"
-
-    # Check if already installed
-    Refresh-Path
-    $node = Get-Command node -ErrorAction SilentlyContinue
-    if ($node) {
-        $v = & node --version 2>$null
-        Write-Already "Node.js already installed" "$v"
-        return $true
-    }
-
-    Write-Status "Downloading Node.js installer..."
-
-    $tempDir = Join-Path $env:TEMP "claude-installer"
-    New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-
-    # Download Node.js LTS
-    $nodeUrl = "https://nodejs.org/dist/v20.18.0/node-v20.18.0-x64.msi"
-    $nodeInstaller = Join-Path $tempDir "nodejs.msi"
-
-    try {
-        Invoke-WebRequest -Uri $nodeUrl -OutFile $nodeInstaller -UseBasicParsing
-    } catch {
-        Write-Fail "Download failed - check your internet connection"
-        return $false
-    }
-
-    Write-Status "Installing Node.js (follow the wizard)..."
-
-    # Run installer and wait
-    $process = Start-Process -FilePath "msiexec.exe" -ArgumentList "/i `"$nodeInstaller`" /passive" -Wait -PassThru
-
-    # Refresh PATH
-    Refresh-Path
-
-    # Verify
-    $node = Get-Command node -ErrorAction SilentlyContinue
-    if ($node) {
-        $v = & node --version 2>$null
-        Write-OK "Node.js installed $v"
-        return $true
-    } else {
-        Write-Fail "Node.js installation incomplete - please restart PowerShell after setup"
-        return $false
-    }
-}
-
-function Install-Git {
-    Write-Step "2/5" "Git" "Tracks every change you make. Never lose work."
-
-    # Check if already installed
-    Refresh-Path
-    $git = Get-Command git -ErrorAction SilentlyContinue
-    if ($git) {
-        $v = & git --version 2>$null
-        $v = $v -replace "git version ", ""
-        Write-Already "Git already installed" "v$v"
-        return $true
-    }
-
-    Write-Status "Downloading Git installer..."
-
-    $tempDir = Join-Path $env:TEMP "claude-installer"
-    New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-
-    # Download Git for Windows
-    $gitUrl = "https://github.com/git-for-windows/git/releases/download/v2.47.1.windows.1/Git-2.47.1-64-bit.exe"
-    $gitInstaller = Join-Path $tempDir "git-installer.exe"
-
-    try {
-        Invoke-WebRequest -Uri $gitUrl -OutFile $gitInstaller -UseBasicParsing
-    } catch {
-        Write-Fail "Download failed - check your internet connection"
-        return $false
-    }
-
-    Write-Status "Installing Git (follow the wizard)..."
-
-    # Run installer with sensible defaults, wait for completion
-    $process = Start-Process -FilePath $gitInstaller -ArgumentList "/VERYSILENT /NORESTART /NOCANCEL /SP- /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS /COMPONENTS=`"icons,ext\reg\shellhere,assoc,assoc_sh`"" -Wait -PassThru
-
-    # Refresh PATH
-    Refresh-Path
-
-    # Also add common Git paths manually
-    $gitPaths = @(
-        "$env:ProgramFiles\Git\cmd",
-        "$env:ProgramFiles\Git\bin",
-        "${env:ProgramFiles(x86)}\Git\cmd"
-    )
-    foreach ($p in $gitPaths) {
-        if (Test-Path $p) {
-            $env:Path = "$p;$env:Path"
-        }
-    }
-
-    # Verify
-    $git = Get-Command git -ErrorAction SilentlyContinue
-    if ($git) {
-        $v = & git --version 2>$null
-        Write-OK "Git installed"
-        return $true
-    } else {
-        Write-Fail "Git installation incomplete - you may need to restart PowerShell"
-        return $false
-    }
-}
-
-function Install-ClaudeCode {
-    Write-Step "3/5" "Claude Code CLI" "Your AI coding companion"
-
-    # Check if already installed
-    Refresh-Path
-    $claude = Get-Command claude -ErrorAction SilentlyContinue
-    if ($claude) {
-        Write-Already "Claude Code already installed" ""
-        return $true
-    }
-
-    # Check if npm is available
-    $npm = Get-Command npm -ErrorAction SilentlyContinue
-    if (-not $npm) {
-        Write-Fail "Node.js/npm not found - Claude Code requires Node.js"
-        return $false
-    }
-
-    Write-Status "Installing Claude Code via npm..."
-
-    try {
-        # Install globally
-        & npm install -g @anthropic-ai/claude-code 2>$null | Out-Null
-
-        # Add npm global bin to path
-        $npmPrefix = & npm config get prefix 2>$null
-        if ($npmPrefix) {
-            $env:Path = "$npmPrefix;$env:Path"
-        }
-
-        # Also check common locations
-        $localBin = "$env:USERPROFILE\.local\bin"
-        if (Test-Path $localBin) {
-            $env:Path = "$localBin;$env:Path"
-        }
-
-        Refresh-Path
-
-        # Verify
-        $claude = Get-Command claude -ErrorAction SilentlyContinue
-        if ($claude) {
-            Write-OK "Claude Code installed"
-            return $true
-        } else {
-            # Try the official installer as backup
-            Write-Status "Trying official installer..."
-            Invoke-Expression (Invoke-RestMethod -Uri "https://claude.ai/install.ps1") 2>$null
-            $env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
-
-            $claude = Get-Command claude -ErrorAction SilentlyContinue
-            if ($claude) {
-                Write-OK "Claude Code installed"
-                return $true
-            }
-
-            Write-Fail "Installation incomplete - try: npm install -g @anthropic-ai/claude-code"
-            return $false
-        }
-    } catch {
-        Write-Fail "Installation failed"
-        return $false
-    }
-}
-
-function Install-VSCode {
-    Write-Step "4/5" "VS Code" "A powerful editor where you'll build and create"
-
-    # Check if already installed
-    Refresh-Path
-    $code = Get-Command code -ErrorAction SilentlyContinue
-    if ($code) {
-        Write-Already "VS Code already installed" ""
-        return $true
-    }
-
-    Write-Status "Downloading VS Code installer..."
-
-    $tempDir = Join-Path $env:TEMP "claude-installer"
-    New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-
-    # Download VS Code
-    $vscodeUrl = "https://code.visualstudio.com/sha/download?build=stable&os=win32-x64"
-    $vscodeInstaller = Join-Path $tempDir "vscode-installer.exe"
-
-    try {
-        Invoke-WebRequest -Uri $vscodeUrl -OutFile $vscodeInstaller -UseBasicParsing
-    } catch {
-        Write-Fail "Download failed - check your internet connection"
-        return $false
-    }
-
-    Write-Status "Installing VS Code (follow the wizard)..."
-
-    # Run installer - use /SILENT for automatic, but show progress
-    $process = Start-Process -FilePath $vscodeInstaller -ArgumentList "/VERYSILENT /NORESTART /MERGETASKS=!runcode,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath" -Wait -PassThru
-
-    # Refresh PATH
-    Refresh-Path
-
-    # Add common VS Code paths
-    $vscodePaths = @(
-        "$env:LOCALAPPDATA\Programs\Microsoft VS Code\bin",
-        "$env:ProgramFiles\Microsoft VS Code\bin"
-    )
-    foreach ($p in $vscodePaths) {
-        if (Test-Path $p) {
-            $env:Path = "$p;$env:Path"
-        }
-    }
-
-    # Verify
-    $code = Get-Command code -ErrorAction SilentlyContinue
-    if ($code) {
-        Write-OK "VS Code installed"
-        return $true
-    } else {
-        Write-Fail "VS Code installation incomplete - you may need to restart PowerShell"
-        return $false
-    }
-}
-
-function Install-Extensions {
-    Write-Step "5/5" "VS Code Extensions" "Claude extension + useful tools"
-
-    Refresh-Path
-    $code = Get-Command code -ErrorAction SilentlyContinue
-    if (-not $code) {
-        Write-Skip "VS Code not available - skipping extensions"
-        return $false
-    }
-
-    Write-Status "Installing Claude extension..."
-
-    try {
-        & code --install-extension anthropic.claude-code --force 2>$null | Out-Null
-        Write-OK "Claude extension installed"
-    } catch {
-        Write-Fail "Claude extension failed - install from VS Code marketplace"
-    }
-
-    Write-Status "Installing Foam extension (connected notes)..."
-
-    try {
-        & code --install-extension foam.foam-vscode --force 2>$null | Out-Null
-        Write-OK "Foam extension installed"
-    } catch {
-        Write-Skip "Foam skipped - optional"
-    }
-
-    return $true
-}
-
-# ============================================================================
-# Main
-# ============================================================================
-
-Write-Logo
-
-Write-Host "  We're about to set up your creative toolkit." -ForegroundColor Gray
-Write-Host "  This takes about 5 minutes." -ForegroundColor DarkGray
+Clear-Host
 Write-Host ""
-Write-Host "  What we'll install:" -ForegroundColor White
-Write-Host ""
-Write-Host "    1. Node.js        " -NoNewline -ForegroundColor Cyan
-Write-Host "- Powers Claude Code" -ForegroundColor DarkGray
-Write-Host "    2. Git            " -NoNewline -ForegroundColor Cyan
-Write-Host "- Version control" -ForegroundColor DarkGray
-Write-Host "    3. Claude Code    " -NoNewline -ForegroundColor Cyan
-Write-Host "- Your AI companion" -ForegroundColor DarkGray
-Write-Host "    4. VS Code        " -NoNewline -ForegroundColor Cyan
-Write-Host "- Your editor" -ForegroundColor DarkGray
-Write-Host "    5. Extensions     " -NoNewline -ForegroundColor Cyan
-Write-Host "- Claude + Foam" -ForegroundColor DarkGray
-Write-Host ""
-
-$null = Read-Host "  Press ENTER to begin"
-
-# Track results
-$results = @{
-    Node = $false
-    Git = $false
-    Claude = $false
-    VSCode = $false
-    Extensions = $false
-}
-
-# Install in order
-$results.Node = Install-NodeJS
-$results.Git = Install-Git
-$results.Claude = Install-ClaudeCode
-$results.VSCode = Install-VSCode
-$results.Extensions = Install-Extensions
+Write-Host "  =============================================" -ForegroundColor DarkCyan
+Write-Host "       Claude Code - Installing..." -ForegroundColor White
+Write-Host "  =============================================" -ForegroundColor DarkCyan
 
 # ============================================================================
-# Summary
+# 1. Node.js
+# ============================================================================
+
+Write-Step 1 "Node.js"
+
+if (Test-HasNode) {
+    Write-Done "Already installed"
+} else {
+    Write-Status "Downloading..."
+    $installer = Join-Path $tempDir "node.msi"
+    try {
+        Invoke-WebRequest -Uri "https://nodejs.org/dist/v22.12.0/node-v22.12.0-x64.msi" -OutFile $installer -UseBasicParsing
+        Write-Status "Installing..."
+        Start-Process "msiexec.exe" -ArgumentList "/i `"$installer`" /passive /norestart" -Wait
+        Write-Done "Installed"
+    } catch {
+        Write-Warn "Failed - visit nodejs.org"
+    }
+}
+
+# ============================================================================
+# 2. Git
+# ============================================================================
+
+Write-Step 2 "Git"
+
+if (Test-HasGit) {
+    Write-Done "Already installed"
+} else {
+    Write-Status "Downloading..."
+    $installer = Join-Path $tempDir "git.exe"
+    try {
+        Invoke-WebRequest -Uri "https://github.com/git-for-windows/git/releases/download/v2.47.1.windows.2/Git-2.47.1.2-64-bit.exe" -OutFile $installer -UseBasicParsing
+        Write-Status "Installing..."
+        Start-Process $installer -ArgumentList "/VERYSILENT /NORESTART /NOCANCEL /SP- /CLOSEAPPLICATIONS" -Wait
+        Write-Done "Installed"
+    } catch {
+        Write-Warn "Failed - visit git-scm.com"
+    }
+}
+
+# ============================================================================
+# 3. VS Code
+# ============================================================================
+
+Write-Step 3 "VS Code"
+
+if (Test-HasCode) {
+    Write-Done "Already installed"
+} else {
+    Write-Status "Downloading..."
+    $installer = Join-Path $tempDir "vscode.exe"
+    try {
+        Invoke-WebRequest -Uri "https://code.visualstudio.com/sha/download?build=stable&os=win32-x64" -OutFile $installer -UseBasicParsing
+        Write-Status "Installing..."
+        Start-Process $installer -ArgumentList "/VERYSILENT /NORESTART /MERGETASKS=!runcode,addcontextmenufiles,addcontextmenufolders,addtopath" -Wait
+        Start-Sleep -Seconds 3
+        Write-Done "Installed"
+    } catch {
+        Write-Warn "Failed - visit code.visualstudio.com"
+    }
+}
+
+# ============================================================================
+# 4. Claude Code
+# ============================================================================
+
+Write-Step 4 "Claude Code"
+
+if (Test-HasClaude) {
+    Write-Done "Already installed"
+} else {
+    $npm = Get-Npm
+    if ($npm) {
+        Write-Status "Installing via npm..."
+        try {
+            # Update PATH for this session
+            $env:Path = "$nodePath;$env:APPDATA\npm;$env:Path"
+            & $npm install -g @anthropic-ai/claude-code 2>$null | Out-Null
+            Write-Done "Installed"
+        } catch {
+            Write-Warn "Run later: npm install -g @anthropic-ai/claude-code"
+        }
+    } else {
+        # Node just installed, npm not available yet
+        Write-Warn "Restart PowerShell, then run: npm install -g @anthropic-ai/claude-code"
+    }
+}
+
+# ============================================================================
+# Extensions
+# ============================================================================
+
+Write-Host ""
+Write-Status "Adding VS Code extensions..."
+
+$code = Get-Code
+if ($code) {
+    & $code --install-extension anthropic.claude-code --force 2>$null | Out-Null
+    Write-Done "Claude extension added"
+} else {
+    Write-Status "VS Code not ready - install Claude extension later"
+}
+
+# ============================================================================
+# Done
 # ============================================================================
 
 Write-Host ""
 Write-Host "  =============================================" -ForegroundColor DarkCyan
-Write-Host ""
-Write-Host "     Installation Complete" -ForegroundColor White
-Write-Host ""
+Write-Host "       Setup Complete!" -ForegroundColor Green
 Write-Host "  =============================================" -ForegroundColor DarkCyan
 Write-Host ""
 
-# Show results
-if ($results.Node) {
-    Write-Host "  [OK] " -NoNewline -ForegroundColor Green
-    Write-Host "Node.js" -ForegroundColor White
-} else {
-    Write-Host "  [X]  " -NoNewline -ForegroundColor Red
-    Write-Host "Node.js - visit nodejs.org" -ForegroundColor Yellow
-}
+# Check if Claude is available
+if (Test-HasClaude) {
+    Write-Host "  Everything is ready!" -ForegroundColor White
+    Write-Host ""
+    Write-Host "  Opening VS Code and your guide..." -ForegroundColor Gray
 
-if ($results.Git) {
-    Write-Host "  [OK] " -NoNewline -ForegroundColor Green
-    Write-Host "Git" -ForegroundColor White
-} else {
-    Write-Host "  [X]  " -NoNewline -ForegroundColor Red
-    Write-Host "Git - visit git-scm.com" -ForegroundColor Yellow
-}
+    Start-Sleep -Seconds 2
 
-if ($results.Claude) {
-    Write-Host "  [OK] " -NoNewline -ForegroundColor Green
-    Write-Host "Claude Code" -ForegroundColor White
-} else {
-    Write-Host "  [X]  " -NoNewline -ForegroundColor Red
-    Write-Host "Claude Code - run: npm install -g @anthropic-ai/claude-code" -ForegroundColor Yellow
-}
+    # Open VS Code
+    $code = Get-Code
+    if ($code) { Start-Process $code }
 
-if ($results.VSCode) {
-    Write-Host "  [OK] " -NoNewline -ForegroundColor Green
-    Write-Host "VS Code" -ForegroundColor White
-} else {
-    Write-Host "  [X]  " -NoNewline -ForegroundColor Red
-    Write-Host "VS Code - visit code.visualstudio.com" -ForegroundColor Yellow
-}
+    Start-Sleep -Seconds 1
 
-if ($results.Extensions) {
-    Write-Host "  [OK] " -NoNewline -ForegroundColor Green
-    Write-Host "Extensions" -ForegroundColor White
+    # Open tutorial
+    Start-Process "https://laviefatigue.github.io/claude-code-installer/onboarding.html"
+
 } else {
-    Write-Host "  [--] " -NoNewline -ForegroundColor DarkGray
-    Write-Host "Extensions - install later from VS Code" -ForegroundColor DarkGray
+    Write-Host "  Almost there! Node.js needs a fresh terminal." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "  Next steps:" -ForegroundColor White
+    Write-Host "    1. Close this window" -ForegroundColor Gray
+    Write-Host "    2. Open a NEW PowerShell" -ForegroundColor Gray
+    Write-Host "    3. Run: " -NoNewline -ForegroundColor Gray
+    Write-Host "npm install -g @anthropic-ai/claude-code" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  Then open VS Code and you're ready!" -ForegroundColor Gray
 }
 
 Write-Host ""
 
-# Next steps
-if ($results.VSCode -and $results.Claude) {
-    Write-Host "  -----------------------------------------" -ForegroundColor DarkGray
-    Write-Host ""
-    Write-Host "  NEXT: Learn where everything is" -ForegroundColor White
-    Write-Host ""
-    Write-Host "  We'll open VS Code and a 2-minute visual guide." -ForegroundColor Gray
-    Write-Host ""
-    Write-Host "  -----------------------------------------" -ForegroundColor DarkGray
-    Write-Host ""
-
-    $launch = Read-Host "  Press ENTER to continue (or type 'skip')"
-
-    if ($launch -ne "skip") {
-        # Open VS Code
-        Write-Host ""
-        Write-Host "  Opening VS Code..." -ForegroundColor Gray
-        Start-Process "code" -ErrorAction SilentlyContinue
-
-        Start-Sleep -Seconds 2
-
-        # Open tutorial
-        Write-Host "  Opening visual guide..." -ForegroundColor Gray
-        Start-Process "https://laviefatigue.github.io/claude-code-installer/onboarding.html"
-    }
-} else {
-    Write-Host "  Some components need attention before continuing." -ForegroundColor Yellow
-    Write-Host "  Fix the issues above, then run this installer again." -ForegroundColor Gray
-    Write-Host ""
-}
-
-Write-Host ""
-Write-Host "  What will you create?" -ForegroundColor DarkYellow
-Write-Host ""
+# Cleanup
+Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
