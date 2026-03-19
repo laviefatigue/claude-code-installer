@@ -40,12 +40,16 @@ Claude Code Installer for Windows
 
 Usage:
   irm https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.ps1 | iex
-  .\install.ps1 [options]
+  .\install.bat [options]          (recommended for local use)
+  powershell -ExecutionPolicy Bypass -File .\install.ps1 [options]
 
 Options:
   -Quiet    Skip all confirmations (auto-yes)
   -DryRun   Show what would be installed without making changes
   -Help     Show this help
+
+Note: Running .\install.ps1 directly may be blocked by ExecutionPolicy.
+      Use install.bat or the irm | iex method instead.
 
 "@
     exit 0
