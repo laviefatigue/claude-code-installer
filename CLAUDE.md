@@ -6,17 +6,40 @@ A modular onboarding and distribution system for Claude Code.
 
 ```
 claude-code-framework/
-├── specs/                    # OpenSpec specifications
-│   └── INSTALLER.md         # Installer requirements
-├── cli-installer/           # PowerShell installer (POC)
-│   ├── install.ps1          # Main entry point
-│   └── modules/             # Installer modules
+├── install.ps1              # Windows installer (single-file, pipeable)
+├── install.sh               # macOS/Linux installer (single-file, pipeable)
+├── specs/                   # Specifications
+│   └── INSTALLER.md         # Installer specification v2.0
 ├── communities/             # Community configurations
 │   ├── base/                # Generic setup
 │   └── _template/           # Template for new communities
 ├── templates/               # MCP server templates
+├── archive/                 # Previous installer versions
+│   ├── install-claude-code.ps1
+│   ├── Install-ClaudeCode.bat
+│   └── cli-installer/
 └── docs/                    # Documentation
 ```
+
+## Installer
+
+Two single-file scripts that install everything needed for Claude Code:
+
+```powershell
+# Windows
+irm https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.ps1 | iex
+
+# macOS / Linux
+curl -fsSL https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.sh | bash
+```
+
+### What it installs (10 steps, 3 phases)
+
+**REQUIRED:** Git, Node.js LTS, VS Code, Claude Code CLI
+**ESSENTIAL:** Python, uv/uvx, GitHub CLI
+**CONFIGURE:** git identity, ExecutionPolicy/PATH, VS Code extensions
+
+See `specs/INSTALLER.md` for full specification.
 
 ## Development Guidelines
 
@@ -26,7 +49,6 @@ claude-code-framework/
 2. Edit `.claude-plugin/plugin.json` with community info
 3. Add skills to `skills/[skill-name]/SKILL.md`
 4. Add commands to `commands/[name].md`
-5. Test with `install.ps1 -Community [name]`
 
 ### Skill Format
 
@@ -43,24 +65,12 @@ allowed-tools: Read, Glob, Grep
 Skill instructions here...
 ```
 
-### Testing the Installer
-
-```powershell
-# Test prerequisite detection
-. .\cli-installer\modules\Check-Prerequisites.ps1
-Test-Prerequisites
-
-# Test plugin deployment (dry run)
-. .\cli-installer\modules\Deploy-CommunityPlugin.ps1
-$result = Deploy-CommunityPlugin -CommunityPath ".\communities\base"
-$result
-```
-
 ## Key Files
 
 | File | Purpose |
 |------|---------|
-| `cli-installer/install.ps1` | Main installer script |
+| `install.ps1` | Windows installer |
+| `install.sh` | macOS/Linux installer |
 | `communities/base/` | Default community plugin |
 | `specs/INSTALLER.md` | Installer specification |
 

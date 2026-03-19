@@ -1,0 +1,35 @@
+{
+  "name": "claude-code-framework",
+  "displayName": "Claude Code Framework",
+  "description": "Everything you need to start creating with Claude Code - the official Claude extension, knowledge tools, and onboarding guide.",
+  "version": "0.1.0",
+  "publisher": "laviefatigue",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/laviefatigue/claude-code-installer"
+  },
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Extension Packs",
+    "AI"
+  ],
+  "keywords": [
+    "claude",
+    "ai",
+    "coding",
+    "assistant",
+    "anthropic",
+    "framework"
+  ],
+  "extensionPack": [
+    "anthropic.claude-code",
+    "foam.foam-vscode"
+  ],
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  }
+}
