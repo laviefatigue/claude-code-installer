@@ -70,9 +70,11 @@ fi
 
 # Parse flags
 QUIET=false
+DRY_RUN=false
 for arg in "$@"; do
     case "$arg" in
         --quiet|-q) QUIET=true ;;
+        --dry-run|-n) DRY_RUN=true ;;
         --help|-h)
             echo ""
             echo "Claude Code Installer for macOS/Linux"
@@ -82,8 +84,9 @@ for arg in "$@"; do
             echo "  ./install.sh [options]"
             echo ""
             echo "Options:"
-            echo "  --quiet, -q    Skip all confirmations"
-            echo "  --help, -h     Show this help"
+            echo "  --quiet, -q      Skip all confirmations"
+            echo "  --dry-run, -n    Show what would be installed without making changes"
+            echo "  --help, -h       Show this help"
             echo ""
             exit 0
             ;;
@@ -142,6 +145,11 @@ write_status() {
         SKIP)    echo -e "      ${DIM}- ${msg}${RESET}" ;;
         INFO)    echo -e "      ${CYAN}${ARROW}${RESET} ${DIM}${msg}${RESET}" ;;
     esac
+}
+
+write_dry_run() {
+    local msg="$1"
+    echo -e "      ${BOLD}[DRY RUN]${RESET} ${DIM}${msg}${RESET}"
 }
 
 install_with_brew() {
@@ -224,6 +232,9 @@ install_git() {
         v=$(git --version | sed 's/git version //')
         write_status "Already installed v${v}" "OK"
         INSTALLED+=("Git v${v}")
+    elif [ "$DRY_RUN" = true ]; then
+        write_dry_run "Would install Git via $PKG_MANAGER"
+        INSTALLED+=("Git (dry run)")
     else
         write_status "Installing Git..." "INSTALL"
 
@@ -253,6 +264,9 @@ install_node() {
         v=$(node --version)
         write_status "Already installed ${v}" "OK"
         INSTALLED+=("Node.js ${v}")
+    elif [ "$DRY_RUN" = true ]; then
+        write_dry_run "Would install Node.js LTS via $PKG_MANAGER"
+        INSTALLED+=("Node.js (dry run)")
     else
         write_status "Installing Node.js LTS..." "INSTALL"
         local installed=false
@@ -297,6 +311,9 @@ install_vscode() {
         export PATH="/Applications/Visual Studio Code.app/Contents/Resources/app/bin:$PATH"
         write_status "Already installed" "OK"
         INSTALLED+=("VS Code")
+    elif [ "$DRY_RUN" = true ]; then
+        write_dry_run "Would install VS Code via $([ "$PKG_MANAGER" = "brew" ] && echo "brew cask" || echo "$PKG_MANAGER / .deb download")"
+        INSTALLED+=("VS Code (dry run)")
     else
         write_status "Installing VS Code..." "INSTALL"
 
@@ -333,6 +350,10 @@ install_claude() {
     if command -v claude &>/dev/null; then
         write_status "Already installed" "OK"
         INSTALLED+=("Claude Code CLI")
+    elif [ "$DRY_RUN" = true ]; then
+        write_dry_run "Would install Claude Code via official installer (claude.ai/install.sh)"
+        write_dry_run "Fallback: npm install -g @anthropic-ai/claude-code"
+        INSTALLED+=("Claude Code CLI (dry run)")
     else
         write_status "Installing Claude Code..." "INSTALL"
 
@@ -379,6 +400,9 @@ install_python() {
         v=$(python --version 2>/dev/null | sed 's/Python //')
         write_status "Already installed v${v}" "OK"
         INSTALLED+=("Python v${v}")
+    elif [ "$DRY_RUN" = true ]; then
+        write_dry_run "Would install Python via $PKG_MANAGER"
+        INSTALLED+=("Python (dry run)")
     else
         write_status "Installing Python..." "INSTALL"
 
@@ -410,6 +434,9 @@ install_uv() {
         v=$(uv --version 2>/dev/null | sed 's/uv //')
         write_status "Already installed v${v}" "OK"
         INSTALLED+=("uv v${v}")
+    elif [ "$DRY_RUN" = true ]; then
+        write_dry_run "Would install uv via official installer (astral.sh/uv/install.sh)"
+        INSTALLED+=("uv (dry run)")
     else
         write_status "Installing uv..." "INSTALL"
 
@@ -437,6 +464,9 @@ install_gh() {
         v=$(gh --version 2>/dev/null | head -1 | sed 's/gh version //' | sed 's/ .*//')
         write_status "Already installed v${v}" "OK"
         INSTALLED+=("GitHub CLI v${v}")
+    elif [ "$DRY_RUN" = true ]; then
+        write_dry_run "Would install GitHub CLI via $PKG_MANAGER"
+        INSTALLED+=("GitHub CLI (dry run)")
     else
         write_status "Installing GitHub CLI..." "INSTALL"
 
@@ -484,6 +514,13 @@ set_git_identity() {
     if [ -n "$current_name" ] && [ -n "$current_email" ]; then
         write_status "${current_name} <${current_email}>" "OK"
         INSTALLED+=("Git identity")
+        echo ""
+        return
+    fi
+
+    if [ "$DRY_RUN" = true ]; then
+        write_dry_run "Would prompt for name and email, then run: git config --global user.name/email"
+        INSTALLED+=("Git identity (dry run)")
         echo ""
         return
     fi
@@ -546,39 +583,51 @@ ensure_shell_path() {
 
     # Ensure shell rc file exists
     if [ -n "$shell_rc" ] && [ ! -f "$shell_rc" ]; then
-        touch "$shell_rc"
-    fi
-
-    # Ensure ~/.local/bin is in PATH
-    if [[ ":$PATH:" != *":$local_bin:"* ]]; then
-        export PATH="$local_bin:$PATH"
-        if [ -n "$shell_rc" ]; then
-            if ! grep -q "\.local/bin" "$shell_rc" 2>/dev/null; then
-                echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$shell_rc"
-                path_updated=true
-            fi
+        if [ "$DRY_RUN" != true ]; then
+            touch "$shell_rc"
         fi
     fi
 
-    # macOS: Ensure Homebrew is in PATH (Apple Silicon or Intel)
-    if [[ "$OS" == "macos" ]]; then
-        if [ -f "/opt/homebrew/bin/brew" ]; then
-            if [ -n "$shell_rc" ] && ! grep -q "homebrew" "$shell_rc" 2>/dev/null; then
-                echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$shell_rc"
-                path_updated=true
-            fi
-        elif [ -f "/usr/local/bin/brew" ]; then
-            if [ -n "$shell_rc" ] && ! grep -q "homebrew" "$shell_rc" 2>/dev/null; then
-                echo 'eval "$(/usr/local/bin/brew shellenv)"' >> "$shell_rc"
-                path_updated=true
-            fi
+    if [ "$DRY_RUN" = true ]; then
+        if [[ ":$PATH:" != *":$local_bin:"* ]]; then
+            write_dry_run "Would add ~/.local/bin to PATH in ${shell_rc:-'(unknown shell rc)'}"
         fi
-    fi
-
-    if [ "$path_updated" = true ]; then
-        write_status "Updated ${shell_rc}" "OK"
+        if [[ "$OS" == "macos" ]]; then
+            write_dry_run "Would ensure Homebrew shellenv in ${shell_rc:-'(unknown shell rc)'}"
+        fi
+        write_status "PATH check complete" "OK"
     else
-        write_status "PATH already configured" "OK"
+        # Ensure ~/.local/bin is in PATH
+        if [[ ":$PATH:" != *":$local_bin:"* ]]; then
+            export PATH="$local_bin:$PATH"
+            if [ -n "$shell_rc" ]; then
+                if ! grep -q "\.local/bin" "$shell_rc" 2>/dev/null; then
+                    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$shell_rc"
+                    path_updated=true
+                fi
+            fi
+        fi
+
+        # macOS: Ensure Homebrew is in PATH (Apple Silicon or Intel)
+        if [[ "$OS" == "macos" ]]; then
+            if [ -f "/opt/homebrew/bin/brew" ]; then
+                if [ -n "$shell_rc" ] && ! grep -q "homebrew" "$shell_rc" 2>/dev/null; then
+                    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$shell_rc"
+                    path_updated=true
+                fi
+            elif [ -f "/usr/local/bin/brew" ]; then
+                if [ -n "$shell_rc" ] && ! grep -q "homebrew" "$shell_rc" 2>/dev/null; then
+                    echo 'eval "$(/usr/local/bin/brew shellenv)"' >> "$shell_rc"
+                    path_updated=true
+                fi
+            fi
+        fi
+
+        if [ "$path_updated" = true ]; then
+            write_status "Updated ${shell_rc}" "OK"
+        else
+            write_status "PATH already configured" "OK"
+        fi
     fi
     INSTALLED+=("Shell PATH")
     echo ""
@@ -600,6 +649,8 @@ install_extensions() {
     # Claude Code extension
     if echo "$extensions" | grep -q "anthropic.claude-code"; then
         write_status "Claude Code extension already installed" "OK"
+    elif [ "$DRY_RUN" = true ]; then
+        write_dry_run "Would run: code --install-extension anthropic.claude-code"
     else
         code --install-extension anthropic.claude-code --force 2>/dev/null
         write_status "Claude Code extension installed" "OK"
@@ -608,6 +659,8 @@ install_extensions() {
     # Foam extension
     if echo "$extensions" | grep -q "foam.foam-vscode"; then
         write_status "Foam extension already installed" "OK"
+    elif [ "$DRY_RUN" = true ]; then
+        write_dry_run "Would run: code --install-extension foam.foam-vscode"
     else
         code --install-extension foam.foam-vscode --force 2>/dev/null
         write_status "Foam extension installed" "OK"
@@ -624,6 +677,11 @@ install_extensions() {
 # ── Phase 0: Welcome ──
 
 write_banner
+
+if [ "$DRY_RUN" = true ]; then
+    echo -e "${BOLD}  [DRY RUN MODE]${RESET} ${DIM}No changes will be made. Showing what would happen.${RESET}"
+    echo ""
+fi
 
 echo -e "${SAND}  This sets up everything you need to create with AI.${RESET}"
 echo -e "${DIM}  Takes about 5 minutes. Cancel anytime with Ctrl+C.${RESET}"

@@ -29,6 +29,7 @@
 
 param(
     [switch]$Quiet,
+    [switch]$DryRun,
     [switch]$Help
 )
 
@@ -43,6 +44,7 @@ Usage:
 
 Options:
   -Quiet    Skip all confirmations (auto-yes)
+  -DryRun   Show what would be installed without making changes
   -Help     Show this help
 
 "@
@@ -222,6 +224,12 @@ function Test-WingetAvailable {
     return $null -ne (Get-Command winget -ErrorAction SilentlyContinue)
 }
 
+function Write-DryRun {
+    param([string]$Msg)
+    Write-Host "      [DRY RUN] " -NoNewline -ForegroundColor Magenta
+    Write-Host $Msg -ForegroundColor DarkGray
+}
+
 function Install-WithWinget {
     param([string]$PackageId)
     $result = winget install $PackageId --accept-package-agreements --accept-source-agreements --silent 2>&1
@@ -344,6 +352,9 @@ function Install-Git {
     if ($info.Found) {
         Write-Status "Already installed v$($info.Version)" "OK"
         $script:Installed += "Git v$($info.Version)"
+    } elseif ($DryRun) {
+        Write-DryRun "Would install Git via $(if (Test-WingetAvailable) { 'winget (Git.Git)' } else { 'direct download from GitHub releases' })"
+        $script:Installed += "Git (dry run)"
     } else {
         Write-Status "Installing Git..." "INSTALL"
         New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
@@ -384,9 +395,11 @@ function Install-Git {
 
     # CRITICAL: Configure Git Bash path for Claude Code on Windows
     if (Test-Path $gitBashExe) {
-        [System.Environment]::SetEnvironmentVariable("CLAUDE_CODE_GIT_BASH_PATH", $gitBashExe, "User")
-        $env:CLAUDE_CODE_GIT_BASH_PATH = $gitBashExe
-        Write-Status "Git Bash path configured for Claude Code" "OK"
+        if (-not $DryRun) {
+            [System.Environment]::SetEnvironmentVariable("CLAUDE_CODE_GIT_BASH_PATH", $gitBashExe, "User")
+            $env:CLAUDE_CODE_GIT_BASH_PATH = $gitBashExe
+        }
+        Write-Status "Git Bash path $(if ($DryRun) { 'would be ' } else { '' })configured for Claude Code" "OK"
     } else {
         Write-Status "Git Bash not found at expected path" "WARN"
         Write-Host "      Claude Code may show errors. Set CLAUDE_CODE_GIT_BASH_PATH manually." -ForegroundColor DarkGray
@@ -402,6 +415,10 @@ function Install-Node {
     if ($info.Found) {
         Write-Status "Already installed $($info.Version)" "OK"
         $script:Installed += "Node.js $($info.Version)"
+    } elseif ($DryRun) {
+        $nodeArch = if ($script:IsARM64) { "arm64" } else { "x64" }
+        Write-DryRun "Would install Node.js v24.14.0 ($nodeArch) via $(if (Test-WingetAvailable) { 'winget (OpenJS.NodeJS.LTS)' } else { "nodejs.org .msi" })"
+        $script:Installed += "Node.js (dry run)"
     } else {
         Write-Status "Installing Node.js LTS..." "INSTALL"
         New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
@@ -446,6 +463,10 @@ function Install-VSCode {
     if ($info.Found) {
         Write-Status "Already installed" "OK"
         $script:Installed += "VS Code"
+    } elseif ($DryRun) {
+        $codeOs = if ($script:IsARM64) { "win32-arm64" } else { "win32-x64" }
+        Write-DryRun "Would install VS Code ($codeOs) via $(if (Test-WingetAvailable) { 'winget (Microsoft.VisualStudioCode)' } else { 'direct download' })"
+        $script:Installed += "VS Code (dry run)"
     } else {
         Write-Status "Installing VS Code..." "INSTALL"
         New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
@@ -490,6 +511,10 @@ function Install-Claude {
     if ($info.Found) {
         Write-Status "Already installed" "OK"
         $script:Installed += "Claude Code CLI"
+    } elseif ($DryRun) {
+        Write-DryRun "Would install Claude Code via official installer (claude.ai/install.ps1)"
+        Write-DryRun "Fallback: npm install -g @anthropic-ai/claude-code"
+        $script:Installed += "Claude Code CLI (dry run)"
     } else {
         Write-Status "Installing Claude Code..." "INSTALL"
         $installed = $false
@@ -542,6 +567,10 @@ function Install-Python {
     if ($info.Found) {
         Write-Status "Already installed v$($info.Version)" "OK"
         $script:Installed += "Python v$($info.Version)"
+    } elseif ($DryRun) {
+        $pyArch = if ($script:IsARM64) { "arm64" } else { "amd64" }
+        Write-DryRun "Would install Python 3.12.13 ($pyArch) via $(if (Test-WingetAvailable) { 'winget (Python.Python.3.12)' } else { 'python.org installer' })"
+        $script:Installed += "Python (dry run)"
     } else {
         Write-Status "Installing Python..." "INSTALL"
         New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
@@ -583,6 +612,9 @@ function Install-Uv {
     if ($info.Found) {
         Write-Status "Already installed v$($info.Version)" "OK"
         $script:Installed += "uv v$($info.Version)"
+    } elseif ($DryRun) {
+        Write-DryRun "Would install uv via official installer (astral.sh/uv/install.ps1)"
+        $script:Installed += "uv (dry run)"
     } else {
         Write-Status "Installing uv..." "INSTALL"
 
@@ -613,6 +645,10 @@ function Install-GhCli {
     if ($info.Found) {
         Write-Status "Already installed v$($info.Version)" "OK"
         $script:Installed += "GitHub CLI v$($info.Version)"
+    } elseif ($DryRun) {
+        $ghArch = if ($script:IsARM64) { "arm64" } else { "amd64" }
+        Write-DryRun "Would install GitHub CLI ($ghArch) via $(if (Test-WingetAvailable) { 'winget (GitHub.cli)' } else { 'GitHub releases .msi' })"
+        $script:Installed += "GitHub CLI (dry run)"
     } else {
         Write-Status "Installing GitHub CLI..." "INSTALL"
         $installed = $false
@@ -670,6 +706,13 @@ function Set-GitIdentity {
         return
     }
 
+    if ($DryRun) {
+        Write-DryRun "Would prompt for name and email, then run: git config --global user.name/email"
+        $script:Installed += "Git identity (dry run)"
+        Write-Host ""
+        return
+    }
+
     if ($Quiet) {
         Write-Status "Not configured (run: git config --global user.name 'Your Name')" "WARN"
         $script:Skipped += "Git identity"
@@ -712,13 +755,18 @@ function Set-PSExecutionPolicy {
 
     $current = Get-ExecutionPolicy -Scope CurrentUser
     if ($current -eq "Restricted" -or $current -eq "Undefined") {
-        try {
-            Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
-            Write-Status "Set to RemoteSigned" "OK"
-            $script:Installed += "ExecutionPolicy"
-        } catch {
-            Write-Status "Could not change ($current) - some tools may not work" "WARN"
-            $script:Skipped += "ExecutionPolicy"
+        if ($DryRun) {
+            Write-DryRun "Would set ExecutionPolicy from '$current' to 'RemoteSigned' (CurrentUser scope)"
+            $script:Installed += "ExecutionPolicy (dry run)"
+        } else {
+            try {
+                Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+                Write-Status "Set to RemoteSigned" "OK"
+                $script:Installed += "ExecutionPolicy"
+            } catch {
+                Write-Status "Could not change ($current) - some tools may not work" "WARN"
+                $script:Skipped += "ExecutionPolicy"
+            }
         }
     } else {
         Write-Status "Already set to $current" "OK"
@@ -744,6 +792,8 @@ function Install-Extensions {
     # Claude Code extension
     if ($extensions -match "anthropic.claude-code") {
         Write-Status "Claude Code extension already installed" "OK"
+    } elseif ($DryRun) {
+        Write-DryRun "Would run: code --install-extension anthropic.claude-code"
     } else {
         & $codePath --install-extension anthropic.claude-code --force 2>$null | Out-Null
         Write-Status "Claude Code extension installed" "OK"
@@ -752,6 +802,8 @@ function Install-Extensions {
     # Foam extension
     if ($extensions -match "foam.foam-vscode") {
         Write-Status "Foam extension already installed" "OK"
+    } elseif ($DryRun) {
+        Write-DryRun "Would run: code --install-extension foam.foam-vscode"
     } else {
         & $codePath --install-extension foam.foam-vscode --force 2>$null | Out-Null
         Write-Status "Foam extension installed" "OK"
@@ -768,6 +820,11 @@ function Install-Extensions {
 # ── Phase 0: Welcome ──
 
 Write-Banner
+
+if ($DryRun) {
+    Write-Host "  [DRY RUN MODE] No changes will be made. Showing what would happen." -ForegroundColor Magenta
+    Write-Host ""
+}
 
 Write-Host "  This sets up everything you need to create with AI." -ForegroundColor Gray
 Write-Host "  Takes about 5 minutes. Cancel anytime with Ctrl+C." -ForegroundColor DarkGray
