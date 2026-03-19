@@ -35,7 +35,8 @@ RESET="\033[0m"
 BOLD="\033[1m"
 DIM="\033[2m"
 
-GOLD="\033[38;5;221m"
+# Replace {U}niversity palette — lime green accent, dark/light contrast
+LIME="\033[38;5;154m"
 SAGE="\033[38;5;114m"
 CORAL="\033[38;5;210m"
 SAND="\033[38;5;223m"
@@ -105,21 +106,22 @@ FAILED=()
 write_banner() {
     clear
     echo ""
-    echo -e "${CREAM}${BOLD}  +-------------------------------------------------------+${RESET}"
-    echo -e "${CREAM}${BOLD}  |                                                       |${RESET}"
-    echo -e "${CREAM}${BOLD}  |            Welcome to Claude Code                     |${RESET}"
-    echo -e "${CREAM}${BOLD}  |                                                       |${RESET}"
-    echo -e "${CREAM}${BOLD}  |    ${RESET}${SAND}Code is the language of technology.${CREAM}${BOLD}            |${RESET}"
-    echo -e "${CREAM}${BOLD}  |    ${RESET}${SAND}Now you speak it fluently.${CREAM}${BOLD}                   |${RESET}"
-    echo -e "${CREAM}${BOLD}  |                                                       |${RESET}"
-    echo -e "${CREAM}${BOLD}  +-------------------------------------------------------+${RESET}"
+    echo -e "${LIME}${BOLD}  +-------------------------------------------------------+${RESET}"
+    echo -e "${LIME}${BOLD}  |                                                       |${RESET}"
+    echo -e "${LIME}${BOLD}  |        ${RESET}${CREAM}${BOLD}Replace {U}niversity${RESET}${LIME}${BOLD}                       |${RESET}"
+    echo -e "${LIME}${BOLD}  |        ${RESET}${GRAY}Claude Code Installer${LIME}${BOLD}                        |${RESET}"
+    echo -e "${LIME}${BOLD}  |                                                       |${RESET}"
+    echo -e "${LIME}${BOLD}  |    ${RESET}${GRAY}Code is the language of technology.${LIME}${BOLD}            |${RESET}"
+    echo -e "${LIME}${BOLD}  |    ${RESET}${GRAY}With Claude, you speak it fluently.${LIME}${BOLD}           |${RESET}"
+    echo -e "${LIME}${BOLD}  |                                                       |${RESET}"
+    echo -e "${LIME}${BOLD}  +-------------------------------------------------------+${RESET}"
     echo ""
 }
 
 write_phase() {
     local name="$1"
     echo ""
-    echo -e "${CYAN}  -- ${name} $(printf '%0.s-' $(seq 1 $((55 - ${#name}))))${RESET}"
+    echo -e "${LIME}  -- ${name} $(printf '%0.s-' $(seq 1 $((55 - ${#name}))))${RESET}"
     echo ""
 }
 
@@ -225,7 +227,7 @@ ensure_homebrew() {
 }
 
 install_git() {
-    write_step_header 1 "Git" "Saves your work like a time machine. Never lose progress."
+    write_step_header 1 "Git" "Every change tracked. Undo anything."
 
     if command -v git &>/dev/null; then
         local v
@@ -257,7 +259,7 @@ install_git() {
 }
 
 install_node() {
-    write_step_header 2 "Node.js" "Powers Claude Code and modern development tools."
+    write_step_header 2 "Node.js" "The engine behind Claude. Runs in the background."
 
     if command -v node &>/dev/null; then
         local v
@@ -302,7 +304,7 @@ install_node() {
 }
 
 install_vscode() {
-    write_step_header 3 "VS Code" "Your creative workspace where you and Claude build together."
+    write_step_header 3 "VS Code" "Your workspace. Where you and Claude build things."
 
     if command -v code &>/dev/null; then
         write_status "Already installed" "OK"
@@ -345,7 +347,7 @@ install_vscode() {
 }
 
 install_claude() {
-    write_step_header 4 "Claude Code" "Your AI partner. Tell it what you want to build."
+    write_step_header 4 "Claude Code" "Your AI builder. Describe it in English, Claude builds it."
 
     if command -v claude &>/dev/null; then
         write_status "Already installed" "OK"
@@ -388,7 +390,7 @@ install_claude() {
 }
 
 install_python() {
-    write_step_header 5 "Python" "For automation, data projects, and MCP servers."
+    write_step_header 5 "Python" "Automate the boring stuff. Runs while you sleep."
 
     if command -v python3 &>/dev/null; then
         local v
@@ -427,7 +429,7 @@ install_python() {
 }
 
 install_uv() {
-    write_step_header 6 "uv" "Fast Python package manager for MCP servers."
+    write_step_header 6 "uv" "Installs Python tools instantly. No waiting."
 
     if command -v uv &>/dev/null; then
         local v
@@ -457,7 +459,7 @@ install_uv() {
 }
 
 install_gh() {
-    write_step_header 7 "GitHub CLI" "Create pull requests, manage issues, collaborate."
+    write_step_header 7 "GitHub CLI" "Ship your work. Collaborate. Show it off."
 
     if command -v gh &>/dev/null; then
         local v
@@ -505,7 +507,7 @@ install_gh() {
 # ============================================================================
 
 set_git_identity() {
-    write_step_header 8 "Git Identity" "Git needs your name and email to save your work."
+    write_step_header 8 "Git Identity" "So your work has your name on it."
 
     local current_name current_email
     current_name=$(git config --global user.name 2>/dev/null)
@@ -564,7 +566,7 @@ set_git_identity() {
 }
 
 ensure_shell_path() {
-    write_step_header 9 "Shell PATH" "Ensuring all tools are accessible from your terminal."
+    write_step_header 9 "Shell PATH" "Making sure everything just works."
 
     local local_bin="$HOME/.local/bin"
     local path_updated=false
@@ -634,7 +636,7 @@ ensure_shell_path() {
 }
 
 install_extensions() {
-    write_step_header 10 "VS Code Extensions" "Claude Code and Foam for your editor."
+    write_step_header 10 "VS Code Extensions" "Claude inside your editor. Ready when you are."
 
     if ! command -v code &>/dev/null; then
         write_status "VS Code not in PATH - extensions will install on first launch" "SKIP"
@@ -683,25 +685,25 @@ if [ "$DRY_RUN" = true ]; then
     echo ""
 fi
 
-echo -e "${SAND}  This sets up everything you need to create with AI.${RESET}"
-echo -e "${DIM}  Takes about 5 minutes. Cancel anytime with Ctrl+C.${RESET}"
+echo -e "${SAND}  5 minutes. 10 tools. Then you build.${RESET}"
+echo -e "${DIM}  No code required. Seriously.${RESET}"
 echo ""
-echo -e "${CREAM}  What we'll install:${RESET}"
+echo -e "${CREAM}  What we're setting up:${RESET}"
 echo ""
 echo -e "${DIM}    REQUIRED                            ESSENTIAL${RESET}"
-echo -e "    ${CYAN}1. Git          ${DIM}version control     ${CYAN}5. Python     ${DIM}automation & data${RESET}"
-echo -e "    ${CYAN}2. Node.js      ${DIM}powers Claude       ${CYAN}6. uv         ${DIM}Python tools${RESET}"
-echo -e "    ${CYAN}3. VS Code      ${DIM}your workspace      ${CYAN}7. GitHub CLI ${DIM}collaboration${RESET}"
-echo -e "    ${CYAN}4. Claude Code  ${DIM}your AI partner${RESET}"
+echo -e "    ${LIME}1. Git          ${DIM}track everything    ${LIME}5. Python     ${DIM}automate anything${RESET}"
+echo -e "    ${LIME}2. Node.js      ${DIM}powers Claude       ${LIME}6. uv         ${DIM}fast installs${RESET}"
+echo -e "    ${LIME}3. VS Code      ${DIM}your workspace      ${LIME}7. GitHub CLI ${DIM}ship & share${RESET}"
+echo -e "    ${LIME}4. Claude Code  ${DIM}your AI builder${RESET}"
 echo ""
-echo -e "${DIM}    Plus: git setup, VS Code extensions${RESET}"
+echo -e "${DIM}    Plus: git identity, VS Code extensions${RESET}"
 echo ""
 
 if [ "$QUIET" != true ]; then
-    read -p "  Ready to begin? [Y/n] " response </dev/tty
+    read -p "  Ready? [Y/n] " response </dev/tty
     if [ "$response" = "n" ] || [ "$response" = "N" ]; then
         echo ""
-        echo -e "${SAND}  No problem! Run this command again when you're ready.${RESET}"
+        echo -e "${SAND}  No worries. Run this again when you're ready to build.${RESET}"
         echo ""
         exit 0
     fi
@@ -758,13 +760,13 @@ echo ""
 if [ ${#FAILED[@]} -eq 0 ]; then
     echo -e "${SAGE}${BOLD}  +-------------------------------------------------------+${RESET}"
     echo -e "${SAGE}${BOLD}  |                                                       |${RESET}"
-    echo -e "${SAGE}${BOLD}  |              ${RESET}${CREAM}${BOLD}You're ready to create!${RESET}${SAGE}${BOLD}                  |${RESET}"
+    echo -e "${SAGE}${BOLD}  |            ${RESET}${CREAM}${BOLD}You're ready to build.${RESET}${SAGE}${BOLD}                    |${RESET}"
     echo -e "${SAGE}${BOLD}  |                                                       |${RESET}"
     echo -e "${SAGE}${BOLD}  +-------------------------------------------------------+${RESET}"
 else
     echo -e "${GOLD}${BOLD}  +-------------------------------------------------------+${RESET}"
     echo -e "${GOLD}${BOLD}  |                                                       |${RESET}"
-    echo -e "${GOLD}${BOLD}  |              ${RESET}${CREAM}${BOLD}Almost there!${RESET}${GOLD}${BOLD}                          |${RESET}"
+    echo -e "${LIME}${BOLD}  |              ${RESET}${CREAM}${BOLD}Almost there.${RESET}${LIME}${BOLD}                          |${RESET}"
     echo -e "${GOLD}${BOLD}  |                                                       |${RESET}"
     echo -e "${GOLD}${BOLD}  +-------------------------------------------------------+${RESET}"
 fi
@@ -794,9 +796,9 @@ fi
 echo ""
 echo -e "${DIM}  ---------------------------------------------------------${RESET}"
 echo ""
-echo -e "${CREAM}  What's next:${RESET}"
+echo -e "${CREAM}  What happens next:${RESET}"
 echo -e "${SAND}    1. Open a new terminal window${RESET}"
-echo -e "${SAND}    2. Type ${CYAN}claude${SAND} to start creating${RESET}"
+echo -e "${SAND}    2. Type ${LIME}claude${SAND} and start building${RESET}"
 echo ""
 
 if [ "$QUIET" != true ]; then

@@ -103,27 +103,30 @@ $script:Failed = @()
 function Write-Banner {
     Clear-Host
     Write-Host ""
-    Write-Host "  +-------------------------------------------------------+" -ForegroundColor DarkCyan
-    Write-Host "  |                                                       |" -ForegroundColor DarkCyan
-    Write-Host "  |            " -NoNewline -ForegroundColor DarkCyan
-    Write-Host "Welcome to Claude Code" -NoNewline -ForegroundColor White
-    Write-Host "                   |" -ForegroundColor DarkCyan
-    Write-Host "  |                                                       |" -ForegroundColor DarkCyan
-    Write-Host "  |    " -NoNewline -ForegroundColor DarkCyan
-    Write-Host "Code is the language of technology." -NoNewline -ForegroundColor Gray
-    Write-Host "            |" -ForegroundColor DarkCyan
-    Write-Host "  |    " -NoNewline -ForegroundColor DarkCyan
-    Write-Host "Now you speak it fluently." -NoNewline -ForegroundColor Gray
-    Write-Host "                   |" -ForegroundColor DarkCyan
-    Write-Host "  |                                                       |" -ForegroundColor DarkCyan
-    Write-Host "  +-------------------------------------------------------+" -ForegroundColor DarkCyan
+    Write-Host "  +-------------------------------------------------------+" -ForegroundColor Green
+    Write-Host "  |                                                       |" -ForegroundColor Green
+    Write-Host "  |        " -NoNewline -ForegroundColor Green
+    Write-Host "Replace {U}niversity" -NoNewline -ForegroundColor White
+    Write-Host "                       |" -ForegroundColor Green
+    Write-Host "  |        " -NoNewline -ForegroundColor Green
+    Write-Host "Claude Code Installer" -NoNewline -ForegroundColor Gray
+    Write-Host "                        |" -ForegroundColor Green
+    Write-Host "  |                                                       |" -ForegroundColor Green
+    Write-Host "  |    " -NoNewline -ForegroundColor Green
+    Write-Host "Code is the language of technology." -NoNewline -ForegroundColor DarkGray
+    Write-Host "            |" -ForegroundColor Green
+    Write-Host "  |    " -NoNewline -ForegroundColor Green
+    Write-Host "With Claude, you speak it fluently." -NoNewline -ForegroundColor DarkGray
+    Write-Host "           |" -ForegroundColor Green
+    Write-Host "  |                                                       |" -ForegroundColor Green
+    Write-Host "  +-------------------------------------------------------+" -ForegroundColor Green
     Write-Host ""
 }
 
 function Write-Phase {
     param([string]$Name)
     Write-Host ""
-    Write-Host "  -- $Name " -NoNewline -ForegroundColor DarkCyan
+    Write-Host "  -- $Name " -NoNewline -ForegroundColor Green
     $pad = 55 - $Name.Length
     if ($pad -gt 0) { Write-Host ("-" * $pad) -ForegroundColor DarkGray }
     else { Write-Host "" }
@@ -350,7 +353,7 @@ function Find-Gh {
 # ============================================================================
 
 function Install-Git {
-    Write-StepHeader 1 "Git for Windows" "Saves your work and provides Git Bash (required by Claude Code)."
+    Write-StepHeader 1 "Git for Windows" "Every change tracked. Undo anything. Required by Claude."
 
     $info = Find-Git
     if ($info.Found) {
@@ -413,7 +416,7 @@ function Install-Git {
 }
 
 function Install-Node {
-    Write-StepHeader 2 "Node.js" "Powers Claude Code and modern development tools."
+    Write-StepHeader 2 "Node.js" "The engine behind Claude. Runs in the background."
 
     $info = Find-Node
     if ($info.Found) {
@@ -461,7 +464,7 @@ function Install-Node {
 }
 
 function Install-VSCode {
-    Write-StepHeader 3 "VS Code" "Your creative workspace where you and Claude build together."
+    Write-StepHeader 3 "VS Code" "Your workspace. Where you and Claude build things."
 
     $info = Find-VSCode
     if ($info.Found) {
@@ -509,7 +512,7 @@ function Install-VSCode {
 }
 
 function Install-Claude {
-    Write-StepHeader 4 "Claude Code" "Your AI partner. Tell it what you want to build."
+    Write-StepHeader 4 "Claude Code" "Your AI builder. Describe it in English, Claude builds it."
 
     $info = Find-Claude
     if ($info.Found) {
@@ -565,7 +568,7 @@ function Install-Claude {
 }
 
 function Install-Python {
-    Write-StepHeader 5 "Python" "For automation, data projects, and MCP servers."
+    Write-StepHeader 5 "Python" "Automate the boring stuff. Runs while you sleep."
 
     $info = Find-Python
     if ($info.Found) {
@@ -610,7 +613,7 @@ function Install-Python {
 }
 
 function Install-Uv {
-    Write-StepHeader 6 "uv" "Fast Python package manager for MCP servers."
+    Write-StepHeader 6 "uv" "Installs Python tools instantly. No waiting."
 
     $info = Find-Uv
     if ($info.Found) {
@@ -643,7 +646,7 @@ function Install-Uv {
 }
 
 function Install-GhCli {
-    Write-StepHeader 7 "GitHub CLI" "Create pull requests, manage issues, collaborate."
+    Write-StepHeader 7 "GitHub CLI" "Ship your work. Collaborate. Show it off."
 
     $info = Find-Gh
     if ($info.Found) {
@@ -698,7 +701,7 @@ function Install-GhCli {
 # ============================================================================
 
 function Set-GitIdentity {
-    Write-StepHeader 8 "Git Identity" "Git needs your name and email to save your work."
+    Write-StepHeader 8 "Git Identity" "So your work has your name on it."
 
     $currentName = & git config --global user.name 2>$null
     $currentEmail = & git config --global user.email 2>$null
@@ -755,7 +758,7 @@ function Set-GitIdentity {
 }
 
 function Set-PSExecutionPolicy {
-    Write-StepHeader 9 "PowerShell ExecutionPolicy" "Allows scripts and tools to run properly."
+    Write-StepHeader 9 "PowerShell ExecutionPolicy" "Unlocks your terminal. One-time fix."
 
     $current = Get-ExecutionPolicy -Scope CurrentUser
     if ($current -eq "Restricted" -or $current -eq "Undefined") {
@@ -780,7 +783,7 @@ function Set-PSExecutionPolicy {
 }
 
 function Install-Extensions {
-    Write-StepHeader 10 "VS Code Extensions" "Claude Code and Foam for your editor."
+    Write-StepHeader 10 "VS Code Extensions" "Claude inside your editor. Ready when you are."
 
     $codePath = Get-CodePath
     if (-not $codePath) {
@@ -830,35 +833,35 @@ if ($DryRun) {
     Write-Host ""
 }
 
-Write-Host "  This sets up everything you need to create with AI." -ForegroundColor Gray
-Write-Host "  Takes about 5 minutes. Cancel anytime with Ctrl+C." -ForegroundColor DarkGray
+Write-Host "  5 minutes. 10 tools. Then you build." -ForegroundColor Gray
+Write-Host "  No code required. Seriously." -ForegroundColor DarkGray
 Write-Host ""
-Write-Host "  What we'll install:" -ForegroundColor White
+Write-Host "  What we're setting up:" -ForegroundColor White
 Write-Host ""
 Write-Host "    REQUIRED                            ESSENTIAL" -ForegroundColor DarkGray
-Write-Host "    1. Git          " -NoNewline -ForegroundColor Cyan
-Write-Host "version control   " -NoNewline -ForegroundColor DarkGray
-Write-Host "  5. Python     " -NoNewline -ForegroundColor Cyan
-Write-Host "automation & data" -ForegroundColor DarkGray
-Write-Host "    2. Node.js      " -NoNewline -ForegroundColor Cyan
+Write-Host "    1. Git          " -NoNewline -ForegroundColor Green
+Write-Host "track everything  " -NoNewline -ForegroundColor DarkGray
+Write-Host "  5. Python     " -NoNewline -ForegroundColor Green
+Write-Host "automate anything" -ForegroundColor DarkGray
+Write-Host "    2. Node.js      " -NoNewline -ForegroundColor Green
 Write-Host "powers Claude     " -NoNewline -ForegroundColor DarkGray
-Write-Host "  6. uv         " -NoNewline -ForegroundColor Cyan
-Write-Host "Python tools" -ForegroundColor DarkGray
-Write-Host "    3. VS Code      " -NoNewline -ForegroundColor Cyan
+Write-Host "  6. uv         " -NoNewline -ForegroundColor Green
+Write-Host "fast installs" -ForegroundColor DarkGray
+Write-Host "    3. VS Code      " -NoNewline -ForegroundColor Green
 Write-Host "your workspace    " -NoNewline -ForegroundColor DarkGray
-Write-Host "  7. GitHub CLI " -NoNewline -ForegroundColor Cyan
-Write-Host "collaboration" -ForegroundColor DarkGray
-Write-Host "    4. Claude Code  " -NoNewline -ForegroundColor Cyan
-Write-Host "your AI partner" -ForegroundColor DarkGray
+Write-Host "  7. GitHub CLI " -NoNewline -ForegroundColor Green
+Write-Host "ship & share" -ForegroundColor DarkGray
+Write-Host "    4. Claude Code  " -NoNewline -ForegroundColor Green
+Write-Host "your AI builder" -ForegroundColor DarkGray
 Write-Host ""
-Write-Host "    Plus: git setup, VS Code extensions" -ForegroundColor DarkGray
+Write-Host "    Plus: git identity, VS Code extensions" -ForegroundColor DarkGray
 Write-Host ""
 
 if (-not $Quiet) {
-    $response = Read-Host "  Ready to begin? [Y/n]"
+    $response = Read-Host "  Ready? [Y/n]"
     if ($response -eq "n" -or $response -eq "N") {
         Write-Host ""
-        Write-Host "  No problem! Run this command again when you're ready." -ForegroundColor Gray
+        Write-Host "  No worries. Run this again when you're ready to build." -ForegroundColor Gray
         Write-Host ""
         exit 0
     }
@@ -904,16 +907,19 @@ Write-Host ""
 if ($script:Failed.Count -eq 0) {
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Green
     Write-Host "  |                                                       |" -ForegroundColor Green
-    Write-Host "  |              " -NoNewline -ForegroundColor Green
-    Write-Host "You're ready to create!" -NoNewline -ForegroundColor White
-    Write-Host "                  |" -ForegroundColor Green
+    Write-Host "  |            " -NoNewline -ForegroundColor Green
+    Write-Host "You're ready to build." -NoNewline -ForegroundColor White
+    Write-Host "                    |" -ForegroundColor Green
+    Write-Host "  |            " -NoNewline -ForegroundColor Green
+    Write-Host "Not a certificate. A toolkit." -NoNewline -ForegroundColor DarkGray
+    Write-Host "            |" -ForegroundColor Green
     Write-Host "  |                                                       |" -ForegroundColor Green
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Green
 } else {
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Yellow
     Write-Host "  |                                                       |" -ForegroundColor Yellow
     Write-Host "  |              " -NoNewline -ForegroundColor Yellow
-    Write-Host "Almost there!" -NoNewline -ForegroundColor White
+    Write-Host "Almost there." -NoNewline -ForegroundColor White
     Write-Host "                          |" -ForegroundColor Yellow
     Write-Host "  |                                                       |" -ForegroundColor Yellow
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Yellow
@@ -944,12 +950,12 @@ if ($script:Failed.Count -gt 0) {
 Write-Host ""
 Write-Host "  ---------------------------------------------------------" -ForegroundColor DarkGray
 Write-Host ""
-Write-Host "  What's next:" -ForegroundColor White
-Write-Host "    1. Open VS Code" -ForegroundColor Gray
+Write-Host "  What happens next:" -ForegroundColor White
+Write-Host "    1. VS Code opens" -ForegroundColor Gray
 Write-Host "    2. Press Ctrl+`` to open the terminal" -ForegroundColor Gray
 Write-Host "    3. Type " -NoNewline -ForegroundColor Gray
-Write-Host "claude" -NoNewline -ForegroundColor Cyan
-Write-Host " to start creating" -ForegroundColor Gray
+Write-Host "claude" -NoNewline -ForegroundColor Green
+Write-Host " and start building" -ForegroundColor Gray
 Write-Host ""
 
 if (-not $Quiet) {
