@@ -103,17 +103,31 @@ FAILED=()
 # SECTION 2: HELPER FUNCTIONS
 # ============================================================================
 
+write_banner_line() {
+    local text="$1"
+    local color="$2"
+    local indent="$3"
+    local padding=""
+    local content=""
+    [ -n "$indent" ] && content=$(printf '%*s' "$indent" '')
+    content="${content}${text}"
+    local pad_len=$((55 - ${#content}))
+    [ $pad_len -lt 0 ] && pad_len=0
+    padding=$(printf '%*s' "$pad_len" '')
+    echo -e "${LIME}${BOLD}  |${RESET}${color}${content}${RESET}${padding}${LIME}${BOLD}|${RESET}"
+}
+
 write_banner() {
     clear
     echo ""
     echo -e "${LIME}${BOLD}  +-------------------------------------------------------+${RESET}"
-    echo -e "${LIME}${BOLD}  |                                                       |${RESET}"
-    echo -e "${LIME}${BOLD}  |        ${RESET}${CREAM}${BOLD}Replace {U}niversity${RESET}${LIME}${BOLD}                       |${RESET}"
-    echo -e "${LIME}${BOLD}  |        ${RESET}${GRAY}Claude Code Installer${LIME}${BOLD}                        |${RESET}"
-    echo -e "${LIME}${BOLD}  |                                                       |${RESET}"
-    echo -e "${LIME}${BOLD}  |    ${RESET}${GRAY}Code is the language of technology.${LIME}${BOLD}            |${RESET}"
-    echo -e "${LIME}${BOLD}  |    ${RESET}${GRAY}With Claude, you speak it fluently.${LIME}${BOLD}           |${RESET}"
-    echo -e "${LIME}${BOLD}  |                                                       |${RESET}"
+    write_banner_line "" "" 0
+    write_banner_line "Replace {U}niversity" "${CREAM}${BOLD}" 7
+    write_banner_line "Claude Code Installer" "${GRAY}" 7
+    write_banner_line "" "" 0
+    write_banner_line "Code is the language of technology." "${GRAY}" 3
+    write_banner_line "With Claude, you speak it fluently." "${GRAY}" 3
+    write_banner_line "" "" 0
     echo -e "${LIME}${BOLD}  +-------------------------------------------------------+${RESET}"
     echo ""
 }
@@ -499,6 +513,30 @@ install_gh() {
             SKIPPED+=("GitHub CLI")
         fi
     fi
+
+    # Offer GitHub auth if gh is installed but not authenticated
+    if [ "$DRY_RUN" != true ] && [ "$QUIET" != true ] && command -v gh &>/dev/null; then
+        if ! gh auth status &>/dev/null; then
+            echo ""
+            echo -e "${DIM}      GitHub account lets you save and share your work online.${RESET}"
+            echo ""
+            read -p "      Sign in to GitHub? (opens browser) [Y/n] " do_auth </dev/tty
+            if [ "$do_auth" != "n" ] && [ "$do_auth" != "N" ]; then
+                write_status "Opening browser to sign in..." "INFO"
+                gh auth login --web --git-protocol https </dev/tty 2>/dev/null
+                if gh auth status &>/dev/null; then
+                    write_status "Signed in to GitHub" "OK"
+                else
+                    write_status "GitHub auth skipped - sign in later with: gh auth login" "SKIP"
+                fi
+            fi
+        else
+            write_status "Already signed in to GitHub" "OK"
+        fi
+    elif [ "$DRY_RUN" = true ] && command -v gh &>/dev/null; then
+        write_dry_run "Would offer GitHub sign-in via browser (gh auth login)"
+    fi
+
     echo ""
 }
 
@@ -521,33 +559,66 @@ set_git_identity() {
     fi
 
     if [ "$DRY_RUN" = true ]; then
-        write_dry_run "Would prompt for name and email, then run: git config --global user.name/email"
+        write_dry_run "Would auto-detect from GitHub (if signed in) or prompt for name/email"
         INSTALLED+=("Git identity (dry run)")
         echo ""
         return
     fi
 
     if [ "$QUIET" = true ]; then
-        write_status "Not configured (run: git config --global user.name 'Your Name')" "WARN"
-        SKIPPED+=("Git identity")
+        # Try GitHub auto-detect silently
+        if command -v gh &>/dev/null && gh auth status &>/dev/null; then
+            local gh_name gh_login
+            gh_name=$(gh api user --jq '.name' 2>/dev/null)
+            gh_login=$(gh api user --jq '.login' 2>/dev/null)
+            [ -z "$current_name" ] && [ -n "$gh_name" ] && git config --global user.name "$gh_name"
+            [ -z "$current_email" ] && [ -n "$gh_login" ] && git config --global user.email "${gh_login}@users.noreply.github.com"
+        fi
+        current_name=$(git config --global user.name 2>/dev/null)
+        current_email=$(git config --global user.email 2>/dev/null)
+        if [ -n "$current_name" ] && [ -n "$current_email" ]; then
+            write_status "${current_name} <${current_email}> (from GitHub)" "OK"
+            INSTALLED+=("Git identity")
+        else
+            write_status "Not configured (run: git config --global user.name 'Your Name')" "WARN"
+            SKIPPED+=("Git identity")
+        fi
         echo ""
         return
     fi
 
-    echo -e "${DIM}      Git needs to know your name so your work is attributed to you.${RESET}"
-    echo ""
-
-    if [ -z "$current_name" ]; then
-        read -p "      Your name (e.g. Jane Smith): " name </dev/tty
-        if [ -n "$name" ]; then
-            git config --global user.name "$name"
+    # Try to auto-detect from GitHub first
+    local gh_detected=false
+    if command -v gh &>/dev/null && gh auth status &>/dev/null; then
+        local gh_name gh_login
+        gh_name=$(gh api user --jq '.name' 2>/dev/null)
+        gh_login=$(gh api user --jq '.login' 2>/dev/null)
+        if [ -n "$gh_name" ] || [ -n "$gh_login" ]; then
+            local display_name="${gh_name:-$gh_login}"
+            echo -e "${DIM}      Found your GitHub account: ${RESET}${CREAM}${display_name} (${gh_login})${RESET}"
+            echo ""
+            read -p "      Use this for your git identity? [Y/n] " use_gh </dev/tty
+            if [ "$use_gh" != "n" ] && [ "$use_gh" != "N" ]; then
+                [ -z "$current_name" ] && git config --global user.name "${gh_name:-$gh_login}"
+                [ -z "$current_email" ] && git config --global user.email "${gh_login}@users.noreply.github.com"
+                gh_detected=true
+            fi
         fi
     fi
 
-    if [ -z "$current_email" ]; then
-        read -p "      Your email: " email </dev/tty
-        if [ -n "$email" ]; then
-            git config --global user.email "$email"
+    # Manual fallback
+    if [ "$gh_detected" != true ]; then
+        echo -e "${DIM}      Every project needs a name attached to it.${RESET}"
+        echo ""
+
+        if [ -z "$(git config --global user.name 2>/dev/null)" ]; then
+            read -p "      Your name (e.g. Jane Smith): " name </dev/tty
+            [ -n "$name" ] && git config --global user.name "$name"
+        fi
+
+        if [ -z "$(git config --global user.email 2>/dev/null)" ]; then
+            read -p "      Your email (any email works): " email </dev/tty
+            [ -n "$email" ] && git config --global user.email "$email"
         fi
     fi
 
@@ -559,7 +630,7 @@ set_git_identity() {
         write_status "${verify_name} <${verify_email}>" "OK"
         INSTALLED+=("Git identity")
     else
-        write_status "Skipped - configure later: git config --global user.name 'Your Name'" "SKIP"
+        write_status "Skipped - run later: git config --global user.name 'Your Name'" "SKIP"
         SKIPPED+=("Git identity")
     fi
     echo ""
@@ -759,16 +830,17 @@ echo ""
 
 if [ ${#FAILED[@]} -eq 0 ]; then
     echo -e "${SAGE}${BOLD}  +-------------------------------------------------------+${RESET}"
-    echo -e "${SAGE}${BOLD}  |                                                       |${RESET}"
-    echo -e "${SAGE}${BOLD}  |            ${RESET}${CREAM}${BOLD}You're ready to build.${RESET}${SAGE}${BOLD}                    |${RESET}"
-    echo -e "${SAGE}${BOLD}  |                                                       |${RESET}"
+    write_banner_line "" "" 0
+    write_banner_line "You're ready to build." "${CREAM}${BOLD}" 12
+    write_banner_line "Not a certificate. A toolkit." "${GRAY}" 12
+    write_banner_line "" "" 0
     echo -e "${SAGE}${BOLD}  +-------------------------------------------------------+${RESET}"
 else
-    echo -e "${GOLD}${BOLD}  +-------------------------------------------------------+${RESET}"
-    echo -e "${GOLD}${BOLD}  |                                                       |${RESET}"
-    echo -e "${LIME}${BOLD}  |              ${RESET}${CREAM}${BOLD}Almost there.${RESET}${LIME}${BOLD}                          |${RESET}"
-    echo -e "${GOLD}${BOLD}  |                                                       |${RESET}"
-    echo -e "${GOLD}${BOLD}  +-------------------------------------------------------+${RESET}"
+    echo -e "${LIME}${BOLD}  +-------------------------------------------------------+${RESET}"
+    write_banner_line "" "" 0
+    write_banner_line "Almost there." "${CREAM}${BOLD}" 14
+    write_banner_line "" "" 0
+    echo -e "${LIME}${BOLD}  +-------------------------------------------------------+${RESET}"
 fi
 
 echo ""

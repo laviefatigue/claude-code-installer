@@ -100,25 +100,29 @@ $script:Failed = @()
 # SECTION 2: HELPER FUNCTIONS
 # ============================================================================
 
+function Write-BannerLine {
+    param([string]$Text, [string]$Color = "Green", [int]$Indent = 0)
+    # Total inner width between pipes = 55 chars
+    $inner = (" " * $Indent) + $Text
+    $pad = 55 - $inner.Length
+    if ($pad -lt 0) { $pad = 0 }
+    Write-Host "  |" -NoNewline -ForegroundColor Green
+    Write-Host $inner -NoNewline -ForegroundColor $Color
+    Write-Host (" " * $pad) -NoNewline
+    Write-Host "|" -ForegroundColor Green
+}
+
 function Write-Banner {
     Clear-Host
     Write-Host ""
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Green
-    Write-Host "  |                                                       |" -ForegroundColor Green
-    Write-Host "  |        " -NoNewline -ForegroundColor Green
-    Write-Host "Replace {U}niversity" -NoNewline -ForegroundColor White
-    Write-Host "                       |" -ForegroundColor Green
-    Write-Host "  |        " -NoNewline -ForegroundColor Green
-    Write-Host "Claude Code Installer" -NoNewline -ForegroundColor Gray
-    Write-Host "                        |" -ForegroundColor Green
-    Write-Host "  |                                                       |" -ForegroundColor Green
-    Write-Host "  |    " -NoNewline -ForegroundColor Green
-    Write-Host "Code is the language of technology." -NoNewline -ForegroundColor DarkGray
-    Write-Host "            |" -ForegroundColor Green
-    Write-Host "  |    " -NoNewline -ForegroundColor Green
-    Write-Host "With Claude, you speak it fluently." -NoNewline -ForegroundColor DarkGray
-    Write-Host "           |" -ForegroundColor Green
-    Write-Host "  |                                                       |" -ForegroundColor Green
+    Write-BannerLine "" -Color Green
+    Write-BannerLine "Replace {U}niversity" -Color White -Indent 7
+    Write-BannerLine "Claude Code Installer" -Color Gray -Indent 7
+    Write-BannerLine "" -Color Green
+    Write-BannerLine "Code is the language of technology." -Color DarkGray -Indent 3
+    Write-BannerLine "With Claude, you speak it fluently." -Color DarkGray -Indent 3
+    Write-BannerLine "" -Color Green
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Green
     Write-Host ""
 }
@@ -693,6 +697,32 @@ function Install-GhCli {
             $script:Skipped += "GitHub CLI"
         }
     }
+
+    # Offer GitHub auth if gh is installed but not authenticated
+    if (-not $DryRun -and -not $Quiet -and (Find-Gh).Found) {
+        $authStatus = & gh auth status 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host ""
+            Write-Host "      GitHub account lets you save and share your work online." -ForegroundColor DarkGray
+            Write-Host ""
+            $doAuth = Read-Host "      Sign in to GitHub? (opens browser) [Y/n]"
+            if ($doAuth -ne "n" -and $doAuth -ne "N") {
+                Write-Status "Opening browser to sign in..." "INFO"
+                & gh auth login --web --git-protocol https 2>$null
+                $authCheck = & gh auth status 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Status "Signed in to GitHub" "OK"
+                } else {
+                    Write-Status "GitHub auth skipped - sign in later with: gh auth login" "SKIP"
+                }
+            }
+        } else {
+            Write-Status "Already signed in to GitHub" "OK"
+        }
+    } elseif ($DryRun -and (Find-Gh).Found) {
+        Write-DryRun "Would offer GitHub sign-in via browser (gh auth login)"
+    }
+
     Write-Host ""
 }
 
@@ -714,33 +744,83 @@ function Set-GitIdentity {
     }
 
     if ($DryRun) {
-        Write-DryRun "Would prompt for name and email, then run: git config --global user.name/email"
+        Write-DryRun "Would auto-detect from GitHub (if signed in) or prompt for name/email"
         $script:Installed += "Git identity (dry run)"
         Write-Host ""
         return
     }
 
     if ($Quiet) {
-        Write-Status "Not configured (run: git config --global user.name 'Your Name')" "WARN"
-        $script:Skipped += "Git identity"
+        # In quiet mode, try GitHub auto-detect silently
+        if ((Find-Gh).Found) {
+            $ghUser = & gh api user 2>$null | ConvertFrom-Json -ErrorAction SilentlyContinue
+            if ($ghUser) {
+                if (-not $currentName -and $ghUser.name) {
+                    & git config --global user.name $ghUser.name
+                }
+                if (-not $currentEmail -and $ghUser.login) {
+                    & git config --global user.email "$($ghUser.login)@users.noreply.github.com"
+                }
+            }
+        }
+        $currentName = & git config --global user.name 2>$null
+        $currentEmail = & git config --global user.email 2>$null
+        if ($currentName -and $currentEmail) {
+            Write-Status "$currentName <$currentEmail> (from GitHub)" "OK"
+            $script:Installed += "Git identity"
+        } else {
+            Write-Status "Not configured (run: git config --global user.name 'Your Name')" "WARN"
+            $script:Skipped += "Git identity"
+        }
         Write-Host ""
         return
     }
 
-    Write-Host "      Git needs to know your name so your work is attributed to you." -ForegroundColor DarkGray
-    Write-Host ""
+    # Try to auto-detect from GitHub first
+    $ghDetected = $false
+    if ((Find-Gh).Found) {
+        $ghUser = & gh api user 2>$null | ConvertFrom-Json -ErrorAction SilentlyContinue
+        if ($ghUser) {
+            $ghName = $ghUser.name
+            $ghLogin = $ghUser.login
+            if ($ghName -or $ghLogin) {
+                $displayName = if ($ghName) { $ghName } else { $ghLogin }
+                $ghEmail = "$ghLogin@users.noreply.github.com"
+                Write-Host "      Found your GitHub account: " -NoNewline -ForegroundColor DarkGray
+                Write-Host "$displayName ($ghLogin)" -ForegroundColor White
+                Write-Host ""
 
-    if (-not $currentName) {
-        $name = Read-Host "      Your name (e.g. Jane Smith)"
-        if ($name) {
-            & git config --global user.name $name
+                $useGh = Read-Host "      Use this for your git identity? [Y/n]"
+                if ($useGh -ne "n" -and $useGh -ne "N") {
+                    if (-not $currentName) {
+                        & git config --global user.name $(if ($ghName) { $ghName } else { $ghLogin })
+                    }
+                    if (-not $currentEmail) {
+                        & git config --global user.email $ghEmail
+                    }
+                    $ghDetected = $true
+                }
+            }
         }
     }
 
-    if (-not $currentEmail) {
-        $email = Read-Host "      Your email"
-        if ($email) {
-            & git config --global user.email $email
+    # Manual fallback if GitHub didn't fill everything
+    if (-not $ghDetected) {
+        Write-Host "      Every project needs a name attached to it." -ForegroundColor DarkGray
+        Write-Host ""
+
+        if (-not $currentName -and -not (& git config --global user.name 2>$null)) {
+            $name = Read-Host "      Your name (e.g. Jane Smith)"
+            if ($name) {
+                & git config --global user.name $name
+            }
+        }
+
+        if (-not $currentEmail -and -not (& git config --global user.email 2>$null)) {
+            $email = Read-Host "      Your email (any email works)"
+            if ($email) {
+                & git config --global user.email $email
+            }
         }
     }
 
@@ -751,7 +831,7 @@ function Set-GitIdentity {
         Write-Status "$verifyName <$verifyEmail>" "OK"
         $script:Installed += "Git identity"
     } else {
-        Write-Status "Skipped - configure later with: git config --global user.name 'Your Name'" "SKIP"
+        Write-Status "Skipped - run later: git config --global user.name 'Your Name'" "SKIP"
         $script:Skipped += "Git identity"
     }
     Write-Host ""
@@ -906,22 +986,16 @@ Write-Host ""
 
 if ($script:Failed.Count -eq 0) {
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Green
-    Write-Host "  |                                                       |" -ForegroundColor Green
-    Write-Host "  |            " -NoNewline -ForegroundColor Green
-    Write-Host "You're ready to build." -NoNewline -ForegroundColor White
-    Write-Host "                    |" -ForegroundColor Green
-    Write-Host "  |            " -NoNewline -ForegroundColor Green
-    Write-Host "Not a certificate. A toolkit." -NoNewline -ForegroundColor DarkGray
-    Write-Host "            |" -ForegroundColor Green
-    Write-Host "  |                                                       |" -ForegroundColor Green
+    Write-BannerLine "" -Color Green
+    Write-BannerLine "You're ready to build." -Color White -Indent 12
+    Write-BannerLine "Not a certificate. A toolkit." -Color DarkGray -Indent 12
+    Write-BannerLine "" -Color Green
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Green
 } else {
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Yellow
-    Write-Host "  |                                                       |" -ForegroundColor Yellow
-    Write-Host "  |              " -NoNewline -ForegroundColor Yellow
-    Write-Host "Almost there." -NoNewline -ForegroundColor White
-    Write-Host "                          |" -ForegroundColor Yellow
-    Write-Host "  |                                                       |" -ForegroundColor Yellow
+    Write-BannerLine "" -Color Yellow
+    Write-BannerLine "Almost there." -Color White -Indent 14
+    Write-BannerLine "" -Color Yellow
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Yellow
 }
 
