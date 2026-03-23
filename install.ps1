@@ -7,13 +7,14 @@
 #
 # What this installs:
 #   REQUIRED:  Git, Node.js LTS, VS Code, Claude Code CLI
-#   ESSENTIAL: Python, uv/uvx, GitHub CLI
+#   ESSENTIAL: Python, uv/uvx, Playwright, GitHub CLI
 #   CONFIGURES: git identity, ExecutionPolicy, VS Code extensions
 #
 # Verified URLs (2026-03-19):
 #   Node.js  v24.14.0  - https://nodejs.org/dist/v24.14.0/node-v24.14.0-{x64|arm64}.msi
 #   Git      latest    - https://api.github.com/repos/git-for-windows/git/releases/latest
-#   Python   v3.12.13  - https://www.python.org/ftp/python/3.12.13/python-3.12.13-{amd64|arm64}.exe
+#   Python   v3.13.5   - https://www.python.org/ftp/python/3.13.5/python-3.13.5-{amd64|arm64}.exe
+#   Playwright latest  - pip install playwright && playwright install chromium
 #   VS Code  latest    - https://code.visualstudio.com/sha/download?build=stable&os=win32-{x64|arm64}
 #   Claude   latest    - https://claude.ai/install.ps1
 #   uv       latest    - https://astral.sh/uv/install.ps1
@@ -24,7 +25,7 @@
 # are used when available in the direct-download fallback path.
 #
 # winget IDs: Git.Git, OpenJS.NodeJS.LTS, Microsoft.VisualStudioCode,
-#             Python.Python.3.12, GitHub.cli
+#             Python.Python.3.13, GitHub.cli
 # ============================================================================
 
 param(
@@ -62,8 +63,8 @@ $ProgressPreference = "SilentlyContinue"
 # SECTION 1: CONSTANTS & KNOWN PATHS
 # ============================================================================
 
-$INSTALLER_VERSION = "2.1.0"
-$TOTAL_STEPS = 10
+$INSTALLER_VERSION = "2.2.0"
+$TOTAL_STEPS = 11
 $tempDir = Join-Path $env:TEMP "claude-setup"
 
 # Architecture detection for ARM64 / Copilot+ PCs
@@ -90,6 +91,7 @@ $pythonLocations = @(
     "$env:ProgramFiles\Python313\python.exe",
     "$env:ProgramFiles\Python312\python.exe"
 )
+$playwrightExe = "$env:LOCALAPPDATA\ms-playwright\chromium-*"
 
 # Track results
 $script:Installed = @()
@@ -101,28 +103,39 @@ $script:Failed = @()
 # ============================================================================
 
 function Write-BannerLine {
-    param([string]$Text, [string]$Color = "Green", [int]$Indent = 0)
+    param([string]$Text, [string]$Color = "Green", [switch]$Center)
     # Total inner width between pipes = 55 chars
-    $inner = (" " * $Indent) + $Text
-    $pad = 55 - $inner.Length
-    if ($pad -lt 0) { $pad = 0 }
-    Write-Host "  |" -NoNewline -ForegroundColor Green
-    Write-Host $inner -NoNewline -ForegroundColor $Color
-    Write-Host (" " * $pad) -NoNewline
-    Write-Host "|" -ForegroundColor Green
+    $width = 55
+    if ($Center -and $Text.Length -gt 0) {
+        $totalPad = $width - $Text.Length
+        $leftPad = [math]::Floor($totalPad / 2)
+        $rightPad = $totalPad - $leftPad
+        Write-Host "  |" -NoNewline -ForegroundColor Green
+        Write-Host (" " * $leftPad) -NoNewline
+        Write-Host $Text -NoNewline -ForegroundColor $Color
+        Write-Host (" " * $rightPad) -NoNewline
+        Write-Host "|" -ForegroundColor Green
+    } else {
+        $pad = $width - $Text.Length
+        if ($pad -lt 0) { $pad = 0 }
+        Write-Host "  |" -NoNewline -ForegroundColor Green
+        Write-Host $Text -NoNewline -ForegroundColor $Color
+        Write-Host (" " * $pad) -NoNewline
+        Write-Host "|" -ForegroundColor Green
+    }
 }
 
 function Write-Banner {
     Clear-Host
     Write-Host ""
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Green
-    Write-BannerLine "" -Color Green
-    Write-BannerLine "Replace {U}niversity" -Color White -Indent 7
-    Write-BannerLine "Claude Code Installer" -Color Gray -Indent 7
-    Write-BannerLine "" -Color Green
-    Write-BannerLine "Code is the language of technology." -Color DarkGray -Indent 3
-    Write-BannerLine "With Claude, you speak it fluently." -Color DarkGray -Indent 3
-    Write-BannerLine "" -Color Green
+    Write-BannerLine ""
+    Write-BannerLine "Replace {U}niversity" -Color White -Center
+    Write-BannerLine "Claude Code Installer" -Color Gray -Center
+    Write-BannerLine ""
+    Write-BannerLine "Code is the language of technology." -Color DarkGray -Center
+    Write-BannerLine "With Claude, you speak it fluently." -Color DarkGray -Center
+    Write-BannerLine ""
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Green
     Write-Host ""
 }
@@ -580,7 +593,7 @@ function Install-Python {
         $script:Installed += "Python v$($info.Version)"
     } elseif ($DryRun) {
         $pyArch = if ($script:IsARM64) { "arm64" } else { "amd64" }
-        Write-DryRun "Would install Python 3.12.13 ($pyArch) via $(if (Test-WingetAvailable) { 'winget (Python.Python.3.12)' } else { 'python.org installer' })"
+        Write-DryRun "Would install Python 3.13.5 ($pyArch) via $(if (Test-WingetAvailable) { 'winget (Python.Python.3.13)' } else { 'python.org installer' })"
         $script:Installed += "Python (dry run)"
     } else {
         Write-Status "Installing Python..." "INSTALL"
@@ -588,13 +601,13 @@ function Install-Python {
         $installed = $false
 
         if (Test-WingetAvailable) {
-            $installed = Install-WithWinget "Python.Python.3.12"
+            $installed = Install-WithWinget "Python.Python.3.13"
         }
 
         if (-not $installed) {
             $installer = Join-Path $tempDir "python.exe"
             $pyArch = if ($script:IsARM64) { "arm64" } else { "amd64" }
-            $pyUrl = "https://www.python.org/ftp/python/3.12.13/python-3.12.13-$pyArch.exe"
+            $pyUrl = "https://www.python.org/ftp/python/3.13.5/python-3.13.5-$pyArch.exe"
             $ok = Start-Download -Url $pyUrl -OutFile $installer -EstimatedSeconds 10
             if ($ok) {
                 Start-Process $installer -ArgumentList "/quiet InstallAllUsers=0 PrependPath=1 Include_test=0" -Wait
@@ -649,8 +662,71 @@ function Install-Uv {
     Write-Host ""
 }
 
+function Install-Playwright {
+    Write-StepHeader 7 "Playwright" "Browser automation. Screenshots. Testing. Claude uses this."
+
+    # Check if playwright pip package is installed
+    $pyInfo = Find-Python
+    $pwInstalled = $false
+    if ($pyInfo.Found) {
+        $pwCheck = & $pyInfo.Path -m playwright --version 2>$null
+        if ($LASTEXITCODE -eq 0 -and $pwCheck) {
+            $pwInstalled = $true
+        }
+    }
+
+    # Check if browser binaries exist
+    $browserInstalled = (Get-ChildItem "$env:LOCALAPPDATA\ms-playwright\chromium-*" -Directory -ErrorAction SilentlyContinue).Count -gt 0
+
+    if ($pwInstalled -and $browserInstalled) {
+        Write-Status "Already installed (pip + chromium browser)" "OK"
+        $script:Installed += "Playwright"
+    } elseif ($DryRun) {
+        $parts = @()
+        if (-not $pwInstalled) { $parts += "pip install playwright" }
+        if (-not $browserInstalled) { $parts += "playwright install chromium" }
+        Write-DryRun "Would run: $($parts -join ' && ')"
+        $script:Installed += "Playwright (dry run)"
+    } else {
+        if (-not $pyInfo.Found) {
+            Write-Status "Python not available - skipping Playwright" "WARN"
+            $script:Skipped += "Playwright"
+            Write-Host ""
+            return
+        }
+
+        # Install pip package if missing
+        if (-not $pwInstalled) {
+            Write-Status "Installing Playwright pip package..." "INSTALL"
+            & $pyInfo.Path -m pip install playwright --quiet 2>$null
+        }
+
+        # Install chromium browser if missing
+        if (-not $browserInstalled) {
+            Write-Status "Installing Chromium browser (this may take a minute)..." "INSTALL"
+            & $pyInfo.Path -m playwright install chromium 2>$null
+        }
+
+        # Verify
+        $pwCheck = & $pyInfo.Path -m playwright --version 2>$null
+        $browserNow = (Get-ChildItem "$env:LOCALAPPDATA\ms-playwright\chromium-*" -Directory -ErrorAction SilentlyContinue).Count -gt 0
+
+        if ($LASTEXITCODE -eq 0 -and $browserNow) {
+            Write-Status "Playwright installed with Chromium" "OK"
+            $script:Installed += "Playwright"
+        } elseif ($LASTEXITCODE -eq 0) {
+            Write-Status "Playwright installed (browser download may have failed - run: playwright install chromium)" "WARN"
+            $script:Installed += "Playwright (no browser)"
+        } else {
+            Write-Status "Playwright not installed - install later: pip install playwright && playwright install chromium" "WARN"
+            $script:Skipped += "Playwright"
+        }
+    }
+    Write-Host ""
+}
+
 function Install-GhCli {
-    Write-StepHeader 7 "GitHub CLI" "Ship your work. Collaborate. Show it off."
+    Write-StepHeader 8 "GitHub CLI" "Ship your work. Collaborate. Show it off."
 
     $info = Find-Gh
     if ($info.Found) {
@@ -703,16 +779,45 @@ function Install-GhCli {
         $authStatus = & gh auth status 2>&1
         if ($LASTEXITCODE -ne 0) {
             Write-Host ""
-            Write-Host "      GitHub account lets you save and share your work online." -ForegroundColor DarkGray
+            Write-Host "      GitHub lets you save and share your work online." -ForegroundColor DarkGray
             Write-Host ""
-            $doAuth = Read-Host "      Sign in to GitHub? (opens browser) [Y/n]"
-            if ($doAuth -ne "n" -and $doAuth -ne "N") {
-                Write-Status "Opening browser to sign in..." "INFO"
-                & gh auth login --web --git-protocol https 2>$null
-                $authCheck = & gh auth status 2>&1
-                if ($LASTEXITCODE -eq 0) {
-                    Write-Status "Signed in to GitHub" "OK"
-                } else {
+            Write-Host "      [1] " -NoNewline -ForegroundColor Yellow
+            Write-Host "I have a GitHub account - sign me in" -ForegroundColor White
+            Write-Host "      [2] " -NoNewline -ForegroundColor Yellow
+            Write-Host "I need to create one first (opens github.com/signup)" -ForegroundColor White
+            Write-Host "      [3] " -NoNewline -ForegroundColor Yellow
+            Write-Host "Skip for now" -ForegroundColor DarkGray
+            Write-Host ""
+            $ghChoice = Read-Host "      Choose [1/2/3]"
+
+            switch ($ghChoice) {
+                "1" {
+                    Write-Status "Opening browser to sign in..." "INFO"
+                    & gh auth login --web --git-protocol https 2>$null
+                    $authCheck = & gh auth status 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Status "Signed in to GitHub" "OK"
+                    } else {
+                        Write-Status "GitHub auth skipped - sign in later with: gh auth login" "SKIP"
+                    }
+                }
+                "2" {
+                    Write-Status "Opening GitHub signup page..." "INFO"
+                    Start-Process "https://github.com/signup"
+                    Write-Host ""
+                    Write-Host "      Create your account, then come back here." -ForegroundColor DarkGray
+                    Write-Host ""
+                    $null = Read-Host "      Press ENTER when you've created your account"
+                    Write-Status "Now let's sign in..." "INFO"
+                    & gh auth login --web --git-protocol https 2>$null
+                    $authCheck = & gh auth status 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Status "Signed in to GitHub" "OK"
+                    } else {
+                        Write-Status "No worries - sign in later with: gh auth login" "SKIP"
+                    }
+                }
+                default {
                     Write-Status "GitHub auth skipped - sign in later with: gh auth login" "SKIP"
                 }
             }
@@ -720,7 +825,7 @@ function Install-GhCli {
             Write-Status "Already signed in to GitHub" "OK"
         }
     } elseif ($DryRun -and (Find-Gh).Found) {
-        Write-DryRun "Would offer GitHub sign-in via browser (gh auth login)"
+        Write-DryRun "Would offer GitHub sign-in or account creation via browser"
     }
 
     Write-Host ""
@@ -731,7 +836,7 @@ function Install-GhCli {
 # ============================================================================
 
 function Set-GitIdentity {
-    Write-StepHeader 8 "Git Identity" "So your work has your name on it."
+    Write-StepHeader 9 "Git Identity" "So your work has your name on it."
 
     $currentName = & git config --global user.name 2>$null
     $currentEmail = & git config --global user.email 2>$null
@@ -838,7 +943,7 @@ function Set-GitIdentity {
 }
 
 function Set-PSExecutionPolicy {
-    Write-StepHeader 9 "PowerShell ExecutionPolicy" "Unlocks your terminal. One-time fix."
+    Write-StepHeader 10 "PowerShell ExecutionPolicy" "Unlocks your terminal. One-time fix."
 
     $current = Get-ExecutionPolicy -Scope CurrentUser
     if ($current -eq "Restricted" -or $current -eq "Undefined") {
@@ -863,7 +968,7 @@ function Set-PSExecutionPolicy {
 }
 
 function Install-Extensions {
-    Write-StepHeader 10 "VS Code Extensions" "Claude inside your editor. Ready when you are."
+    Write-StepHeader 11 "VS Code Extensions" "Claude inside your editor. Ready when you are."
 
     $codePath = Get-CodePath
     if (-not $codePath) {
@@ -913,7 +1018,7 @@ if ($DryRun) {
     Write-Host ""
 }
 
-Write-Host "  5 minutes. 10 tools. Then you build." -ForegroundColor Gray
+Write-Host "  5 minutes. 11 tools. Then you build." -ForegroundColor Gray
 Write-Host "  No code required. Seriously." -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "  What we're setting up:" -ForegroundColor White
@@ -921,18 +1026,20 @@ Write-Host ""
 Write-Host "    REQUIRED                            ESSENTIAL" -ForegroundColor DarkGray
 Write-Host "    1. Git          " -NoNewline -ForegroundColor Green
 Write-Host "track everything  " -NoNewline -ForegroundColor DarkGray
-Write-Host "  5. Python     " -NoNewline -ForegroundColor Green
+Write-Host "  5. Python      " -NoNewline -ForegroundColor Green
 Write-Host "automate anything" -ForegroundColor DarkGray
 Write-Host "    2. Node.js      " -NoNewline -ForegroundColor Green
 Write-Host "powers Claude     " -NoNewline -ForegroundColor DarkGray
-Write-Host "  6. uv         " -NoNewline -ForegroundColor Green
+Write-Host "  6. uv          " -NoNewline -ForegroundColor Green
 Write-Host "fast installs" -ForegroundColor DarkGray
 Write-Host "    3. VS Code      " -NoNewline -ForegroundColor Green
 Write-Host "your workspace    " -NoNewline -ForegroundColor DarkGray
-Write-Host "  7. GitHub CLI " -NoNewline -ForegroundColor Green
-Write-Host "ship & share" -ForegroundColor DarkGray
+Write-Host "  7. Playwright  " -NoNewline -ForegroundColor Green
+Write-Host "browser automation" -ForegroundColor DarkGray
 Write-Host "    4. Claude Code  " -NoNewline -ForegroundColor Green
-Write-Host "your AI builder" -ForegroundColor DarkGray
+Write-Host "your AI builder   " -NoNewline -ForegroundColor DarkGray
+Write-Host "  8. GitHub CLI  " -NoNewline -ForegroundColor Green
+Write-Host "ship & share" -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "    Plus: git identity, VS Code extensions" -ForegroundColor DarkGray
 Write-Host ""
@@ -964,6 +1071,7 @@ Write-Phase "ESSENTIAL"
 
 Install-Python
 Install-Uv
+Install-Playwright
 Install-GhCli
 
 # ── Phase 3: CONFIGURE ──
@@ -986,16 +1094,16 @@ Write-Host ""
 
 if ($script:Failed.Count -eq 0) {
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Green
-    Write-BannerLine "" -Color Green
-    Write-BannerLine "You're ready to build." -Color White -Indent 12
-    Write-BannerLine "Not a certificate. A toolkit." -Color DarkGray -Indent 12
-    Write-BannerLine "" -Color Green
+    Write-BannerLine ""
+    Write-BannerLine "You're ready to build." -Color White -Center
+    Write-BannerLine "Not a certificate. A toolkit." -Color DarkGray -Center
+    Write-BannerLine ""
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Green
 } else {
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Yellow
-    Write-BannerLine "" -Color Yellow
-    Write-BannerLine "Almost there." -Color White -Indent 14
-    Write-BannerLine "" -Color Yellow
+    Write-BannerLine ""
+    Write-BannerLine "Almost there." -Color White -Center
+    Write-BannerLine ""
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Yellow
 }
 

@@ -1,0 +1,14 @@
+<Configuration>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder>C:\Users\ellio\Desktop\claude-code-framework</HostFolder>
+      <SandboxFolder>C:\Installer</SandboxFolder>
+      <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <LogonCommand>
+    <Command>cmd /c start powershell -NoProfile -ExecutionPolicy Bypass -File C:\Installer\install.ps1</Command>
+  </LogonCommand>
+  <MemoryInMB>4096</MemoryInMB>
+  <Networking>Enable</Networking>
+</Configuration>
