@@ -543,12 +543,16 @@ function Install-Claude {
         Write-Status "Installing Claude Code..." "INSTALL"
         $installed = $false
 
-        # Method 1: Official installer
+        # Method 1: Official installer (installs to ~/.local/bin/claude.exe)
         try {
             $installerScript = Invoke-RestMethod -Uri "https://claude.ai/install.ps1" -UseBasicParsing
             $scriptBlock = [ScriptBlock]::Create($installerScript)
             & $scriptBlock
-            $installed = $true
+            Refresh-Path
+            # Only mark as installed if the binary actually exists now
+            if ((Test-Path $claudeLocal) -or (Find-Claude).Found) {
+                $installed = $true
+            }
         } catch {}
 
         # Method 2: npm global install (if Node is available)
