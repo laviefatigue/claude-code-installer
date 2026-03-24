@@ -373,32 +373,36 @@ install_claude() {
         INSTALLED+=("Claude Code CLI (dry run)")
     else
         write_status "Installing Claude Code..." "INSTALL"
+        local installed=false
 
-        # Official installer
-        curl -fsSL https://claude.ai/install.sh | bash 2>/dev/null
-        export PATH="$HOME/.local/bin:$PATH"
+        # Method 1: npm global install (most reliable)
+        if command -v npm &>/dev/null; then
+            npm install -g @anthropic-ai/claude-code 2>/dev/null
+            if command -v claude &>/dev/null; then
+                installed=true
+            fi
+        fi
 
-        if command -v claude &>/dev/null; then
+        # Method 2: Official installer (fallback)
+        if [ "$installed" != true ]; then
+            write_status "Trying official installer..." "INFO"
+            curl -fsSL https://claude.ai/install.sh | bash 2>/dev/null
+            export PATH="$HOME/.local/bin:$PATH"
+            if command -v claude &>/dev/null; then
+                installed=true
+            fi
+        fi
+
+        if [ "$installed" = true ]; then
             write_status "Claude Code installed" "OK"
             INSTALLED+=("Claude Code CLI")
         else
-            # Fallback: npm global install
-            if command -v npm &>/dev/null; then
-                write_status "Trying npm install..." "INFO"
-                npm install -g @anthropic-ai/claude-code 2>/dev/null
-            fi
-
-            if command -v claude &>/dev/null; then
-                write_status "Claude Code installed" "OK"
-                INSTALLED+=("Claude Code CLI")
-            else
-                write_status "Claude Code install failed" "FAIL"
-                FAILED+=("Claude Code CLI")
-                echo -e "${DIM}      Try manually: npm install -g @anthropic-ai/claude-code${RESET}"
-                echo ""
-                echo -e "      ${CORAL}Claude Code is required. Install it manually and re-run this script.${RESET}"
-                exit 2
-            fi
+            write_status "Claude Code install failed" "FAIL"
+            FAILED+=("Claude Code CLI")
+            echo -e "${DIM}      Try manually: npm install -g @anthropic-ai/claude-code${RESET}"
+            echo ""
+            echo -e "      ${CORAL}Claude Code is required. Install it manually and re-run this script.${RESET}"
+            exit 2
         fi
     fi
     echo ""

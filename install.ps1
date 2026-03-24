@@ -513,31 +513,32 @@ function Install-Claude {
         Write-Status "Installing Claude Code..." "INSTALL"
         $installed = $false
 
-        # Method 1: Official installer (installs to ~/.local/bin/claude.exe)
-        try {
-            $installerScript = Invoke-RestMethod -Uri "https://claude.ai/install.ps1" -UseBasicParsing
-            $scriptBlock = [ScriptBlock]::Create($installerScript)
-            & $scriptBlock
-            Refresh-Path
-            # Only mark as installed if the binary actually exists now
-            if ((Test-Path $claudeLocal) -or (Find-Claude).Found) {
-                $installed = $true
-            }
-        } catch {}
-
-        # Method 2: npm global install (if Node is available)
-        if (-not $installed -and (Test-Path $npmExe)) {
-            Write-Status "Trying npm install..." "INFO"
+        # Method 1: npm global install (most reliable, works in low-memory environments)
+        if (Test-Path $npmExe) {
             $env:Path = "$nodePath;$env:APPDATA\npm;$env:Path"
             & $npmExe install -g @anthropic-ai/claude-code 2>$null | Out-Null
             if (Test-Path $claudeExe) { $installed = $true }
         }
 
-        # Method 3: npm in new process
+        # Method 2: npm in new process
         if (-not $installed -and (Test-Path $npmExe)) {
             $cmd = "`$env:Path = `"$nodePath;$env:APPDATA\npm;`$env:Path`"; npm install -g @anthropic-ai/claude-code"
             Start-Process "powershell.exe" -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command $cmd" -Wait -WindowStyle Hidden
             if (Test-Path $claudeExe) { $installed = $true }
+        }
+
+        # Method 3: Official installer (fallback — can fail in low-memory environments)
+        if (-not $installed) {
+            try {
+                Write-Status "Trying official installer..." "INFO"
+                $installerScript = Invoke-RestMethod -Uri "https://claude.ai/install.ps1" -UseBasicParsing
+                $scriptBlock = [ScriptBlock]::Create($installerScript)
+                & $scriptBlock 2>$null
+                Refresh-Path
+                if ((Test-Path $claudeLocal) -or (Find-Claude).Found) {
+                    $installed = $true
+                }
+            } catch {}
         }
 
         Refresh-Path
