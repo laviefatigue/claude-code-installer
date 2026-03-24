@@ -368,8 +368,8 @@ install_claude() {
         write_status "Already installed" "OK"
         INSTALLED+=("Claude Code CLI")
     elif [ "$DRY_RUN" = true ]; then
-        write_dry_run "Would install Claude Code via official installer (claude.ai/install.sh)"
-        write_dry_run "Fallback: npm install -g @anthropic-ai/claude-code"
+        write_dry_run "Would install Claude Code via npm install -g @anthropic-ai/claude-code"
+        write_dry_run "Fallback: official installer (claude.ai/install.sh)"
         INSTALLED+=("Claude Code CLI (dry run)")
     else
         write_status "Installing Claude Code..." "INSTALL"
@@ -753,7 +753,7 @@ if [ "$DRY_RUN" = true ]; then
     echo ""
 fi
 
-echo -e "${SAND}  5 minutes. 8 tools. Then you build.${RESET}"
+echo -e "${SAND}  5 minutes. 6 tools. Then you build.${RESET}"
 echo -e "${DIM}  No code required. Seriously.${RESET}"
 echo ""
 echo -e "${CREAM}  What we're setting up:${RESET}"

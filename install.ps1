@@ -506,8 +506,8 @@ function Install-Claude {
         Write-Status "Already installed" "OK"
         $script:Installed += "Claude Code CLI"
     } elseif ($DryRun) {
-        Write-DryRun "Would install Claude Code via official installer (claude.ai/install.ps1)"
-        Write-DryRun "Fallback: npm install -g @anthropic-ai/claude-code"
+        Write-DryRun "Would install Claude Code via npm install -g @anthropic-ai/claude-code"
+        Write-DryRun "Fallback: official installer (claude.ai/install.ps1)"
         $script:Installed += "Claude Code CLI (dry run)"
     } else {
         Write-Status "Installing Claude Code..." "INSTALL"
@@ -886,7 +886,7 @@ if ($DryRun) {
     Write-Host ""
 }
 
-Write-Host "  5 minutes. 8 tools. Then you build." -ForegroundColor Gray
+Write-Host "  5 minutes. 6 tools. Then you build." -ForegroundColor Gray
 Write-Host "  No code required. Seriously." -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "  What we're setting up:" -ForegroundColor White
