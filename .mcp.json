@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "copilot-design": {
-      "type": "stdio",
-      "command": "node",
-      "args": ["D:\\Work\\copilot-design-mcp\\dist\\src\\index.js"]
-    }
-  }
-}
