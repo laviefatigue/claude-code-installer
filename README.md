@@ -2,15 +2,24 @@
 
 One command. Everything you need. Ready to create.
 
-## Quick Start
+## Download & Run
+
+No terminal required — just download and double-click:
+
+| OS | Download | What to expect |
+|----|----------|----------------|
+| **Windows** | [`install-claude.bat`](https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install-claude.bat) | SmartScreen may warn — click "More info" → "Run anyway" |
+| **macOS** | [`install-claude.command`](https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install-claude.command) | Right-click → "Open" → "Open" to bypass Gatekeeper |
+
+## Terminal Alternative
+
+If you prefer the command line:
 
 ### Windows (PowerShell)
 
 ```powershell
 irm https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.ps1 | iex
 ```
-
-Or download and double-click `install.bat`.
 
 ### macOS / Linux
 
@@ -64,9 +73,11 @@ Run this inside a fresh [Windows Sandbox](https://learn.microsoft.com/en-us/wind
 
 | File | Description |
 |------|-------------|
-| `install.ps1` | Windows PowerShell installer |
-| `install.sh` | macOS/Linux bash installer |
-| `install.bat` | Windows double-click launcher |
+| `install-claude.bat` | Windows — download and double-click |
+| `install-claude.command` | macOS — download and double-click |
+| `install.ps1` | Windows PowerShell installer (full script) |
+| `install.sh` | macOS/Linux bash installer (full script) |
+| `install.bat` | Windows launcher (requires install.ps1 next to it) |
 
 ## License
 
