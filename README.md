@@ -26,9 +26,7 @@ curl -fsSL https://raw.githubusercontent.com/laviefatigue/claude-code-installer/
 | **Node.js LTS** | Runtime for Claude Code | winget / MSI | Homebrew / NodeSource |
 | **VS Code** | Code editor | winget / direct download | Homebrew cask / .deb |
 | **Claude Code CLI** | AI coding assistant | `claude.ai/install.ps1` | `claude.ai/install.sh` |
-| **Python 3.13** | Scripting & tools | winget / direct download | Homebrew / apt |
 | **uv / uvx** | Fast Python package manager | `astral.sh/uv/install.ps1` | `astral.sh/uv/install.sh` |
-| **Playwright** | Browser automation | pip + chromium | pip + chromium |
 | **GitHub CLI (gh)** | GitHub from the terminal | winget / direct download | Homebrew / apt |
 
 ### VS Code Extensions

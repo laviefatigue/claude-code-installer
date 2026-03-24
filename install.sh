@@ -8,7 +8,7 @@
 #
 # What this installs:
 #   REQUIRED:  Git, Node.js LTS, VS Code, Claude Code CLI
-#   ESSENTIAL: Python, uv/uvx, Playwright, GitHub CLI
+#   ESSENTIAL: uv/uvx, GitHub CLI
 #   CONFIGURES: git identity, shell PATH, VS Code extensions
 #
 # Verified (2026-03-19):
@@ -18,7 +18,7 @@
 #   Claude   - https://claude.ai/install.sh
 #   uv       - https://astral.sh/uv/install.sh
 #   gh (apt) - https://cli.github.com/packages/githubcli-archive-keyring.gpg
-#   Brew pkgs: git, node, python, gh, visual-studio-code (cask)
+#   Brew pkgs: git, node, gh, visual-studio-code (cask)
 # ============================================================================
 
 set -e
@@ -27,8 +27,8 @@ set -e
 # SECTION 1: CONSTANTS & COLORS
 # ============================================================================
 
-INSTALLER_VERSION="2.2.0"
-TOTAL_STEPS=11
+INSTALLER_VERSION="2.3.0"
+TOTAL_STEPS=9
 
 # ANSI color palette
 RESET="\033[0m"
@@ -404,47 +404,8 @@ install_claude() {
     echo ""
 }
 
-install_python() {
-    write_step_header 5 "Python" "Automate the boring stuff. Runs while you sleep."
-
-    if command -v python3 &>/dev/null; then
-        local v
-        v=$(python3 --version 2>/dev/null | sed 's/Python //')
-        write_status "Already installed v${v}" "OK"
-        INSTALLED+=("Python v${v}")
-    elif command -v python &>/dev/null; then
-        local v
-        v=$(python --version 2>/dev/null | sed 's/Python //')
-        write_status "Already installed v${v}" "OK"
-        INSTALLED+=("Python v${v}")
-    elif [ "$DRY_RUN" = true ]; then
-        write_dry_run "Would install Python via $PKG_MANAGER"
-        INSTALLED+=("Python (dry run)")
-    else
-        write_status "Installing Python..." "INSTALL"
-
-        install_pkg "python" "python3" "python3" "python"
-
-        # Also install pip on Linux
-        if [[ "$PKG_MANAGER" == "apt" ]]; then
-            sudo apt-get install -y python3-pip -qq 2>/dev/null
-        fi
-
-        if command -v python3 &>/dev/null; then
-            local v
-            v=$(python3 --version 2>/dev/null | sed 's/Python //')
-            write_status "Python installed v${v}" "OK"
-            INSTALLED+=("Python v${v}")
-        else
-            write_status "Python not installed - install later from https://python.org" "WARN"
-            SKIPPED+=("Python")
-        fi
-    fi
-    echo ""
-}
-
 install_uv() {
-    write_step_header 6 "uv" "Installs Python tools instantly. No waiting."
+    write_step_header 5 "uv" "Installs Python tools instantly. No waiting."
 
     if command -v uv &>/dev/null; then
         local v
@@ -473,74 +434,8 @@ install_uv() {
     echo ""
 }
 
-install_playwright() {
-    write_step_header 7 "Playwright" "Browser automation. Screenshots. Testing. Claude uses this."
-
-    # Find python command
-    local py_cmd=""
-    if command -v python3 &>/dev/null; then
-        py_cmd="python3"
-    elif command -v python &>/dev/null; then
-        py_cmd="python"
-    fi
-
-    if [ -z "$py_cmd" ]; then
-        write_status "Python not available - skipping Playwright" "WARN"
-        SKIPPED+=("Playwright")
-        echo ""
-        return
-    fi
-
-    # Check if playwright pip package is installed
-    local pw_installed=false
-    if $py_cmd -m playwright --version &>/dev/null; then
-        pw_installed=true
-    fi
-
-    # Check if chromium browser is installed
-    local browser_installed=false
-    if [ -d "$HOME/.cache/ms-playwright" ] && ls "$HOME/.cache/ms-playwright"/chromium-* &>/dev/null 2>&1; then
-        browser_installed=true
-    fi
-    # macOS path
-    if [ -d "$HOME/Library/Caches/ms-playwright" ] && ls "$HOME/Library/Caches/ms-playwright"/chromium-* &>/dev/null 2>&1; then
-        browser_installed=true
-    fi
-
-    if [ "$pw_installed" = true ] && [ "$browser_installed" = true ]; then
-        write_status "Already installed (pip + chromium browser)" "OK"
-        INSTALLED+=("Playwright")
-    elif [ "$DRY_RUN" = true ]; then
-        local parts=""
-        [ "$pw_installed" != true ] && parts="pip install playwright"
-        [ "$browser_installed" != true ] && parts="${parts:+$parts && }playwright install chromium"
-        write_dry_run "Would run: $parts"
-        INSTALLED+=("Playwright (dry run)")
-    else
-        if [ "$pw_installed" != true ]; then
-            write_status "Installing Playwright pip package..." "INSTALL"
-            $py_cmd -m pip install playwright --quiet 2>/dev/null
-        fi
-
-        if [ "$browser_installed" != true ]; then
-            write_status "Installing Chromium browser (this may take a minute)..." "INSTALL"
-            $py_cmd -m playwright install chromium 2>/dev/null
-        fi
-
-        # Verify
-        if $py_cmd -m playwright --version &>/dev/null; then
-            write_status "Playwright installed with Chromium" "OK"
-            INSTALLED+=("Playwright")
-        else
-            write_status "Playwright not installed - install later: pip install playwright && playwright install chromium" "WARN"
-            SKIPPED+=("Playwright")
-        fi
-    fi
-    echo ""
-}
-
 install_gh() {
-    write_step_header 8 "GitHub CLI" "Ship your work. Collaborate. Show it off."
+    write_step_header 6 "GitHub CLI" "Ship your work. Collaborate. Show it off."
 
     if command -v gh &>/dev/null; then
         local v
@@ -641,7 +536,7 @@ install_gh() {
 # ============================================================================
 
 set_git_identity() {
-    write_step_header 9 "Git Identity" "So your work has your name on it."
+    write_step_header 7 "Git Identity" "So your work has your name on it."
 
     local current_name current_email
     current_name=$(git config --global user.name 2>/dev/null)
@@ -733,7 +628,7 @@ set_git_identity() {
 }
 
 ensure_shell_path() {
-    write_step_header 10 "Shell PATH" "Making sure everything just works."
+    write_step_header 8 "Shell PATH" "Making sure everything just works."
 
     local local_bin="$HOME/.local/bin"
     local path_updated=false
@@ -803,7 +698,7 @@ ensure_shell_path() {
 }
 
 install_extensions() {
-    write_step_header 11 "VS Code Extensions" "Claude inside your editor. Ready when you are."
+    write_step_header 9 "VS Code Extensions" "Claude inside your editor. Ready when you are."
 
     if ! command -v code &>/dev/null; then
         write_status "VS Code not in PATH - extensions will install on first launch" "SKIP"
@@ -852,16 +747,16 @@ if [ "$DRY_RUN" = true ]; then
     echo ""
 fi
 
-echo -e "${SAND}  5 minutes. 11 tools. Then you build.${RESET}"
+echo -e "${SAND}  5 minutes. 8 tools. Then you build.${RESET}"
 echo -e "${DIM}  No code required. Seriously.${RESET}"
 echo ""
 echo -e "${CREAM}  What we're setting up:${RESET}"
 echo ""
 echo -e "${DIM}    REQUIRED                            ESSENTIAL${RESET}"
-echo -e "    ${LIME}1. Git          ${DIM}track everything    ${LIME}5. Python      ${DIM}automate anything${RESET}"
-echo -e "    ${LIME}2. Node.js      ${DIM}powers Claude       ${LIME}6. uv          ${DIM}fast installs${RESET}"
-echo -e "    ${LIME}3. VS Code      ${DIM}your workspace      ${LIME}7. Playwright  ${DIM}browser automation${RESET}"
-echo -e "    ${LIME}4. Claude Code  ${DIM}your AI builder     ${LIME}8. GitHub CLI  ${DIM}ship & share${RESET}"
+echo -e "    ${LIME}1. Git          ${DIM}track everything    ${LIME}5. uv          ${DIM}fast installs${RESET}"
+echo -e "    ${LIME}2. Node.js      ${DIM}powers Claude       ${LIME}6. GitHub CLI  ${DIM}ship & share${RESET}"
+echo -e "    ${LIME}3. VS Code      ${DIM}your workspace${RESET}"
+echo -e "    ${LIME}4. Claude Code  ${DIM}your AI builder${RESET}"
 echo ""
 echo -e "${DIM}    Plus: git identity, VS Code extensions${RESET}"
 echo ""
@@ -906,9 +801,7 @@ install_claude
 
 write_phase "ESSENTIAL"
 
-install_python
 install_uv
-install_playwright
 install_gh
 
 # ── Phase 3: CONFIGURE ──

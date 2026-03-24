@@ -23,7 +23,7 @@ curl -fsSL https://raw.githubusercontent.com/laviefatigue/claude-code-installer/
 ## What it installs
 
 **REQUIRED:** Git, Node.js LTS, VS Code, Claude Code CLI
-**ESSENTIAL:** Python 3.13, uv/uvx, Playwright, GitHub CLI
+**ESSENTIAL:** uv/uvx, GitHub CLI
 **CONFIGURES:** git identity, ExecutionPolicy/PATH, VS Code extensions
 
 ## Development Notes

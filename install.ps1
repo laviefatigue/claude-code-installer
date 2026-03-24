@@ -7,14 +7,12 @@
 #
 # What this installs:
 #   REQUIRED:  Git, Node.js LTS, VS Code, Claude Code CLI
-#   ESSENTIAL: Python, uv/uvx, Playwright, GitHub CLI
+#   ESSENTIAL: uv/uvx, GitHub CLI
 #   CONFIGURES: git identity, ExecutionPolicy, VS Code extensions
 #
 # Verified URLs (2026-03-19):
 #   Node.js  v24.14.0  - https://nodejs.org/dist/v24.14.0/node-v24.14.0-{x64|arm64}.msi
 #   Git      latest    - https://api.github.com/repos/git-for-windows/git/releases/latest
-#   Python   v3.13.5   - https://www.python.org/ftp/python/3.13.5/python-3.13.5-{amd64|arm64}.exe
-#   Playwright latest  - pip install playwright && playwright install chromium
 #   VS Code  latest    - https://code.visualstudio.com/sha/download?build=stable&os=win32-{x64|arm64}
 #   Claude   latest    - https://claude.ai/install.ps1
 #   uv       latest    - https://astral.sh/uv/install.ps1
@@ -24,8 +22,7 @@
 # ARM64/Copilot+ PCs: Architecture is auto-detected; native ARM64 installers
 # are used when available in the direct-download fallback path.
 #
-# winget IDs: Git.Git, OpenJS.NodeJS.LTS, Microsoft.VisualStudioCode,
-#             Python.Python.3.13, GitHub.cli
+# winget IDs: Git.Git, OpenJS.NodeJS.LTS, Microsoft.VisualStudioCode, GitHub.cli
 # ============================================================================
 
 param(
@@ -63,8 +60,8 @@ $ProgressPreference = "SilentlyContinue"
 # SECTION 1: CONSTANTS & KNOWN PATHS
 # ============================================================================
 
-$INSTALLER_VERSION = "2.2.0"
-$TOTAL_STEPS = 11
+$INSTALLER_VERSION = "2.3.0"
+$TOTAL_STEPS = 9
 $tempDir = Join-Path $env:TEMP "claude-setup"
 
 # Architecture detection for ARM64 / Copilot+ PCs
@@ -83,15 +80,6 @@ $claudeLocal = "$env:USERPROFILE\.local\bin\claude.exe"
 $uvExe      = "$env:USERPROFILE\.local\bin\uv.exe"
 $ghExe      = "$env:ProgramFiles\GitHub CLI\gh.exe"
 
-$pythonLocations = @(
-    "$env:LOCALAPPDATA\Programs\Python\Python314\python.exe",
-    "$env:LOCALAPPDATA\Programs\Python\Python313\python.exe",
-    "$env:LOCALAPPDATA\Programs\Python\Python312\python.exe",
-    "$env:ProgramFiles\Python314\python.exe",
-    "$env:ProgramFiles\Python313\python.exe",
-    "$env:ProgramFiles\Python312\python.exe"
-)
-$playwrightExe = "$env:LOCALAPPDATA\ms-playwright\chromium-*"
 
 # Track results
 $script:Installed = @()
@@ -319,24 +307,6 @@ function Find-Claude {
     }
     if (Test-Cmd "claude") {
         return @{ Found = $true; Version = "installed"; Path = (Get-Command claude).Source }
-    }
-    return @{ Found = $false; Version = $null; Path = $null }
-}
-
-function Find-Python {
-    foreach ($loc in $pythonLocations) {
-        if (Test-Path $loc) {
-            $v = & $loc --version 2>$null
-            return @{ Found = $true; Version = ($v -replace "Python ", ""); Path = $loc }
-        }
-    }
-    if (Test-Cmd "python") {
-        $v = & python --version 2>$null
-        return @{ Found = $true; Version = ($v -replace "Python ", ""); Path = (Get-Command python).Source }
-    }
-    if (Test-Cmd "python3") {
-        $v = & python3 --version 2>$null
-        return @{ Found = $true; Version = ($v -replace "Python ", ""); Path = (Get-Command python3).Source }
     }
     return @{ Found = $false; Version = $null; Path = $null }
 }
@@ -588,53 +558,8 @@ function Install-Claude {
     Write-Host ""
 }
 
-function Install-Python {
-    Write-StepHeader 5 "Python" "Automate the boring stuff. Runs while you sleep."
-
-    $info = Find-Python
-    if ($info.Found) {
-        Write-Status "Already installed v$($info.Version)" "OK"
-        $script:Installed += "Python v$($info.Version)"
-    } elseif ($DryRun) {
-        $pyArch = if ($script:IsARM64) { "arm64" } else { "amd64" }
-        Write-DryRun "Would install Python 3.13.5 ($pyArch) via $(if (Test-WingetAvailable) { 'winget (Python.Python.3.13)' } else { 'python.org installer' })"
-        $script:Installed += "Python (dry run)"
-    } else {
-        Write-Status "Installing Python..." "INSTALL"
-        New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-        $installed = $false
-
-        if (Test-WingetAvailable) {
-            $installed = Install-WithWinget "Python.Python.3.13"
-        }
-
-        if (-not $installed) {
-            $installer = Join-Path $tempDir "python.exe"
-            $pyArch = if ($script:IsARM64) { "arm64" } else { "amd64" }
-            $pyUrl = "https://www.python.org/ftp/python/3.13.5/python-3.13.5-$pyArch.exe"
-            $ok = Start-Download -Url $pyUrl -OutFile $installer -EstimatedSeconds 10
-            if ($ok) {
-                Start-Process $installer -ArgumentList "/quiet InstallAllUsers=0 PrependPath=1 Include_test=0" -Wait
-                $installed = $true
-            }
-        }
-
-        Refresh-Path
-
-        $verify = Find-Python
-        if ($verify.Found) {
-            Write-Status "Python installed v$($verify.Version)" "OK"
-            $script:Installed += "Python v$($verify.Version)"
-        } else {
-            Write-Status "Python not installed - install later from https://python.org" "WARN"
-            $script:Skipped += "Python"
-        }
-    }
-    Write-Host ""
-}
-
 function Install-Uv {
-    Write-StepHeader 6 "uv" "Installs Python tools instantly. No waiting."
+    Write-StepHeader 5 "uv" "Installs Python tools instantly. No waiting."
 
     $info = Find-Uv
     if ($info.Found) {
@@ -666,71 +591,8 @@ function Install-Uv {
     Write-Host ""
 }
 
-function Install-Playwright {
-    Write-StepHeader 7 "Playwright" "Browser automation. Screenshots. Testing. Claude uses this."
-
-    # Check if playwright pip package is installed
-    $pyInfo = Find-Python
-    $pwInstalled = $false
-    if ($pyInfo.Found) {
-        $pwCheck = & $pyInfo.Path -m playwright --version 2>$null
-        if ($LASTEXITCODE -eq 0 -and $pwCheck) {
-            $pwInstalled = $true
-        }
-    }
-
-    # Check if browser binaries exist
-    $browserInstalled = (Get-ChildItem "$env:LOCALAPPDATA\ms-playwright\chromium-*" -Directory -ErrorAction SilentlyContinue).Count -gt 0
-
-    if ($pwInstalled -and $browserInstalled) {
-        Write-Status "Already installed (pip + chromium browser)" "OK"
-        $script:Installed += "Playwright"
-    } elseif ($DryRun) {
-        $parts = @()
-        if (-not $pwInstalled) { $parts += "pip install playwright" }
-        if (-not $browserInstalled) { $parts += "playwright install chromium" }
-        Write-DryRun "Would run: $($parts -join ' && ')"
-        $script:Installed += "Playwright (dry run)"
-    } else {
-        if (-not $pyInfo.Found) {
-            Write-Status "Python not available - skipping Playwright" "WARN"
-            $script:Skipped += "Playwright"
-            Write-Host ""
-            return
-        }
-
-        # Install pip package if missing
-        if (-not $pwInstalled) {
-            Write-Status "Installing Playwright pip package..." "INSTALL"
-            & $pyInfo.Path -m pip install playwright --quiet 2>$null
-        }
-
-        # Install chromium browser if missing
-        if (-not $browserInstalled) {
-            Write-Status "Installing Chromium browser (this may take a minute)..." "INSTALL"
-            & $pyInfo.Path -m playwright install chromium 2>$null
-        }
-
-        # Verify
-        $pwCheck = & $pyInfo.Path -m playwright --version 2>$null
-        $browserNow = (Get-ChildItem "$env:LOCALAPPDATA\ms-playwright\chromium-*" -Directory -ErrorAction SilentlyContinue).Count -gt 0
-
-        if ($LASTEXITCODE -eq 0 -and $browserNow) {
-            Write-Status "Playwright installed with Chromium" "OK"
-            $script:Installed += "Playwright"
-        } elseif ($LASTEXITCODE -eq 0) {
-            Write-Status "Playwright installed (browser download may have failed - run: playwright install chromium)" "WARN"
-            $script:Installed += "Playwright (no browser)"
-        } else {
-            Write-Status "Playwright not installed - install later: pip install playwright && playwright install chromium" "WARN"
-            $script:Skipped += "Playwright"
-        }
-    }
-    Write-Host ""
-}
-
 function Install-GhCli {
-    Write-StepHeader 8 "GitHub CLI" "Ship your work. Collaborate. Show it off."
+    Write-StepHeader 6 "GitHub CLI" "Ship your work. Collaborate. Show it off."
 
     $info = Find-Gh
     if ($info.Found) {
@@ -840,7 +702,7 @@ function Install-GhCli {
 # ============================================================================
 
 function Set-GitIdentity {
-    Write-StepHeader 9 "Git Identity" "So your work has your name on it."
+    Write-StepHeader 7 "Git Identity" "So your work has your name on it."
 
     $currentName = & git config --global user.name 2>$null
     $currentEmail = & git config --global user.email 2>$null
@@ -947,7 +809,7 @@ function Set-GitIdentity {
 }
 
 function Set-PSExecutionPolicy {
-    Write-StepHeader 10 "PowerShell ExecutionPolicy" "Unlocks your terminal. One-time fix."
+    Write-StepHeader 8 "PowerShell ExecutionPolicy" "Unlocks your terminal. One-time fix."
 
     $current = Get-ExecutionPolicy -Scope CurrentUser
     if ($current -eq "Restricted" -or $current -eq "Undefined") {
@@ -972,7 +834,7 @@ function Set-PSExecutionPolicy {
 }
 
 function Install-Extensions {
-    Write-StepHeader 11 "VS Code Extensions" "Claude inside your editor. Ready when you are."
+    Write-StepHeader 9 "VS Code Extensions" "Claude inside your editor. Ready when you are."
 
     $codePath = Get-CodePath
     if (-not $codePath) {
@@ -1022,7 +884,7 @@ if ($DryRun) {
     Write-Host ""
 }
 
-Write-Host "  5 minutes. 11 tools. Then you build." -ForegroundColor Gray
+Write-Host "  5 minutes. 8 tools. Then you build." -ForegroundColor Gray
 Write-Host "  No code required. Seriously." -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "  What we're setting up:" -ForegroundColor White
@@ -1030,20 +892,16 @@ Write-Host ""
 Write-Host "    REQUIRED                            ESSENTIAL" -ForegroundColor DarkGray
 Write-Host "    1. Git          " -NoNewline -ForegroundColor Green
 Write-Host "track everything  " -NoNewline -ForegroundColor DarkGray
-Write-Host "  5. Python      " -NoNewline -ForegroundColor Green
-Write-Host "automate anything" -ForegroundColor DarkGray
+Write-Host "  5. uv          " -NoNewline -ForegroundColor Green
+Write-Host "fast installs" -ForegroundColor DarkGray
 Write-Host "    2. Node.js      " -NoNewline -ForegroundColor Green
 Write-Host "powers Claude     " -NoNewline -ForegroundColor DarkGray
-Write-Host "  6. uv          " -NoNewline -ForegroundColor Green
-Write-Host "fast installs" -ForegroundColor DarkGray
-Write-Host "    3. VS Code      " -NoNewline -ForegroundColor Green
-Write-Host "your workspace    " -NoNewline -ForegroundColor DarkGray
-Write-Host "  7. Playwright  " -NoNewline -ForegroundColor Green
-Write-Host "browser automation" -ForegroundColor DarkGray
-Write-Host "    4. Claude Code  " -NoNewline -ForegroundColor Green
-Write-Host "your AI builder   " -NoNewline -ForegroundColor DarkGray
-Write-Host "  8. GitHub CLI  " -NoNewline -ForegroundColor Green
+Write-Host "  6. GitHub CLI  " -NoNewline -ForegroundColor Green
 Write-Host "ship & share" -ForegroundColor DarkGray
+Write-Host "    3. VS Code      " -NoNewline -ForegroundColor Green
+Write-Host "your workspace" -ForegroundColor DarkGray
+Write-Host "    4. Claude Code  " -NoNewline -ForegroundColor Green
+Write-Host "your AI builder" -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "    Plus: git identity, VS Code extensions" -ForegroundColor DarkGray
 Write-Host ""
@@ -1073,9 +931,7 @@ Install-Claude
 
 Write-Phase "ESSENTIAL"
 
-Install-Python
 Install-Uv
-Install-Playwright
 Install-GhCli
 
 # ── Phase 3: CONFIGURE ──
