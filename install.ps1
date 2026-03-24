@@ -531,9 +531,7 @@ function Install-Claude {
         if (-not $installed) {
             try {
                 Write-Status "Trying official installer..." "INFO"
-                $installerScript = Invoke-RestMethod -Uri "https://claude.ai/install.ps1" -UseBasicParsing
-                $scriptBlock = [ScriptBlock]::Create($installerScript)
-                & $scriptBlock 2>$null
+                Start-Process "powershell.exe" -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"irm https://claude.ai/install.ps1 | iex`"" -Wait -WindowStyle Hidden
                 Refresh-Path
                 if ((Test-Path $claudeLocal) -or (Find-Claude).Found) {
                     $installed = $true
@@ -574,9 +572,7 @@ function Install-Uv {
         Write-Status "Installing uv..." "INSTALL"
 
         try {
-            $installerScript = Invoke-RestMethod -Uri "https://astral.sh/uv/install.ps1" -UseBasicParsing
-            $scriptBlock = [ScriptBlock]::Create($installerScript)
-            & $scriptBlock
+            Start-Process "powershell.exe" -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"irm https://astral.sh/uv/install.ps1 | iex`"" -Wait -WindowStyle Hidden
         } catch {}
 
         Refresh-Path
