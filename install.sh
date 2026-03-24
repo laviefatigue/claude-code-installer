@@ -402,6 +402,8 @@ install_claude() {
             echo -e "${DIM}      Try manually: npm install -g @anthropic-ai/claude-code${RESET}"
             echo ""
             echo -e "      ${CORAL}Claude Code is required. Install it manually and re-run this script.${RESET}"
+            echo ""
+            read -p "  Press ENTER to close" </dev/tty
             exit 2
         fi
     fi

@@ -553,6 +553,8 @@ function Install-Claude {
             Write-Host "      Try manually: npm install -g @anthropic-ai/claude-code" -ForegroundColor DarkGray
             Write-Host ""
             Write-Host "      Claude Code is required. Install it manually and re-run this script." -ForegroundColor Red
+            Write-Host ""
+            $null = Read-Host "  Press ENTER to close"
             exit 2
         }
     }
