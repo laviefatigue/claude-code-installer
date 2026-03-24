@@ -50,7 +50,7 @@ Note: Running .\install.ps1 directly may be blocked by ExecutionPolicy.
       Use install.bat or the irm | iex method instead.
 
 "@
-    exit 0
+    return
 }
 
 $ErrorActionPreference = "SilentlyContinue"
@@ -383,7 +383,7 @@ function Install-Git {
             $script:Failed += "Git"
             Write-Host ""
             Write-Host "      Git is required. Install it manually and re-run this script." -ForegroundColor Red
-            exit 2
+            return
         }
     }
 
@@ -444,7 +444,7 @@ function Install-Node {
             $script:Failed += "Node.js"
             Write-Host ""
             Write-Host "      Node.js is required. Install it manually and re-run this script." -ForegroundColor Red
-            exit 2
+            return
         }
     }
     Write-Host ""
@@ -492,7 +492,7 @@ function Install-VSCode {
             $script:Failed += "VS Code"
             Write-Host ""
             Write-Host "      VS Code is required. Install it manually and re-run this script." -ForegroundColor Red
-            exit 2
+            return
         }
     }
     Write-Host ""
@@ -554,8 +554,7 @@ function Install-Claude {
             Write-Host ""
             Write-Host "      Claude Code is required. Install it manually and re-run this script." -ForegroundColor Red
             Write-Host ""
-            $null = Read-Host "  Press ENTER to close"
-            exit 2
+            return
         }
     }
     Write-Host ""
@@ -915,7 +914,7 @@ if (-not $Quiet) {
         Write-Host ""
         Write-Host "  No worries. Run this again when you're ready to build." -ForegroundColor Gray
         Write-Host ""
-        exit 0
+        return
     }
 }
 
