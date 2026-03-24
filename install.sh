@@ -126,8 +126,8 @@ write_banner() {
     write_banner_line "Replace {U}niversity" "${CREAM}${BOLD}" 7
     write_banner_line "Claude Code Installer" "${GRAY}" 7
     write_banner_line "" "" 0
-    write_banner_line "Code is the language of technology." "${GRAY}" 3
-    write_banner_line "With Claude, you speak it fluently." "${GRAY}" 3
+    write_banner_line "The community where normal people" "${GRAY}" 3
+    write_banner_line "learn to build with AI." "${GRAY}" 7
     write_banner_line "" "" 0
     echo -e "${LIME}${BOLD}  +-------------------------------------------------------+${RESET}"
     echo ""

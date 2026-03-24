@@ -121,8 +121,8 @@ function Write-Banner {
     Write-BannerLine "Replace {U}niversity" -Color White -Center
     Write-BannerLine "Claude Code Installer" -Color Gray -Center
     Write-BannerLine ""
-    Write-BannerLine "Code is the language of technology." -Color DarkGray -Center
-    Write-BannerLine "With Claude, you speak it fluently." -Color DarkGray -Center
+    Write-BannerLine "The community where normal people" -Color DarkGray -Center
+    Write-BannerLine "learn to build with AI." -Color DarkGray -Center
     Write-BannerLine ""
     Write-Host "  +-------------------------------------------------------+" -ForegroundColor Green
     Write-Host ""
