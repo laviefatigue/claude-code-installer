@@ -7,7 +7,6 @@ Single-file installers for Claude Code and its development tool dependencies.
 ```
 install.ps1    # Windows PowerShell installer
 install.sh     # macOS/Linux bash installer
-install.bat    # Windows double-click launcher
 ```
 
 ## Quick Test
