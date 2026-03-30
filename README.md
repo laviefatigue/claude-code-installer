@@ -9,13 +9,13 @@ Open your terminal, paste one line, hit Enter. The installer does the rest.
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.ps1 | iex
+irm https://raw.githubusercontent.com/replaceyou/claude-code-installer/master/install.ps1 | iex
 ```
 
 ### macOS / Linux (Terminal)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/replaceyou/claude-code-installer/master/install.sh | bash
 ```
 
 ## What Gets Installed
