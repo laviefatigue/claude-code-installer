@@ -8,8 +8,8 @@ No terminal required — just download and double-click:
 
 | OS | Download | What to expect |
 |----|----------|----------------|
-| **Windows** | [`ReplaceU-Claude-Setup.exe`](https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/build/ReplaceU-Claude-Setup.exe) | SmartScreen may warn — click "More info" → "Run anyway" |
-| **macOS** | [`install-claude.command`](https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install-claude.command) | Right-click → "Open" → "Open" to bypass Gatekeeper |
+| **Windows** | [`ReplaceU-Claude-Setup.exe`](https://github.com/laviefatigue/claude-code-installer/releases/latest/download/ReplaceU-Claude-Setup.exe) | SmartScreen may warn — click "More info" → "Run anyway" |
+| **macOS** | [`install-claude.command`](https://github.com/laviefatigue/claude-code-installer/releases/latest/download/install-claude.command) | Right-click → "Open" → "Open" to bypass Gatekeeper |
 
 ## Terminal Alternative
 
