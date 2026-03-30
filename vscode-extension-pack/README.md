@@ -28,7 +28,7 @@ New to Claude Code? Follow our visual guide:
 
 - [Claude Code Documentation](https://docs.anthropic.com/claude-code)
 - [Foam Documentation](https://foambubble.github.io/foam/)
-- [Report Issues](https://github.com/laviefatigue/claude-code-installer/issues)
+- [Report Issues](https://github.com/replaceyou/claude-code-installer/issues)
 
 ---
 

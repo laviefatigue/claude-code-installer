@@ -14,12 +14,12 @@ Cross-platform installer that bootstraps Claude Code for anyone. Two single-file
 
 ```powershell
 # Windows
-irm https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.ps1 | iex
+irm https://raw.githubusercontent.com/replaceyou/claude-code-installer/master/install.ps1 | iex
 ```
 
 ```bash
 # macOS / Linux
-curl -fsSL https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/replaceyou/claude-code-installer/master/install.sh | bash
 ```
 
 ## What Gets Installed

@@ -27,10 +27,10 @@ Two single-file scripts that install everything needed for Claude Code:
 
 ```powershell
 # Windows
-irm https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.ps1 | iex
+irm https://raw.githubusercontent.com/replaceyou/claude-code-installer/master/install.ps1 | iex
 
 # macOS / Linux
-curl -fsSL https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/replaceyou/claude-code-installer/master/install.sh | bash
 ```
 
 ### What it installs (10 steps, 3 phases)
