@@ -2,7 +2,7 @@
 # CLAUDE CODE INSTALLER (Windows)
 # One command. Everything you need. Ready to create.
 #
-# Run: irm https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.ps1 | iex
+# Run: irm https://raw.githubusercontent.com/replaceyou/claude-code-installer/master/install.ps1 | iex
 # Or:  .\install.ps1
 #
 # What this installs:
@@ -37,7 +37,7 @@ if ($Help) {
 Claude Code Installer for Windows
 
 Usage:
-  irm https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.ps1 | iex
+  irm https://raw.githubusercontent.com/replaceyou/claude-code-installer/master/install.ps1 | iex
   .\install.bat [options]          (recommended for local use)
   powershell -ExecutionPolicy Bypass -File .\install.ps1 [options]
 

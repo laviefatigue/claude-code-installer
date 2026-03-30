@@ -13,10 +13,10 @@ install.sh     # macOS/Linux bash installer
 
 ```powershell
 # Windows (PowerShell)
-irm https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.ps1 | iex
+irm https://raw.githubusercontent.com/replaceyou/claude-code-installer/master/install.ps1 | iex
 
 # macOS / Linux
-curl -fsSL https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/replaceyou/claude-code-installer/master/install.sh | bash
 ```
 
 ## What it installs

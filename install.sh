@@ -3,7 +3,7 @@
 # CLAUDE CODE INSTALLER (macOS / Linux)
 # One command. Everything you need. Ready to create.
 #
-# Run: curl -fsSL https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.sh | bash
+# Run: curl -fsSL https://raw.githubusercontent.com/replaceyou/claude-code-installer/master/install.sh | bash
 # Or:  chmod +x install.sh && ./install.sh
 #
 # What this installs:
@@ -82,7 +82,7 @@ for arg in "$@"; do
             echo "Claude Code Installer for macOS/Linux"
             echo ""
             echo "Usage:"
-            echo "  curl -fsSL https://raw.githubusercontent.com/laviefatigue/claude-code-installer/master/install.sh | bash"
+            echo "  curl -fsSL https://raw.githubusercontent.com/replaceyou/claude-code-installer/master/install.sh | bash"
             echo "  ./install.sh [options]"
             echo ""
             echo "Options:"
