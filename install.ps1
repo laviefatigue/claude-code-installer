@@ -855,6 +855,16 @@ function Install-Extensions {
         Write-Status "Claude Code extension installed" "OK"
     }
 
+    # GitHub Pull Requests extension
+    if ($extensions -match "GitHub.vscode-pull-request-github") {
+        Write-Status "GitHub PR extension already installed" "OK"
+    } elseif ($DryRun) {
+        Write-DryRun "Would run: code --install-extension GitHub.vscode-pull-request-github"
+    } else {
+        & $codePath --install-extension GitHub.vscode-pull-request-github --force 2>$null | Out-Null
+        Write-Status "GitHub PR extension installed" "OK"
+    }
+
     # Foam extension
     if ($extensions -match "foam.foam-vscode") {
         Write-Status "Foam extension already installed" "OK"

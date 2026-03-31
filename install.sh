@@ -726,6 +726,16 @@ install_extensions() {
         write_status "Claude Code extension installed" "OK"
     fi
 
+    # GitHub Pull Requests extension
+    if echo "$extensions" | grep -q "GitHub.vscode-pull-request-github"; then
+        write_status "GitHub PR extension already installed" "OK"
+    elif [ "$DRY_RUN" = true ]; then
+        write_dry_run "Would run: code --install-extension GitHub.vscode-pull-request-github"
+    else
+        code --install-extension GitHub.vscode-pull-request-github --force 2>/dev/null
+        write_status "GitHub PR extension installed" "OK"
+    fi
+
     # Foam extension
     if echo "$extensions" | grep -q "foam.foam-vscode"; then
         write_status "Foam extension already installed" "OK"

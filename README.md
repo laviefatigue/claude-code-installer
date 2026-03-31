@@ -29,7 +29,7 @@ curl -fsSL https://raw.githubusercontent.com/replaceyou/claude-code-installer/ma
 | **uv / uvx** | Fast Python package manager |
 | **GitHub CLI** | Ship and share your work |
 
-Plus: VS Code extensions (Claude Code, Foam), git identity setup, GitHub authentication.
+Plus: VS Code extensions (Claude Code, GitHub Pull Requests, Foam), git identity setup, GitHub authentication.
 
 ## Architecture Support
 
